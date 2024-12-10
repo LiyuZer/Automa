@@ -1,10 +1,12 @@
 # Automa  
 Automa - A Graph-Based Programming Language  
 
-Automa is a unique programming language where all computation revolves around graphs. Designed to challenge traditional programming paradigms, Automa eliminates constructs like **if statements**, **loops**, and **procedures**, instead operating entirely on **graphs** that interact with memory.  
+Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, and pending. Automa does this by representing all computations as graph traversals combined with some action of memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
+
+Automa eliminates constructs like **if statements**, **loops**, and **procedures**, instead operating entirely on **graphs** that interact with memory.  
 
 At its core, every program in Automa is a **graph** consisting of nodes and transitions. Transitions define paths between nodes and are represented as tuples of **conditions** and **operations**:  
-- **Conditions**: Evaluate to `true` or `false`, determining if a transition is valid.  
+- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid. **Cannot** change the graph's memory in any way, thus having no side effects.  
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
 Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing for multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
@@ -12,7 +14,7 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 ## Key Features  
 - **Graph-Based Computation**: Every computation is modeled as a graph traversal.  
 - **Memory-Driven Logic**: Operations manipulate memory structures, which graphs process during execution.  
-- **Deterministic and Nondeterministic Support**: Explore multiple paths in parallel for nondeterministic computations.  
+- **Deterministic and Nondeterministic Support**: Explore multiple parallel paths for nondeterministic computations.  
 - **Immutable Graphs**: Graphs cannot be modified after creation, ensuring a consistent and predictable execution model.  
 - **Minimal Constructs**: No loops, conditionals, or procedures—just transitions, nodes, and memory.  
 
