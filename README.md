@@ -1,7 +1,7 @@
 # Automa  
 Automa - A Graph-Based Programming Language  
 
-Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, and pending. Automa does this by representing all computations as graph traversals combined with some action of memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
+Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action of memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
 
 Automa eliminates constructs like **if statements**, **loops**, and **procedures**, instead operating entirely on **graphs** that interact with memory.  
 
