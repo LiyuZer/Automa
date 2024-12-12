@@ -11,13 +11,7 @@ keywords yay! Also bulkier code ;)
 /*Keywords here*/
 Operator : 'operator' ;
 
-Transition : 'transition' ;
-
-Start : 'start' ;
-
-Accept : 'accept' ;
-
-Node : 'node' ;
+Transitions : 'transitions' ;
 
 Graph : 'graph';
 
@@ -43,7 +37,6 @@ None : 'None';
 
 NodeDef : 'nodeDef';
 
-NodeDefTypes : StartNode | AcceptNode| RejectNode; 
 
 StartNode : 'startNode';
 
@@ -82,9 +75,10 @@ Div: '/';
 
 Mod: '%';
 
-And: '&';
+And: '&&' |  'and';
 
-Or: '|';
+Or: '||' | 'or';
+
 
 Tilde: '~';
 
@@ -104,10 +98,6 @@ NotEqual: '!=';
 LessEqual: '<=';
 
 GreaterEqual: '>=';
-
-AndAnd: '&&' | 'and';
-
-OrOr: '||' | 'or';
 
 Semicolon : ';';
 
@@ -131,7 +121,7 @@ StringLiteral : '"'[0-9a-zA-Z]*'"';
 CharLiteral :  '\'' [0-9a-zA-Z] '\'';           
 IntegerLiteral : Digit+;
 Digit : [0-9] ;
-IDENTIFIER : [0-9a-zA-Z]+;
+IDENTIFIER : [a-zA-Z_]+[0-9a-zA-Z_]*;
 
 
 

@@ -1,34 +1,91 @@
-// Define a grammar called automa
-
+// Define a grammar called AUTOMAParser
 
 parser grammar AUTOMAParser;
 options {
     tokenVocab = AUTOMALexer;
 }
 
+r: graphDef*;
+
+graphDef: Graph IDENTIFIER LeftBrace graphBody RightBrace;
+
+graphBody: memoryDefinition nodeDefinition transitionDefinition afterAcceptDefinition* afterRejectDefinition*;
+
+memoryDefinition: Memory LeftBrace (IDENTIFIER Colon expression (Comma IDENTIFIER Colon expression)*)? RightBrace;
+
+nodeDefinition: NodeDef LeftBrace (IDENTIFIER DoubleColon nodeDefTypes Semicolon (IDENTIFIER DoubleColon nodeDefTypes Semicolon)*)? RightBrace;
 
 
-r  : graphDef*;
+transitionDefinition: Transitions LeftBrace transition+ RightBrace;
 
-graphDef : Graph IDENTIFIER  LeftBrace graphBody RightBrace;
+transition: firstNode secondNode ArrowEquals  Conditions Colon tupleType Comma Operations Colon tupleType Semicolon;
 
-graphBody: memoryDefinition nodeDefinition transitionDefinition afterAcceptDefinition, afterRejectDefinition; 
+firstNode: IDENTIFIER;
 
-memoryDefinition : Memory LeftBrace --- RightBrace;
+secondNode: IDENTIFIER;
 
-nodeDefinition: NodeDef LeftBrace (IDENTIFIER DoubleColon NodeDefTypes)* RightBrace;
+expression
+    : (Not)* booleanExpression
+    ;
 
-transitionDefinition : Transition LeftBrace  RightBrace; 
+booleanExpression
+    : arithmeticExpression (boolOperator arithmeticExpression)*
+    ;
 
-expression : LeftParen expression RightParen | expressionAtom;
+arithmeticExpression
+    : term ((Plus | Minus) term)*
+    ;
 
-expressionAtom: graphCall | arithmeticOperation | var;
+term
+    : factor ((Star | Div) factor)*
+    ;
 
-graphCall : IDENTIFIER LeftParen  ;
+factor
+    : LeftParen expression RightParen
+    | expressionAtom
+    ;
+
+expressionAtom
+    : graphCall
+    | var
+    | literals
+    | dataTypes
+    ;
 
 
-arithmeticOperation : expression arithmeticOperator expression;
+dataTypes : memoryType | tupleType | listType; 
 
-arithmeticOperator : Plus | Div | Minus | Star;
+memoryType: LeftBrace (IDENTIFIER Colon expression (Comma IDENTIFIER Colon expression)*)? RightBrace;
 
-var : 
+tupleType: LeftParen (expression (Comma expression)*)* RightParen;
+
+listType: LeftBracket (expression (Comma expression)*)* RightBracket;
+
+
+nodeDefTypes : StartNode | AcceptNode| RejectNode; 
+
+
+graphCall: IDENTIFIER tupleType ;
+
+afterAcceptDefinition: AfterAccept LeftBrace (expression Semicolon)* RightBrace;
+
+afterRejectDefinition: AfterReject LeftBrace (expression Semicolon)* RightBrace;
+
+arithmeticOperator: Plus | Div | Minus | Star;
+
+
+
+
+boolOperator: And | Or | Equal;
+
+literals: booleanLiteral | charLiteral | stringLiteral | integerLiteral;
+
+var: IDENTIFIER;
+
+
+booleanLiteral : BooleanLiteral;
+stringLiteral : StringLiteral;
+charLiteral :  CharLiteral;
+integerLiteral : IntegerLiteral;
+digit : Digit;
+
