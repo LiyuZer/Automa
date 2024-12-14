@@ -1,17 +1,1 @@
-graph dfaSolver {
-    memory {
-        input_string : "baab"  // Global input string for DFA
-    }
-    nodeDef{
-    start :: startNode;
-    accept :: acceptNode;
-    }
-    transitions {
-        Start Babgraph => conditions: () , operations: (); // Start `bab_graph` validation
-        Babgraph Accept => conditions: (length(input_string) == 0), operations: (); // Accept if `bab_graph` completely consumes input
-        Babgraph Cd_graph => conditions: (!length(input_string) == 0), operations: (); // Continue to `cdgraph` if input remains
-
-        Cdgraph Cdgraph => conditions: (cd_graph(input_string)), operations: (5 + 6); // Recursive checks for `cd*`
-        Cdgraph Accept => conditions: (length(input_string) == 0), operations: (); // Accept if `cd_graph` completes
-    }
-}
+hello : [hello]]
