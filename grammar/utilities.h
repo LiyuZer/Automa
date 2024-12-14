@@ -98,7 +98,7 @@ class Token : public Symbol {
         Token(string type, string value)
             : Symbol(true, false), type(type), value(value){};
         Token(string type)
-            : Symbol(true, false), type(type), value(keywords[type]){};
+            : Symbol(true, false), type(type), value(" "){};
         virtual void print(){
             cout << "Token" << endl;
         }
