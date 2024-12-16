@@ -10,6 +10,7 @@ using namespace std;
 
 std::unordered_map<std::string, std::string> keywords = {
         {"transitions", "TRANSITIONS"},
+        {"main", "MAIN"},
         {"memory", "MEMORY"},
         {"graph", "GRAPH"},
         {"afterReject", "AFTER_REJECT"},
@@ -60,6 +61,8 @@ std::unordered_map<std::string, std::string> operators = {
         {";", "SEMICOLON"},
         {"::", "DOUBLE_COLON"},
         {":", "COLON"},
+        {"\"", "QUOTES"},
+        {"\'", "SINGLE_QUOTES"},
         {",", "COMMA"}
     };
 

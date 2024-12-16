@@ -109,6 +109,39 @@ struct stack_location {
         return new_rule_name;
     }
 
+    int search_or(const vector<SymbolPtr>& symbols, int current_index){
+        /*
+        This is the trickiest bit, when in the case a symbol is invalidated
+        we search the rule until we see another rule, if we do we 
+        then we go and look at that rule 
+        The trick is we have to skip any rules in deeper parentheses so only see 'or' symbols 
+        that are in the outside of our scope ie A B C (D| B) | L in this case the or before L would be used not (D|B) 
+        */
+        int start = current_index; // Position after '('
+        int end = start;
+        int parenthesis_count = 0; // To handle nested parentheses
+
+        // Iterate to find the matching ')'
+        while (end < symbols.size()) {
+            if(symbols[end]->paren()){
+                shared_ptr<ParenSymbol> paren_symbol = dynamic_pointer_cast<ParenSymbol>(symbols[end]);
+                char type = paren_symbol->parenType;
+                if (type == '(') {
+                    parenthesis_count++;
+                } else if (type == ')') {
+                    parenthesis_count--;
+                }
+            }
+            if(parenthesis_count == 0 && symbols[end]->or_symbol()){
+                return end + 1;
+            }
+            end++;
+        }
+
+        return -1;
+
+    }
+
     bool terminated(Lexer& x, vector<SymbolPtr>& v, int& i, int& current_pos, string& input){
         shared_ptr<Token> token_symbol = dynamic_pointer_cast<Token>(v[i]);
 
@@ -124,7 +157,6 @@ struct stack_location {
         cout<<token_symbol->type<<endl;
         cout<<current_token->type<<endl;
         cout<<current_token->value<<endl;
-
         if(i < (v.size() - 1) && v[i + 1]->special()){
             shared_ptr<SpecialSymbol> special_symbol = dynamic_pointer_cast<SpecialSymbol>(v[i + 1]);
             if(special_symbol->type == '*'){
@@ -182,7 +214,7 @@ struct stack_location {
 
     shared_ptr<stack_location> visit_rule(Lexer& x, int& current_index, string current_rule, string& input_string, int& current_pos, bool& found, std::unordered_map<std::string, std::vector<SymbolPtr>>& rules){
         vector<SymbolPtr> v = rules[current_rule];// Our current rule
-
+        
         while(current_index < v.size()){
             // If the current token is supposed to be terminating
             int i = current_index; // Makes it easier than writing current_index over again;
@@ -230,10 +262,11 @@ struct stack_location {
                     special_symbol_char = special_symbol->type;
                     current_index++;
                }
-               cout<<current_index<<endl;
                return shared_ptr<stack_location>(new stack_location(special_symbol_char, 0, current_pos, new_rule, input_string)); 
             }
-
+            else if(v[i]->or_symbol()){
+                break;
+            }
         }
         found = true;
         return nullptr;
@@ -244,6 +277,8 @@ struct stack_location {
         std::stack<shared_ptr<stack_location>> executionStack; 
         string current_rule = "program";
         executionStack.push( shared_ptr<stack_location>(new stack_location(' ', 0, current_pos, current_rule, input)) ); 
+
+        start:
         while(!executionStack.empty()){
           // We will define the variables for our visit here
           int& current_index = executionStack.top()->current_index;
@@ -251,13 +286,11 @@ struct stack_location {
           input = executionStack.top()->input;  
           current_pos = executionStack.top()->current_pos;   
           bool found = false;
-
-
           // Visit the rule note curent index will never backtrace and so no need to create a copy
           shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules);
+
           if (!current_output_ptr){
                 if(found){ // Pop stack and update the top of the previous stack with the new string
-                    
                     if (executionStack.top()->special_rule == '*'){
                          //We have to rest the current index to go through the whole input
                         executionStack.top()->current_index = 0;
@@ -280,13 +313,13 @@ struct stack_location {
                     }
                 }
                 else if(executionStack.top()->special_rule != ' '){ // If the top has some special rule 
-
                     check_symbol:
                     // Do special logic with the current symbol 
                     if(executionStack.top()->special_rule == '*'){
                         // We are creating a temp_pos and tempInput because 
                         // the * could have run multiple times, so we want to take the 
                         // last valid position 
+
                         int temp_pos = executionStack.top()->current_pos;
                         string temp_input = executionStack.top()->input;
                         executionStack.pop(); 
@@ -302,10 +335,24 @@ struct stack_location {
                         if(temp_pos == executionStack.top()->current_pos){// That means that the element in the stack
                         // has not moved positions thus it is is invalid as we have a + we need one or more
                         while(!executionStack.empty()){
+                            /* A detailed explanation of what the hell is happening here
+                             While we are iteratively reducing the stack to see if there is some element 
+                             with a special symbol(for extra computation say * for example) we also 
+                             check to see if that stack member has an or rule, if it does 
+                             then great! We move the current index there and start computing baby!
+                             */
                             if(executionStack.top()->special_rule != ' '){
                                 found = false;
-                                goto check_symbol; // Go back to checking the special symbol
-                                // We are iteratively pooping until we see a special symbol. 
+                                vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
+                                int pos = search_or(v, executionStack.top()->current_index);
+                                if(pos != -1){
+                                    executionStack.top()->current_index = pos; 
+                                    goto start;
+                                }
+
+                                if(executionStack.top()->special_rule != ' '){
+                                    goto check_symbol;
+                                }                            
                             }
                             executionStack.pop();
                         }
@@ -331,17 +378,31 @@ struct stack_location {
                     // This case you should pop the stack until either you reach a special 
                     //Symbol or the stack is empty, if it is empty return false 
                     while(!executionStack.empty()){
+                    /* 
+                    A detailed repeated explanation of what the hell is happening here
+                    While we are iteratively poping the stack to see if there is some element 
+                    with a special symbol(for extra computation say * for example) we also 
+                    check to see if that stack member has an or rule, if it does 
+                    then great! We move the current index there and start computing baby!
+                    */
+                        found = false;
+                        vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
+                        int pos = search_or(v, executionStack.top()->current_index);
+                        if(pos != -1){
+                            executionStack.top()->current_index = pos; 
+                            goto start;
+                        }
+
                         if(executionStack.top()->special_rule != ' '){
-                            found = false;
-                            goto check_symbol; // Go back to checking the special symbol
-                            // We are iteratively pooping until we see a special symbol. 
+                            goto check_symbol;
                         }
                         executionStack.pop();
                     }
                     return false;
                     }
             }
-         else{// The return shared_ptr is not null so you add this to the stack and then evaluate the top
+         else{
+            // The return shared_ptr is not null so you add this to the stack and then evaluate the top
          // But before you need to make sure that teh current pos and string is the same
             executionStack.top()->current_pos = current_pos;
             executionStack.top()->input = input;

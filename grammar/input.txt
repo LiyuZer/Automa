@@ -1,3 +1,35 @@
-myTuple : (hello, world)
-myList : [Wassup, Hello]
-myTuple : (hello, world)
+graph graphDef {
+    nodeDef{
+        start :: startNode;
+        end :: rejectNode;
+        accept :: acceptNode;
+    }
+    transitions{
+        start -> end => conditions : ("hello", "wassup"), operations : ();
+        start -> end => conditions : (), operations : ();
+    }
+}
+
+graph main {
+    nodeDef{
+        start :: startNode;
+        end :: rejectNode;
+        accept :: acceptNode;
+    }
+    transitions{
+        start -> end => conditions : ("hello1", "wassup1"), operations : ();
+        start -> end => conditions : (), operations : ();
+    }
+}
+
+graph graphDef2 {
+    nodeDef{
+        start :: startNode;
+        end :: rejectNode;
+        accept :: acceptNode;
+    }
+    transitions{
+        start -> end => conditions : ("hello2", "wassup2"), operations : ("hello2", "wassup2");
+        start -> end => conditions : ("hello", "wassup2"), operations : ("hello2", "wassup2");
+    }
+}
