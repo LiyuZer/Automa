@@ -142,7 +142,7 @@ struct stack_location {
 
     }
 
-    bool terminated(Lexer& x, vector<SymbolPtr>& v, int& i, int& current_pos, string& input){
+    bool terminated(Lexer& x, vector<SymbolPtr>& v, int& i, int& current_pos, string& input, string ruleDebug=""){
         shared_ptr<Token> token_symbol = dynamic_pointer_cast<Token>(v[i]);
 
         int temp_current_pos = current_pos;// The temp current pos and temp_input are here to save the last valid current pos and input
@@ -157,6 +157,7 @@ struct stack_location {
         cout<<token_symbol->type<<endl;
         cout<<current_token->type<<endl;
         cout<<current_token->value<<endl;
+        cout<<ruleDebug<<endl;
         if(i < (v.size() - 1) && v[i + 1]->special()){
             shared_ptr<SpecialSymbol> special_symbol = dynamic_pointer_cast<SpecialSymbol>(v[i + 1]);
             if(special_symbol->type == '*'){
@@ -219,7 +220,7 @@ struct stack_location {
             // If the current token is supposed to be terminating
             int i = current_index; // Makes it easier than writing current_index over again;
             if(v[i]->terminating()){
-                found = terminated(x, v, current_index, current_pos, input_string);
+                found = terminated(x, v, current_index, current_pos, input_string, current_rule);
                 if(!found){// Return false and a null ptr
                     found = false;
                     return shared_ptr<stack_location>(nullptr);
@@ -288,13 +289,12 @@ struct stack_location {
           bool found = false;
           // Visit the rule note curent index will never backtrace and so no need to create a copy
           shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules);
-
+          
           if (!current_output_ptr){
                 if(found){ // Pop stack and update the top of the previous stack with the new string
                     if (executionStack.top()->special_rule == '*'){
                          //We have to rest the current index to go through the whole input
                         executionStack.top()->current_index = 0;
-
                     }
                     else if (executionStack.top()->special_rule == '+'){
                         // We do the same as * the only difference is in the not found case 
@@ -316,10 +316,18 @@ struct stack_location {
                     check_symbol:
                     // Do special logic with the current symbol 
                     if(executionStack.top()->special_rule == '*'){
+
+                        vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
+                        int pos = search_or(v, executionStack.top()->current_index);
+                        if(pos != -1){ // In the case where we have a * rule and found is false 
+                        // Then check if there is an or, if so go and start from that index
+                            executionStack.top()->current_index = pos; 
+                            goto start;
+                        }    
+
                         // We are creating a temp_pos and tempInput because 
                         // the * could have run multiple times, so we want to take the 
-                        // last valid position 
-
+                        // last valid position                       
                         int temp_pos = executionStack.top()->current_pos;
                         string temp_input = executionStack.top()->input;
                         executionStack.pop(); 
@@ -329,38 +337,37 @@ struct stack_location {
                         }
                     }
                     else if(executionStack.top()->special_rule == '+'){
-                        int temp_pos = executionStack.top()->current_pos;
-                        string temp_input = executionStack.top()->input;
-                        executionStack.pop(); 
-                        if(temp_pos == executionStack.top()->current_pos){// That means that the element in the stack
-                        // has not moved positions thus it is is invalid as we have a + we need one or more
-                        while(!executionStack.empty()){
-                            /* A detailed explanation of what the hell is happening here
-                             While we are iteratively reducing the stack to see if there is some element 
-                             with a special symbol(for extra computation say * for example) we also 
-                             check to see if that stack member has an or rule, if it does 
-                             then great! We move the current index there and start computing baby!
-                             */
-                            if(executionStack.top()->special_rule != ' '){
-                                found = false;
-                                vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
-                                int pos = search_or(v, executionStack.top()->current_index);
-                                if(pos != -1){
-                                    executionStack.top()->current_index = pos; 
-                                    goto start;
-                                }
-
+                        vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
+                        int pos = search_or(v, executionStack.top()->current_index);
+                        if(pos != -1){
+                            executionStack.top()->current_index = pos; 
+                            goto start;
+                        }
+                        
+                        int old_current_pos = executionStack.top()->current_pos;
+                        string old_input = executionStack.top()->input;
+                        executionStack.pop();
+                        if(!executionStack.empty() && (old_current_pos == executionStack.top()->current_pos)){
+                            while(!executionStack.empty()){
+                                /* A detailed explanation of what the hell is happening here
+                                While we are iteratively reducing the stack to see if there is some element 
+                                with a special symbol(for extra computation say * for example) we also 
+                                check to see if that stack member has an or rule, if it does 
+                                then great! We move the current index there and start computing baby!
+                                */
                                 if(executionStack.top()->special_rule != ' '){
+                                    found = false;
                                     goto check_symbol;
-                                }                            
+                                }
+                                executionStack.pop();
                             }
-                            executionStack.pop();
                         }
+                        if(!executionStack.empty() ){// If the execution stack is not empty
+                            executionStack.top()->current_pos = old_current_pos;
+                            executionStack.top()->input = old_input;
+                        }
+                        else{ 
                             return false; 
-                        }
-                        if(!executionStack.empty()){// Only do this if the stack is not empty
-                            executionStack.top()->current_pos = temp_pos;
-                            executionStack.top()->input = temp_input;
                         }
                     }
                     else if(executionStack.top()->special_rule == '?'){
@@ -404,8 +411,6 @@ struct stack_location {
          else{
             // The return shared_ptr is not null so you add this to the stack and then evaluate the top
          // But before you need to make sure that teh current pos and string is the same
-            executionStack.top()->current_pos = current_pos;
-            executionStack.top()->input = input;
             executionStack.push(current_output_ptr);
             }
         }

@@ -38,10 +38,20 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateToken("RIGHT_BRACE") // Closing brace
     }},
     {"graphDef", {
+        CreateParen('('),
+        CreateRule("memoryDef"),
         CreateRule("nodeDef"),
-        CreateSpecialSymbol('*'), // Allow multiple nodes
         CreateRule("transitionDef"), // Include transitions
-        CreateSpecialSymbol('*'), // Allow multiple transitions
+        CreateRule("afterAccept"), // Include transitions
+        CreateRule("AfterReject"), // Include transitions
+        CreateParen(')'),
+        CreateSpecialSymbol('?')
+    }},
+    {"memoryDef", {
+        CreateToken("MEMORY"),
+        CreateToken("LEFT_BRACE"),
+        CreateRule("tupleItems"),
+        CreateToken("RIGHT_BRACE"),
     }},
     {"nodeDef", {
         CreateToken("NODE_DEF"),
@@ -126,10 +136,41 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateParen(')'),
         CreateSpecialSymbol('?'), 
     }},
-    {"expression", {
-        CreateToken("QUOTES"),
+    {"tupleItems", {
+        CreateParen('('),
+        CreateRule("keyValuePair"), // Condition name
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("keyValuePair"), // Condition name 
+        CreateParen(')'),
+        CreateSpecialSymbol('*'), // Allow multiple conditions
+        CreateParen(')'),
+        CreateSpecialSymbol('?'), 
+    }},
+    {"keyValuePair", {
         CreateToken("IDENTIFIER"),
-        CreateToken("QUOTES"),
+        CreateToken("COLON"),
+        CreateRule("expression"),
+    }},
+    {"expression", {
+        CreateParen('('),
+        CreateToken("STRING_LITERAL"),
+        CreateOr(),
+        CreateToken("INTEGER_LITERAL"),
+        CreateOr(),
+        CreateRule("boolLiteral"),
+        CreateOr(),
+        CreateToken("CHAR_LITERAL"),
+        CreateParen(')'), 
+        CreateSpecialSymbol('+'),
+    }},
+    {"boolLiteral", {
+        CreateParen('('),
+        CreateToken("TRUE"),
+        CreateOr(),
+        CreateToken("FALSE"),
+        CreateParen(')'),
     }}
+
 
 };

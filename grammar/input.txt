@@ -1,35 +1,15 @@
-graph graphDef {
-    nodeDef{
-        start :: startNode;
-        end :: rejectNode;
-        accept :: acceptNode;
-    }
-    transitions{
-        start -> end => conditions : ("hello", "wassup"), operations : ();
-        start -> end => conditions : (), operations : ();
-    }
-}
 
 graph main {
+    memory{
+        vim : 53,
+        wassup : "This actually works what the hell"
+    }
     nodeDef{
         start :: startNode;
         end :: rejectNode;
         accept :: acceptNode;
     }
     transitions{
-        start -> end => conditions : ("hello1", "wassup1"), operations : ();
-        start -> end => conditions : (), operations : ();
-    }
-}
-
-graph graphDef2 {
-    nodeDef{
-        start :: startNode;
-        end :: rejectNode;
-        accept :: acceptNode;
-    }
-    transitions{
-        start -> end => conditions : ("hello2", "wassup2"), operations : ("hello2", "wassup2");
-        start -> end => conditions : ("hello", "wassup2"), operations : ("hello2", "wassup2");
+        start -> end => conditions : ('0', 5, 2,3) , operations : ("hello1", true);
     }
 }

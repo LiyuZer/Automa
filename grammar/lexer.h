@@ -34,7 +34,35 @@ class Lexer{
         size_t start = currentPos;
 
         // Check for identifiers and keywords
-        if (std::isalpha(input[currentPos])) {
+        if(input[currentPos] == '\"'){
+            // Add error here in the future
+            while (currentPos < input.length() ) {
+                currentPos++;
+                if(input[currentPos] == '\"'){
+                    currentPos++;
+                    break;
+                }
+                
+            }
+            std::string value = input.substr(start, currentPos - start);
+            shared_ptr<Token> ptr(new Token("STRING_LITERAL", value));
+            return ptr;
+        }
+        else if(input[currentPos] == '\''){
+            // Add errors here in the future
+            if(currentPos < (input.length() - 2) && input[currentPos + 2] == '\''){
+                currentPos = currentPos + 3;
+            }
+            else{
+                cerr<<"Char not defined properly"<<endl;
+                exit(0);
+            }
+            std::string value = input.substr(start, currentPos - start);
+            shared_ptr<Token> ptr(new Token("CHAR_LITERAL", value));
+            return ptr;
+
+        }
+        else if(std::isalpha(input[currentPos])) {
             while (currentPos < input.length() && std::isalnum(input[currentPos])) {
                 currentPos++;
             }
@@ -53,7 +81,7 @@ class Lexer{
                 currentPos++;
             }
             std::string value = input.substr(start, currentPos - start);
-            shared_ptr<Token> ptr(new Token("IntegerLiteral", value));
+            shared_ptr<Token> ptr(new Token("INTEGER_LITERAL", value));
             return ptr;
         }
         // Check for operators
