@@ -25,7 +25,8 @@ std::unordered_map<std::string, std::string> keywords = {
         {"startNode", "START_NODE"},
         {"acceptNode", "ACCEPT_NODE"},
         {"rejectNode", "REJECT_NODE"},
-        {"operator", "OPERATOR"}
+        {"operator", "OPERATOR"},
+        {"edgeDef" , "EDGE_DEF" }
     };
 
 std::unordered_map<std::string, std::string> operators = {

@@ -39,7 +39,6 @@ class Lexer{
                 currentPos++;
             }
             std::string value = input.substr(start, currentPos - start);
-
             if (keywords.find(value) != keywords.end()) {
                 shared_ptr<Token> ptr(new Token(keywords[value], value));
                 return ptr;

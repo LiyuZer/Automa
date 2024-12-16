@@ -12,6 +12,6 @@ string input_text;
 readFile("input.txt", input_text);
 
 Parser myParser;
-myParser.parse(myLexer,input_text);
+cout << myParser.parse(myLexer,input_text, rules) << endl;
 return 0;
 }

@@ -14,33 +14,45 @@ program : IDENTIFIER : [a]
 
 */
 
-    std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
+std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
     {"program", {
-        CreateToken("GRAPH"),
-        CreateToken("COLON"), 
-        CreateToken("LEFT_BRACKET"),
-        CreateToken("IDENTIFIER"),
-        CreateToken("RIGHT_BRACKET"),
-        CreateSpecialSymbol('+'),
-        CreateRule("memoryDef"),
+        CreateParen('('),
+        CreateRule("tupleDef"), // The program starts with a tuple rule
+        CreateOr(),
+        CreateRule("listDef"),
+        CreateParen(')'),
         CreateSpecialSymbol('*'),
     }},
-    {"memoryDef", {
-        CreateToken("MEMORY"),
-        CreateToken("COLON"), 
-        CreateToken("LEFT_PAREN"),
+    {"tupleDef", {
         CreateToken("IDENTIFIER"),
-        CreateToken("RIGHT_PAREN"),
+        CreateToken("COLON"),
+        CreateToken("LEFT_PAREN"), // Opening parenthesis for the tuple
+        CreateParen('('),
+        CreateToken("IDENTIFIER"), // First identifier
+        CreateSpecialSymbol('*'),  // Optional repetition for additional identifiers with commas
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateToken("IDENTIFIER"), // First identifier
+        CreateParen(')'),
+        CreateSpecialSymbol('*'), 
+        CreateParen(')'),
         CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_PAREN") // Closing parenthesis for the tuple
     }},
-        {"memoryDef", {
-        CreateToken("MEMORY"),
-        CreateToken("COLON"), 
-        CreateToken("LEFT_PAREN"),
+    {"listDef", {
         CreateToken("IDENTIFIER"),
-        CreateToken("RIGHT_PAREN"),
+        CreateToken("COLON"),
+        CreateToken("LEFT_BRACKET"), // Opening parenthesis for the tuple
+        CreateParen('('),
+        CreateToken("IDENTIFIER"), // First identifier
+        CreateSpecialSymbol('*'),  // Optional repetition for additional identifiers with commas
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateToken("IDENTIFIER"), // First identifier
+        CreateParen(')'),
+        CreateSpecialSymbol('*'), 
+        CreateParen(')'),
         CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_BRACKET") // Closing parenthesis for the tuple
     }}
-    
-
-    };
+};
