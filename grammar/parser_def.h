@@ -43,7 +43,7 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateRule("nodeDef"),
         CreateRule("transitionDef"), // Include transitions
         CreateRule("afterAccept"), // Include transitions
-        CreateRule("AfterReject"), // Include transitions
+        CreateRule("afterReject"), // Include transitions
         CreateParen(')'),
         CreateSpecialSymbol('?')
     }},
@@ -136,6 +136,20 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateParen(')'),
         CreateSpecialSymbol('?'), 
     }},
+    {"afterAccept", {
+        CreateToken("AFTER_ACCEPT"),
+        CreateToken("LEFT_BRACE"), 
+        CreateRule("expression"),
+        CreateToken("SEMICOLON"), 
+        CreateToken("RIGHT_BRACE"), 
+    }},
+    {"afterReject", {
+        CreateToken("AFTER_REJECT"),
+        CreateToken("LEFT_BRACE"), 
+        CreateRule("expression"),
+        CreateToken("SEMICOLON"), 
+        CreateToken("RIGHT_BRACE"), 
+    }},
     {"tupleItems", {
         CreateParen('('),
         CreateRule("keyValuePair"), // Condition name
@@ -150,10 +164,17 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
     {"keyValuePair", {
         CreateToken("IDENTIFIER"),
         CreateToken("COLON"),
-        CreateRule("expression"),
+        CreateRule("literal"),
     }},
     {"expression", {
         CreateParen('('),
+        CreateRule("literal"),
+        CreateOr(),
+        CreateToken("IDENTIFIER"),
+        CreateParen(')'), 
+        CreateSpecialSymbol('+'),
+    }},
+    {"literal", {
         CreateToken("STRING_LITERAL"),
         CreateOr(),
         CreateToken("INTEGER_LITERAL"),
@@ -161,8 +182,6 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateRule("boolLiteral"),
         CreateOr(),
         CreateToken("CHAR_LITERAL"),
-        CreateParen(')'), 
-        CreateSpecialSymbol('+'),
     }},
     {"boolLiteral", {
         CreateParen('('),
