@@ -17,7 +17,7 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 - **Deterministic and Nondeterministic Support**: Explore multiple parallel paths for nondeterministic computations.  
 - **Immutable Graphs**: Graphs cannot be modified after creation, ensuring a consistent and predictable execution model.  
 - **Minimal Constructs**: No loops, conditionals, or procedures—just transitions, nodes, and memory.  
-- **Minimal Rollback**: Memory is only set **after** an accept state has been reached and a path has been completed,
+- **Memory Rollback**: Memory is only set **after** an accept state has been reached and a path has been completed,
   ensuring that only Accepted computations make persistent changes to memory. 
 
 ## Graph States  
