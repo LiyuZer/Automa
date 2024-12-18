@@ -5,6 +5,7 @@
 #include <iostream>
 #include "utilities.h"
 #include <memory>
+#include "automaTokenDef.h"
 
 #pragma once
 

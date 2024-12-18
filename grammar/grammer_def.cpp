@@ -2,9 +2,7 @@
 #include <string>
 #include <vector>
 #include "utilities.h"
-
-#pragma once
-
+#include "grammer_def.h"
 using namespace std;
 
 /*
@@ -152,25 +150,25 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
     }},
     {"tupleItems", {
         CreateParen('('),
-        CreateRule("keyValuePair"), // Condition name
+        CreateRule("varDefenition"), // Condition name
         CreateParen('('),
         CreateToken("COMMA"),
-        CreateRule("keyValuePair"), // Condition name 
+        CreateRule("varDefenition"), // Condition name 
         CreateParen(')'),
         CreateSpecialSymbol('*'), // Allow multiple conditions
         CreateParen(')'),
         CreateSpecialSymbol('?'), 
     }},
-    {"keyValuePair", {
-        CreateToken("IDENTIFIER"),
+    {"varDefenition", {
+        CreateRule("variable"),
         CreateToken("COLON"),
-        CreateRule("literal"),
+        CreateRule("expression"),
     }},
     {"expression", {
         CreateParen('('),
         CreateRule("literal"),
         CreateOr(),
-        CreateToken("IDENTIFIER"),
+        CreateRule("variable"),
         CreateParen(')'), 
         CreateSpecialSymbol('+'),
     }},
@@ -189,6 +187,9 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateOr(),
         CreateToken("FALSE"),
         CreateParen(')'),
+    }},
+    {"variable", {
+        CreateToken("IDENTIFIER")
     }}
 
 

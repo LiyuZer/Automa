@@ -5,12 +5,19 @@
 #include <stdexcept>
 #include <iostream>
 #include <memory>
-#include "parser_def.h"
+#include "grammer_def.h"
 #include "lexer.h"
 #include <stack>
 #include "parse_tree.h"
+#pragma once
 /*
-Here we will create a parser class
+Here we will create a parser class, why create a custom modular parser that can generate a wide array of 
+grammar rules? The idea is to not constrain the language, everytime a feature is added I  
+just have to update the grammar rule, not the actual parser, then make some adjustments to the AST creation 
+that is it! Plus I thought it would be cool to create a custom greedy parser, with a slightly unconventional 
+approach for parsing and lexing. 
+
+If you want to check out Automa's grammar go to the grammar_def.cpp. There you will see it!
 */
 
 /*
@@ -44,10 +51,13 @@ struct stack_location {
     int current_pos;
     string rule_str;
     string input;
-
+    shared_ptr<ParseNode> node;
+    bool is_dynamic;
     // Constructor initializing members in the same order as their declaration
-    stack_location(char sr, int ci, int cp, string& rs, string& inp)
-        : special_rule(sr), current_index(ci), current_pos(cp), rule_str(rs), input(inp) {}
+    stack_location(char sr, int ci, int cp, string& rs, string& inp, bool is_dynamic=false)
+        : special_rule(sr), current_index(ci), current_pos(cp), rule_str(rs), input(inp), is_dynamic(is_dynamic) {
+            node = shared_ptr<ParseNode>(new ParseNode(rs, "", is_dynamic));
+        }
 };
 
 
@@ -141,14 +151,26 @@ struct stack_location {
         return -1;
 
     }
-
-    bool terminated(Lexer& x, vector<SymbolPtr>& v, int& i, int& current_pos, string& input, string ruleDebug=""){
+    void addToNodeFromVec(shared_ptr<ParseNode> node, vector<shared_ptr<ParseNode>> parse_vec ){
+        for(shared_ptr<ParseNode> i : parse_vec){
+            node->addChildren(i->getType(), i);
+        }
+        return;
+    }
+    void addNodeFromStack(stack<shared_ptr<stack_location>> executionStack, shared_ptr<ParseNode> child_node ){
+        if(!executionStack.empty()){
+            executionStack.top()->node->addChildren(child_node->getType(), child_node);
+        }
+        return;
+    }
+    bool terminated(Lexer& x, vector<SymbolPtr>& v, int& i, int& current_pos, string& input, shared_ptr<ParseNode>& node, string ruleDebug=""){
         shared_ptr<Token> token_symbol = dynamic_pointer_cast<Token>(v[i]);
 
         int temp_current_pos = current_pos;// The temp current pos and temp_input are here to save the last valid current pos and input
         string temp_input = input;
 
-
+        vector<shared_ptr<ParseNode>> vec; // Our vector storing all our nodes, as a token might have a * ? or + thus may be 
+        //appear more than one time
         shared_ptr<Token> current_token = x.run(temp_current_pos, temp_input); // Get the current token from the lexer
         if(current_token->type == "EOF"){
             return false;
@@ -164,6 +186,7 @@ struct stack_location {
                 while (token_symbol->type == current_token->type){
                     current_pos = temp_current_pos;
                     input = temp_input;
+                    vec.push_back(shared_ptr<ParseNode>(new ParseNode(current_token->type, current_token->value)));// Push before we increment lexer
                     current_token = x.run(temp_current_pos, temp_input);
                 }
             }
@@ -172,6 +195,7 @@ struct stack_location {
                 // Then update teh current pos and input
                     current_pos = temp_current_pos;
                     input = temp_input;
+                    vec.push_back(shared_ptr<ParseNode>(new ParseNode(current_token->type, current_token->value)));// Push before we increment lexer
                 } 
                 else{
                     i = i + 2;
@@ -181,6 +205,7 @@ struct stack_location {
                 while (token_symbol->type == current_token->type){
                     current_pos = temp_current_pos;
                     input = temp_input;
+                    vec.push_back(shared_ptr<ParseNode>(new ParseNode(current_token->type, current_token->value)));// Push before we increment lexer
                     current_token = x.run(temp_current_pos, temp_input);
                 }
             }
@@ -188,6 +213,7 @@ struct stack_location {
                 if (token_symbol->type == current_token->type){
                     current_pos = temp_current_pos;
                     input = temp_input;
+                    vec.push_back(shared_ptr<ParseNode>(new ParseNode(current_token->type, current_token->value)));// Push before we increment lexer
                 } 
             }
             i = i + 2; // You have to skip the special operator
@@ -201,26 +227,27 @@ struct stack_location {
             else{
                 current_pos = temp_current_pos;
                 input = temp_input;
-
+                vec.push_back(shared_ptr<ParseNode>(new ParseNode(current_token->type, current_token->value)));// Push before we increment lexer
             }
             
             i = i + 1;
         }
         cout<<"*******"<<endl;
-    return true;
-
+    
+        addToNodeFromVec(node, vec);// Adding the vector to the nodes children one by one
+        return true;
     }
 
 
 
-    shared_ptr<stack_location> visit_rule(Lexer& x, int& current_index, string current_rule, string& input_string, int& current_pos, bool& found, std::unordered_map<std::string, std::vector<SymbolPtr>>& rules){
+    shared_ptr<stack_location> visit_rule(Lexer& x, int& current_index, string current_rule, string& input_string, int& current_pos, bool& found, std::unordered_map<std::string, std::vector<SymbolPtr>>& rules, shared_ptr<ParseNode>& node){
         vector<SymbolPtr> v = rules[current_rule];// Our current rule
         
         while(current_index < v.size()){
             // If the current token is supposed to be terminating
             int i = current_index; // Makes it easier than writing current_index over again;
             if(v[i]->terminating()){
-                found = terminated(x, v, current_index, current_pos, input_string, current_rule);
+                found = terminated(x, v, current_index, current_pos, input_string, node, current_rule);
                 if(!found){// Return false and a null ptr
                     found = false;
                     return shared_ptr<stack_location>(nullptr);
@@ -263,7 +290,7 @@ struct stack_location {
                     special_symbol_char = special_symbol->type;
                     current_index++;
                }
-               return shared_ptr<stack_location>(new stack_location(special_symbol_char, 0, current_pos, new_rule, input_string)); 
+               return shared_ptr<stack_location>(new stack_location(special_symbol_char, 0, current_pos, new_rule, input_string, true)); 
             }
             else if(v[i]->or_symbol()){
                 break;
@@ -273,11 +300,12 @@ struct stack_location {
         return nullptr;
     }
 
-    bool parse(Lexer& x, string input, std::unordered_map<std::string, std::vector<SymbolPtr>>& rules){
+    bool parse(Lexer& x, string input, std::unordered_map<std::string, std::vector<SymbolPtr>>& rules, shared_ptr<ParseNode>& head){
         int current_pos = 0;
         std::stack<shared_ptr<stack_location>> executionStack; 
         string current_rule = "program";
         executionStack.push( shared_ptr<stack_location>(new stack_location(' ', 0, current_pos, current_rule, input)) ); 
+        head = executionStack.top()->node;
 
         start:
         while(!executionStack.empty()){
@@ -288,7 +316,7 @@ struct stack_location {
           current_pos = executionStack.top()->current_pos;   
           bool found = false;
           // Visit the rule note curent index will never backtrace and so no need to create a copy
-          shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules);
+          shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules, executionStack.top()->node);
           
           if (!current_output_ptr){
                 if(found){ // Pop stack and update the top of the previous stack with the new string
@@ -304,7 +332,10 @@ struct stack_location {
                     }
 
                     else if (executionStack.top()->special_rule != '*'){ // If it is a kleene star then try again
+                        shared_ptr<ParseNode> ptr = executionStack.top()->node;
                         executionStack.pop();
+                        // If the execution stack is not empty then update the children of the top stack
+                        addNodeFromStack(executionStack, ptr);
                     }
 
                     if(!executionStack.empty()){// Only do this if the stack is not empty
@@ -330,8 +361,14 @@ struct stack_location {
                         // last valid position                       
                         int temp_pos = executionStack.top()->current_pos;
                         string temp_input = executionStack.top()->input;
+
+                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
                         executionStack.pop(); 
                         if(!executionStack.empty()){// Only do this if the stack is not empty
+                            if(temp_pos != executionStack.top()->current_pos){// If the pos has not changed then ignore
+                                addNodeFromStack(executionStack, ptr);// Added children here
+                            }
+
                             executionStack.top()->current_pos = temp_pos;
                             executionStack.top()->input = temp_input;
                         }
@@ -346,6 +383,7 @@ struct stack_location {
                         
                         int old_current_pos = executionStack.top()->current_pos;
                         string old_input = executionStack.top()->input;
+                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
                         executionStack.pop();
                         if(!executionStack.empty() && (old_current_pos == executionStack.top()->current_pos)){
                             while(!executionStack.empty()){
@@ -365,6 +403,7 @@ struct stack_location {
                         if(!executionStack.empty() ){// If the execution stack is not empty
                             executionStack.top()->current_pos = old_current_pos;
                             executionStack.top()->input = old_input;
+                            addNodeFromStack(executionStack, ptr);//Added children here
                         }
                         else{ 
                             return false; 
@@ -373,8 +412,12 @@ struct stack_location {
                     else if(executionStack.top()->special_rule == '?'){
                         int temp_pos = executionStack.top()->current_pos;
                         string temp_input = executionStack.top()->input;
+                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
                         executionStack.pop(); 
                         if(!executionStack.empty()){// Only do this if the stack is not empty
+                            if(temp_pos != executionStack.top()->current_pos){// If the pos has not changed then ignore
+                                addNodeFromStack(executionStack, ptr);// Added children here
+                            }
                             executionStack.top()->current_pos = temp_pos;
                             executionStack.top()->input = temp_input;
                         }

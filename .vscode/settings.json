@@ -52,6 +52,8 @@
         "iomanip": "cpp",
         "stack": "cpp",
         "deque": "cpp",
-        "__memory": "cpp"
+        "__memory": "cpp",
+        "memory_resource": "cpp",
+        "queue": "cpp"
     }
 }

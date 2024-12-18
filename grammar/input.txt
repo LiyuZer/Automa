@@ -1,21 +1,18 @@
 
 graph main {
     memory{
-        vim : 53,
-        wassup : "This actually works what the hell"
+        i : 0,
+        num : 1
     }
     nodeDef{
         start :: startNode;
-        end :: rejectNode;
         accept :: acceptNode;
     }
     transitions{
-        start -> end => conditions : ('0', 5, 2,3) , operations : ("hello1", true);
+        start -> start => conditions : (i) , operations : ( i, num);
+        start -> accept => conditions : (i) , operations : (); 
     }
     afterAccept{
-        h;
-    }
-    afterReject{
-        h;
+        num;
     }
 }

@@ -7,68 +7,6 @@
 using namespace std;
 
 #pragma once
-
-std::unordered_map<std::string, std::string> keywords = {
-        {"transitions", "TRANSITIONS"},
-        {"main", "MAIN"},
-        {"memory", "MEMORY"},
-        {"graph", "GRAPH"},
-        {"afterReject", "AFTER_REJECT"},
-        {"afterAccept", "AFTER_ACCEPT"},
-        {"symbols", "SYMBOLS"},
-        {"array", "ARRAY"},
-        {"dict", "DICT"},
-        {"tuple", "TUPLE"},
-        {"conditions", "CONDITIONS"},
-        {"operations", "OPERATIONS"},
-        {"None", "NONE"},
-        {"nodeDef", "NODE_DEF"},
-        {"startNode", "START_NODE"},
-        {"acceptNode", "ACCEPT_NODE"},
-        {"rejectNode", "REJECT_NODE"},
-        {"operator", "OPERATOR"},
-        {"edgeDef" , "EDGE_DEF" }, 
-        {"true" , "TRUE" },
-        {"false" , "FALSE" }
-    };
-
-std::unordered_map<std::string, std::string> operators = {
-        {"->", "ARROW"},
-        {"=>", "ARROW_EQUALS"},
-        {"(", "LEFT_PAREN"},
-        {")", "RIGHT_PAREN"},
-        {"[", "LEFT_BRACKET"},
-        {"]", "RIGHT_BRACKET"},
-        {"{", "LEFT_BRACE"},
-        {"}", "RIGHT_BRACE"},
-        {"+", "PLUS"},
-        {"-", "MINUS"},
-        {"*", "STAR"},
-        {"/", "DIV"},
-        {"%", "MOD"},
-        {"&&", "AND"},
-        {"and", "AND_ALT"},
-        {"||", "OR"},
-        {"or", "OR_ALT"},
-        {"~", "TILDE"},
-        {"!", "NOT"},
-        {"not", "NOT_ALT"},
-        {"=", "ASSIGN"},
-        {"<", "LESS"},
-        {">", "GREATER"},
-        {"==", "EQUAL"},
-        {"!=", "NOT_EQUAL"},
-        {"<=", "LESS_EQUAL"},
-        {">=", "GREATER_EQUAL"},
-        {";", "SEMICOLON"},
-        {"::", "DOUBLE_COLON"},
-        {":", "COLON"},
-        {"\"", "QUOTES"},
-        {"\'", "SINGLE_QUOTES"},
-        {",", "COMMA"}
-    };
-
-
 class Symbol {
     private:
         bool is_terminating;
@@ -152,27 +90,27 @@ public:
 
 using SymbolPtr = std::shared_ptr<Symbol>;
 
-SymbolPtr CreateToken(const std::string& name) {
+static SymbolPtr CreateToken(const std::string& name) {
     return std::make_shared<Token>(name);
 }
 
-SymbolPtr CreateRule(const std::string& ruleName) {
+static SymbolPtr CreateRule(const std::string& ruleName) {
     return std::make_shared<Rule>(ruleName);
 }
 
-SymbolPtr CreateSpecialSymbol(char symbol) {
+static SymbolPtr CreateSpecialSymbol(char symbol) {
     return std::make_shared<SpecialSymbol>(symbol);
 }
 
-SymbolPtr CreateParen(char symbol) {
+static SymbolPtr CreateParen(char symbol) {
     return std::make_shared<ParenSymbol>(symbol);
 }
 
-SymbolPtr CreateOr() {
+static SymbolPtr CreateOr() {
     return std::make_shared<OrSymbol>();
 }
 
-int readFile(string filePath, string& input){
+static int readFile(string filePath, string& input){
     ifstream file(filePath);
     if (!file.is_open()) {
         cerr << "Failed to open file: " << filePath << endl;
