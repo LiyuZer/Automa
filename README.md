@@ -85,7 +85,6 @@ graph dfaRegex {
 
 ### Prerequisites  
 - **C++ Compiler**: Automa is implemented in C++, so a compiler is necessary.  
-- **ANTLR**: Used for parsing and lexing Automa syntax.  
 
 ### Installation  
 Clone the repository:  
