@@ -1,8 +1,8 @@
 
 graph main {
     memory{
-        i : 0,
-        num : 1
+        Girum : 0,
+        Tigist : 1
     }
     nodeDef{
         start :: startNode;

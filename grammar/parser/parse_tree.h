@@ -33,6 +33,9 @@ public:
     }
 
     bool addChildrenVec(string child, vector<shared_ptr<ParseNode>>& vec) {
+        // for(auto node : children){
+        //     cout<<node.first<<endl;
+        // }
         if(children.find(child) != children.end()){
             vec = children[child];
             return true;

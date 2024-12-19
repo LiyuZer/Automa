@@ -1,0 +1,27 @@
+digraph AST {
+    node0 [label="program"];
+    node0 -> node1;
+    node1 [label="graphDef"];
+    node1 -> node2;
+    node2 [label="memoryDef"];
+    node2 -> node3;
+    node3 [label="variableDefintions(name=Girum)"];
+    node3 -> node4;
+    node4 [label="expression(type=)"];
+    node2 -> node5;
+    node5 [label="variableDefintions(name=Tigist)"];
+    node5 -> node6;
+    node6 [label="expression(type=)"];
+    node1 -> node7;
+    node7 [label="afterAccept"];
+    node1 -> node8;
+    node8 [label="afterReject"];
+    node1 -> node9;
+    node9 [label="nodeDef"];
+    node9 -> node10;
+    node10 [label="nodeDefStatements(node=start, type=startNode)"];
+    node9 -> node11;
+    node11 [label="nodeDefStatements(node=accept, type=acceptNode)"];
+    node1 -> node12;
+    node12 [label="transitionDef"];
+}
