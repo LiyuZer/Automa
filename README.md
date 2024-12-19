@@ -1,7 +1,7 @@
 # Automa  
 Automa - A Graph-Based Programming Language  
 
-Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action of memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
+Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action on memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
 
 Automa eliminates constructs like **if statements**, **loops**, and **procedures**, instead operating entirely on **graphs** that interact with memory.  
 
@@ -17,6 +17,8 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 - **Deterministic and Nondeterministic Support**: Explore multiple parallel paths for nondeterministic computations.  
 - **Immutable Graphs**: Graphs cannot be modified after creation, ensuring a consistent and predictable execution model.  
 - **Minimal Constructs**: No loops, conditionals, or procedures—just transitions, nodes, and memory.  
+- **Memory Rollback**: Memory is only set **after** an accept state has been reached and a path has been completed,
+  ensuring that only Accepted computations make persistent changes to memory. 
 
 ## Graph States  
 Each graph operates within one of the following states:  
@@ -83,7 +85,6 @@ graph dfaRegex {
 
 ### Prerequisites  
 - **C++ Compiler**: Automa is implemented in C++, so a compiler is necessary.  
-- **ANTLR**: Used for parsing and lexing Automa syntax.  
 
 ### Installation  
 Clone the repository:  
