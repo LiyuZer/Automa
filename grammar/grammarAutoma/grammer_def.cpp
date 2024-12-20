@@ -1,7 +1,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include "utilities.h"
+#include "../utilities.h"
 #include "grammer_def.h"
 using namespace std;
 
@@ -63,8 +63,12 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
     }},
     {"nodeDefStatement", {
         CreateToken("IDENTIFIER"),
+        CreateParen('('),
         CreateToken("DOUBLE_COLON"),
         CreateRule("nodeTypes"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+
     }},
     {"nodeTypes", {
         CreateToken("START_NODE"),
@@ -164,14 +168,92 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateToken("COLON"),
         CreateRule("expression"),
     }},
+    // expression : level1 | ( level1 )
+    // level1 : binary_operations | assignment | level2
+    // level2 : unary_operations |  variable | literal 
+    // binary_operations : level2 binary_operators expression 
+    // unary_operations : unary_operators
+    // assignment : variable = expression
+    // binary_operations : + * / % == && || or and <= >= < > == 
+    // unary_operators : ! 
+    // (((5 + 2)))
+    //(5 * 2) * 2
     {"expression", {
-        CreateParen('('),
-        CreateRule("literal"),
+        CreateToken("LEFT_PAREN"),
+        CreateRule("expression"),
+        CreateToken("RIGHT_PAREN"),
         CreateOr(),
-        CreateRule("variable"),
-        CreateParen(')'), 
-        CreateSpecialSymbol('+'),
+        CreateRule("level1"),
+ 
     }},
+
+    {"level1", {
+        CreateRule("binary_operations"), 
+        CreateOr(),
+        CreateRule("assignment"), 
+        CreateOr(),
+        CreateRule("level2"), 
+    }},
+
+    {"level2", {
+        CreateRule("unary_operations"), // Handles unary operations first
+        CreateOr(),
+        CreateRule("variable"), 
+        CreateOr(),
+        CreateRule("literal"), 
+    }},
+    {"assignment", {
+        CreateRule("variable"), // Handles unary operations first
+        CreateToken("ASSIGN"), 
+        CreateRule("expression"), 
+    }},
+    {"unary_operations", {
+        CreateToken("NOT"), 
+        CreateRule("expression"),
+    }},
+
+    {"binary_operations", {
+        CreateRule("level2"),
+        CreateRule("binary_operators"), 
+        CreateRule("expression"),
+        CreateOr(),
+        CreateToken("LEFT_PAREN"),
+        CreateRule("expression"), 
+        CreateToken("RIGHT_PAREN"),
+        CreateRule("binary_operators"),
+        CreateRule("expression"), 
+    }},
+
+    {"binary_operators", {
+        CreateToken("PLUS"),
+        CreateOr(),
+        CreateToken("MINUS"),
+        CreateOr(),
+        CreateToken("STAR"),
+        CreateOr(),
+        CreateToken("DIV"),
+        CreateOr(),
+        CreateToken("MOD"),
+        CreateOr(),
+        CreateToken("AND"),
+        CreateOr(),
+        CreateToken("OR"),
+        CreateOr(),
+        CreateToken("EQUAL"),
+        CreateOr(),
+        CreateToken("NOT_EQUAL"),
+        CreateOr(),
+        CreateToken("LESS"),
+        CreateOr(),
+        CreateToken("LESS_EQUAL"),
+        CreateOr(),
+        CreateToken("GREATER"),
+        CreateOr(),
+        CreateToken("GREATER_EQUAL"),
+    }},
+
+
+
     {"literal", {
         CreateToken("STRING_LITERAL"),
         CreateOr(),

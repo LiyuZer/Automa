@@ -1,18 +1,21 @@
-
 graph main {
-    memory{
-        Girum : 0,
-        Tigist : 1
+    memory {
+        counter : (4 + 2),
+        result : ' ',
+        flag : false
     }
-    nodeDef{
+    nodeDef {
         start :: startNode;
+        mid;
+        check;
         accept :: acceptNode;
+        reject :: rejectNode;
     }
-    transitions{
-        start -> start => conditions : (i) , operations : ( i, num);
-        start -> accept => conditions : (i) , operations : (); 
+    transitions {
+        start -> mid => conditions : (counter), operations : (counter);
+        mid -> check => conditions : (flag), operations : (flag);
+        check -> accept => conditions : (success), operations : (' ');
+        check -> reject => conditions : (success), operations : (failure);
     }
-    afterAccept{
-        num;
-    }
+
 }

@@ -1,7 +1,7 @@
 #include <memory>
 #include <queue>
 #include "ast_tree.h"
-#include "parser.h"
+#include "../parser/parser.h"
 #include "ast_node.h"
 
 
@@ -84,6 +84,7 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
         astNodeQueue.push(elem);
         }
 
+
     while(!astNodeQueue.empty()){
         /*
         Here we will have an iterative method for creating out Abstract syntax tree! Fun! 
@@ -99,19 +100,17 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        astNodeQueueElem top = astNodeQueue.front();
        string type = top.astNodeptr->get_type();
        if(type == "memoryDef"){
-        explore_memoryDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+            explore_memoryDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
        else if(type == "nodeDef"){
             explore_nodeDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
        else if(type == "transitionDef"){
-        
+            explore_transitionDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+
        }
-       else if(type == "transitionDef"){
-        
-       }
-       else if(type == "transitionDef"){
-        
+       else if(type == "transitionDefStatements"){
+            explore_transitionDefStatements(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
        else if(type == "variableDefintions"){
             explore_variableDefinitions(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
@@ -119,6 +118,22 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        else if(type == "nodeDefStatements"){
             explore_nodeDefStatements(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
+       else if(type == "expression"){
+            explore_expression(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
+       else if(type == "variable"){
+            explore_variable(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       } 
+       else if(type == "stringLiteral"){
+            explore_stringLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
+       else if(type == "integerLiteral"){
+            explore_integerLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       } 
+       else if(type == "charLiteral"){
+            explore_charLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       } 
+
        astNodeQueue.pop();
 
     }
@@ -151,6 +166,18 @@ void AbstractTreeGenerator::explore_transitionDef(shared_ptr<ParseNode> root_nod
     /*
     Here we are exploring a transition definition parse node
     */
+
+    vector<shared_ptr<ParseNode>> transitions;
+    root_node->addChildrenVec("transitionStatement", transitions);
+    shared_ptr<transitionDef> transitionNode = dynamic_pointer_cast<transitionDef>(parentAstNode);
+
+    for(auto transition : transitions){
+        shared_ptr<transitionDefStatements> transitionDef = shared_ptr<transitionDefStatements>(new transitionDefStatements);
+        transitionNode->add_transitionDefStatement(transitionDef);
+        astNodeQueueElem elem = astNodeQueueElem(transitionDef, transition);
+        astNodeQueue.push(elem);
+
+    }
 
 
 }
@@ -223,16 +250,18 @@ void AbstractTreeGenerator::explore_nodeDefStatements(shared_ptr<ParseNode> root
 
         if(type_vec_value.empty()){
         type_vec[0]->addChildrenVec("ACCEPT_NODE", type_vec_value);
-        type_identifier = type_vec_value[0]->getValue();
         }
 
-        else if(type_vec_value.empty()){
+        if(type_vec_value.empty()){
         type_vec[0]->addChildrenVec("REJECT_NODE", type_vec_value);
-        type_identifier = type_vec_value[0]->getValue();
         }
-        else{
-             type_identifier = type_vec_value[0]->getValue();
+
+
+        if(!type_vec_value.empty()){
+            type_identifier = type_vec_value[0]->getValue();
         }
+
+
     }
 
     vector<shared_ptr<ParseNode>> node;
@@ -246,53 +275,177 @@ void AbstractTreeGenerator::explore_nodeDefStatements(shared_ptr<ParseNode> root
     nodeDefStatement_ptr->set_node(node_identifier);
 
 }
-
 void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring transition definition statements parse node
     */
-}
 
-void AbstractTreeGenerator::explore_conditions(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
-    /*
-    Here we are exploring a conditions parse node
-    */
-}
 
-void AbstractTreeGenerator::explore_operations(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
-    /*
-    Here we are exploring an operations parse node
-    */
+    vector<shared_ptr<ParseNode>> conditions_expressions;
+    root_node->addChildrenVec("conditions", conditions_expressions);
+    shared_ptr<ParseNode> conditions_ptr = conditions_expressions[0];
+    conditions_ptr->addChildrenVec("conditionStatement", conditions_expressions);
+
+    vector<shared_ptr<ParseNode>> operations_expressions;
+    root_node->addChildrenVec("operations", operations_expressions);
+    shared_ptr<ParseNode> operations_ptr = operations_expressions[0];
+    operations_ptr->addChildrenVec("operationStatement", operations_expressions);
+
+
+    vector<shared_ptr<ParseNode>> fromNode;
+    root_node->addChildrenVec("fromNode", fromNode);
+    fromNode[0]->addChildrenVec("IDENTIFIER", fromNode);
+
+
+    vector<shared_ptr<ParseNode>> toNode;
+    root_node->addChildrenVec("toNode", toNode);
+    toNode[0]->addChildrenVec("IDENTIFIER", toNode);
+
+
+    shared_ptr<transitionDefStatements> transitionStatement = dynamic_pointer_cast<transitionDefStatements>(parentAstNode);
+
+    transitionStatement->set_toNode(toNode[0]->getValue());
+    transitionStatement->set_fromNode(fromNode[0]->getValue());
+
+    for(auto operation_expression : operations_expressions){
+        shared_ptr<expression> operationNode = shared_ptr<expression>(new expression);
+
+        vector<shared_ptr<ParseNode>> expression;
+        operation_expression->addChildrenVec("expression", expression);
+
+        if(!expression.empty()){
+            transitionStatement->add_operationsExpression(operationNode);
+            astNodeQueueElem elem = astNodeQueueElem(operationNode, expression[0]);
+            astNodeQueue.push(elem);
+        }
+
+    }
+
+    for(auto condition_expression : conditions_expressions){
+        shared_ptr<expression> conditionNode = shared_ptr<expression>(new expression);
+
+        vector<shared_ptr<ParseNode>> expression;
+        condition_expression->addChildrenVec("expression", expression);
+
+        if(!expression.empty()){
+            transitionStatement->add_conditionExpression(conditionNode);
+            astNodeQueueElem elem = astNodeQueueElem(conditionNode, expression[0]);
+            astNodeQueue.push(elem);
+        }
+
+    }
+
 }
 
 void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring an expression parse node
     */
+    vector<shared_ptr<ParseNode>> literal_vec;
+    vector<shared_ptr<ParseNode>> variable_vec;
+
+    root_node->addChildrenVec("literal", literal_vec);
+    root_node->addChildrenVec("variable", variable_vec);
+
+    if (!literal_vec.empty()) {
+        dynamic_pointer_cast<expression>(parentAstNode)->set_expressionType("literal");
+
+        vector<shared_ptr<ParseNode>> string_vec;
+        vector<shared_ptr<ParseNode>> integer_vec;
+        vector<shared_ptr<ParseNode>> char_vec;
+
+        literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
+        literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
+        literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
+
+        if (!string_vec.empty()) {
+            shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
+            stringNode->set_stringLiteral(string_vec[0]->getValue());
+            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(stringNode);
+            astNodeQueue.push(astNodeQueueElem(stringNode, string_vec[0]));
+        } else if (!integer_vec.empty()) {
+            shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
+            intNode->set_integerLiteral(stol(integer_vec[0]->getValue()));
+            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(intNode);
+            astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
+        } else if (!char_vec.empty()) {
+            shared_ptr<charLiteral> charNode = make_shared<charLiteral>();
+            charNode->set_charLiteral(char_vec[0]->getValue()[0]);
+            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(charNode);
+            astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
+        }
+    }
+
+    if (!variable_vec.empty()) {
+        dynamic_pointer_cast<expression>(parentAstNode)->set_expressionType("variable");
+        shared_ptr<variable> variableNode = make_shared<variable>();
+
+        vector<shared_ptr<ParseNode>> identifier_vec;
+        variable_vec[0]->addChildrenVec("IDENTIFIER", identifier_vec);
+
+        if (!identifier_vec.empty()) {
+            variableNode->set_variableName(identifier_vec[0]->getValue());
+        }
+
+        dynamic_pointer_cast<expression>(parentAstNode)->set_expression(variableNode);
+        astNodeQueue.push(astNodeQueueElem(variableNode, variable_vec[0]));
+    }
 }
 
 void AbstractTreeGenerator::explore_variable(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a variable parse node
     */
+    vector<shared_ptr<ParseNode>> identifier_vec;
+    root_node->addChildrenVec("IDENTIFIER", identifier_vec);
+
+    if (!identifier_vec.empty()) {
+        string variableName = identifier_vec[0]->getValue();
+        shared_ptr<variable> variableNode = dynamic_pointer_cast<variable>(parentAstNode);
+        variableNode->set_variableName(variableName);
+    }
 }
 
 void AbstractTreeGenerator::explore_stringLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a string literal parse node
     */
+    vector<shared_ptr<ParseNode>> literal_vec;
+    root_node->addChildrenVec("STRING_LITERAL", literal_vec);
+
+    if (!literal_vec.empty()) {
+        string value = literal_vec[0]->getValue();
+        shared_ptr<stringLiteral> stringNode = dynamic_pointer_cast<stringLiteral>(parentAstNode);
+        stringNode->set_stringLiteral(value);
+    }
 }
 
 void AbstractTreeGenerator::explore_integerLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring an integer literal parse node
     */
+    vector<shared_ptr<ParseNode>> literal_vec;
+    root_node->addChildrenVec("INTEGER_LITERAL", literal_vec);
+
+    if (!literal_vec.empty()) {
+        long value = stol(literal_vec[0]->getValue());
+        shared_ptr<integerLiteral> intNode = dynamic_pointer_cast<integerLiteral>(parentAstNode);
+        intNode->set_integerLiteral(value);
+    }
 }
 
 void AbstractTreeGenerator::explore_charLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a char literal parse node
     */
+    vector<shared_ptr<ParseNode>> literal_vec;
+    root_node->addChildrenVec("CHAR_LITERAL", literal_vec);
+
+    if (!literal_vec.empty()) {
+        char value = literal_vec[0]->getValue()[0]; // Assuming the value is a single character
+        shared_ptr<charLiteral> charNode = dynamic_pointer_cast<charLiteral>(parentAstNode);
+        charNode->set_charLiteral(value);
+    }
 }
 
 void AbstractTreeGenerator::explore_afterAccept(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
@@ -374,15 +527,25 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                     dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
                     writeNode(nodeDefStatement, nodeId);
                 }
-            }        
-        else if (auto nodeStatementsNode = dynamic_pointer_cast<nodeDefStatements>(node)) {
-            // Handle additional child nodes here if applicable.
-        } else if (auto transitionNode = dynamic_pointer_cast<transitionDefStatements>(node)) {
-            if (auto conds = transitionNode->get_conditions()) {
+            }
+        else if (auto node_def = dynamic_pointer_cast<transitionDef>(node)) {
+                for (const auto& transitionDefStatement : node_def->get_transitionDefStatements()) {
+                    dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                    writeNode(transitionDefStatement, nodeId);
+                }
+            }           
+        else if (auto express = dynamic_pointer_cast<expression>(node)) {
+            if (auto expr = express->get_expression()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                writeNode(expr, nodeId);
+            }
+        } 
+        else if (auto transitionNode = dynamic_pointer_cast<transitionDefStatements>(node)) {
+            for (auto conds : transitionNode->get_conditionExpressions()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
                 writeNode(conds, nodeId);
             }
-            if (auto ops = transitionNode->get_operations()) {
+            for (auto ops : transitionNode->get_operationsExpressions()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
                 writeNode(ops, nodeId);
             }

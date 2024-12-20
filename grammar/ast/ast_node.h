@@ -169,8 +169,8 @@ class transitionDefStatements : public AstNode {
 private:
     string fromNode;
     string toNode;
-    shared_ptr<AstNode> conditions;
-    shared_ptr<AstNode> operations;
+    vector<shared_ptr<AstNode>> conditionExpressions;
+    vector<shared_ptr<AstNode>> operationsExpressions;
 
 public:
     transitionDefStatements() : AstNode("transitionDefStatements") {}
@@ -181,46 +181,17 @@ public:
     string get_toNode() { return toNode; }
     void set_toNode(const string& to) { toNode = to; }
 
-    shared_ptr<AstNode> get_conditions() { return conditions; }
-    void set_conditions(const shared_ptr<AstNode>& cond) { conditions = cond; }
+    vector<shared_ptr<AstNode>> get_conditionExpressions() { return conditionExpressions; }
+    void add_conditionExpression(const shared_ptr<AstNode>& expr) { conditionExpressions.push_back(expr); }
 
-    shared_ptr<AstNode> get_operations() { return operations; }
-    void set_operations(const shared_ptr<AstNode>& ops) { operations = ops; }
+    vector<shared_ptr<AstNode>> get_operationsExpressions() { return operationsExpressions; }
+    void add_operationsExpression(const shared_ptr<AstNode>& expr) { operationsExpressions.push_back(expr); }
 
     string repr() override {
         return "transitionDefStatements(fromNode=" + fromNode + ", toNode=" + toNode + ")";
     }
 };
 
-class conditions : public AstNode {
-private:
-    vector<shared_ptr<AstNode>> conditionExpressions;
-
-public:
-    conditions() : AstNode("conditions") {}
-
-    vector<shared_ptr<AstNode>> get_conditionExpressions() { return conditionExpressions; }
-    void add_conditionExpression(const shared_ptr<AstNode>& expr) { conditionExpressions.push_back(expr); }
-
-    string repr() override {
-        return "conditions";
-    }
-};
-
-class operations : public AstNode {
-private:
-    vector<shared_ptr<AstNode>> operationsExpressions;
-
-public:
-    operations() : AstNode("operations") {}
-
-    vector<shared_ptr<AstNode>> get_operationsExpressions() { return operationsExpressions; }
-    void add_operationsExpression(const shared_ptr<AstNode>& expr) { operationsExpressions.push_back(expr); }
-
-    string repr() override {
-        return "operations";
-    }
-};
 
 class afterAcceptDef : public AstNode {
 private:

@@ -3,9 +3,9 @@
 #include <cctype>
 #include <stdexcept>
 #include <iostream>
-#include "utilities.h"
+#include "../utilities.h"
 #include <memory>
-#include "automaTokenDef.h"
+#include "../lexer/automaTokenDef.h"
 
 #pragma once
 
