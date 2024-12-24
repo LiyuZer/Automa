@@ -3,13 +3,21 @@ Automa - A Graph-Based Programming Language
 
 Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action on memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
 
-Automa eliminates constructs like **if statements**, **loops**, and **procedures**, instead operating entirely on **graphs** that interact with memory.  
-
 At its core, every program in Automa is a **graph** consisting of nodes and transitions. Transitions define paths between nodes and are represented as tuples of **conditions** and **operations**:  
-- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid. **Cannot** change the graph's memory in any way, thus having no side effects.  
+- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid. **Cannot** change the graph's memory, thus having no side effects.  
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
-Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing for multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
+Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
+
+
+## Philosophy 
+The philosophy of Automa is to create a closed programming language that only interacts with the development environment and memory if the computation is accepted, the goal being 
+to create a programming language where rollback is inherent and isolation is guaranteed. Hopefully, this will develop safe and robust programs that are transparent in the description.
+
+Another crucial philosophical framework for Automa is quantifying computation into discreet steps, represented as a finite state machine. This way, computation becomes a first-class citizen much more granularly than traditional functions. Traditional programs are viewed as statements to be executed one after the other, performing some tasks. 
+Automa, on the other hand, is a structure-based programming language; we are running the structure rather than statement-by-statement flows. 
+
+Finally, programming should be more intuitive. With a graph-based programming language, visual representations of code will be more straightforward. Hopefully, this will make it easier to teach code and demonstrate workflows. 
 
 ## Key Features  
 - **Graph-Based Computation**: Every computation is modeled as a graph traversal.  
@@ -120,7 +128,7 @@ Run an Automa program:
 ---
 
 ## Contributing  
-Automa is an open-source project. Contributions are welcome! If you have ideas or improvements, feel free to submit a pull request.  
+Automa is an open-source project. Contributions are welcome! Feel free to submit a pull request if you have ideas or improvements.  
 
 ---
 
