@@ -257,6 +257,70 @@ public:
     }
 };
 
+
+class binaryExpression : public AstNode {
+private:
+    string operation;
+    shared_ptr<AstNode> leftSide;
+    shared_ptr<AstNode> rightSide;
+
+public:
+    binaryExpression() : AstNode("binaryExpression") {}
+
+    string get_operation() { return operation; }
+    void set_operation(const string& op) { operation = op; }
+
+    shared_ptr<AstNode> get_leftSide() { return leftSide; }
+    void set_leftSide(const shared_ptr<AstNode>& left) { leftSide = left; }
+
+    shared_ptr<AstNode> get_rightSide() { return rightSide; }
+    void set_rightSide(const shared_ptr<AstNode>& right) { rightSide = right; }
+
+    string repr() override {
+        return "binaryExpression(op=" + operation + ")";
+    }
+};
+
+class unaryExpression : public AstNode {
+private:
+    string operation;
+    shared_ptr<AstNode> operand;
+
+public:
+    unaryExpression() : AstNode("unaryExpression") {}
+
+    string get_operation() { return operation; }
+    void set_operation(const string& op) { operation = op; }
+
+    shared_ptr<AstNode> get_operand() { return operand; }
+    void set_operand(const shared_ptr<AstNode>& op) { operand = op; }
+
+    string repr() override {
+        return "unaryExpression(op=" + operation + ")";
+    }
+};
+
+class assignmentExpression : public AstNode {
+private:
+    string variableName;
+    shared_ptr<AstNode> expression;
+
+public:
+    assignmentExpression() : AstNode("assignmentExpression") {}
+
+    string get_variableName() { return variableName; }
+    void set_variableName(const string& name) { variableName = name; }
+
+    shared_ptr<AstNode> get_expression() { return expression; }
+    void set_expression(const shared_ptr<AstNode>& expr) { expression = expr; }
+
+    string repr() override {
+        return "assignmentExpression(variable=" + variableName + ")";
+    }
+};
+
+
+
 class stringLiteral : public AstNode {
 private:
     string string_literal;

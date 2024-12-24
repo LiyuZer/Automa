@@ -308,48 +308,56 @@ void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode
     transitionStatement->set_fromNode(fromNode[0]->getValue());
 
     for(auto operation_expression : operations_expressions){
-        shared_ptr<expression> operationNode = shared_ptr<expression>(new expression);
 
-        vector<shared_ptr<ParseNode>> expression;
-        operation_expression->addChildrenVec("expression", expression);
+        vector<shared_ptr<ParseNode>> expressions;
+        operation_expression->addChildrenVec("expression", expressions);
 
-        if(!expression.empty()){
-            transitionStatement->add_operationsExpression(operationNode);
-            astNodeQueueElem elem = astNodeQueueElem(operationNode, expression[0]);
-            astNodeQueue.push(elem);
+
+        if(!expressions.empty()){
+            for(auto expression_ptr : expressions){
+                shared_ptr<expression> operationNode = shared_ptr<expression>(new expression);
+                transitionStatement->add_operationsExpression(operationNode);
+                astNodeQueueElem elem = astNodeQueueElem(operationNode, expression_ptr);
+                astNodeQueue.push(elem);
+
+            }
         }
 
     }
 
     for(auto condition_expression : conditions_expressions){
-        shared_ptr<expression> conditionNode = shared_ptr<expression>(new expression);
 
-        vector<shared_ptr<ParseNode>> expression;
-        condition_expression->addChildrenVec("expression", expression);
+        vector<shared_ptr<ParseNode>> expressions;
+        condition_expression->addChildrenVec("expression", expressions);
 
-        if(!expression.empty()){
-            transitionStatement->add_conditionExpression(conditionNode);
-            astNodeQueueElem elem = astNodeQueueElem(conditionNode, expression[0]);
-            astNodeQueue.push(elem);
+
+        if(!expressions.empty()){
+            for(auto expression_ptr : expressions){
+                shared_ptr<expression> conditionNode = shared_ptr<expression>(new expression);
+                transitionStatement->add_conditionExpression(conditionNode);
+                astNodeQueueElem elem = astNodeQueueElem(conditionNode, expression_ptr);
+                astNodeQueue.push(elem);
+
+            }
         }
 
     }
 
 }
 
-void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
-    /*
-    Here we are exploring an expression parse node
-    */
+shared_ptr<AstNode> AbstractTreeGenerator::explore_term(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue) {
+/*
+This does not point to any specific ast nodes but return an ast node, while also pushing up to the queue 
+*/
+
     vector<shared_ptr<ParseNode>> literal_vec;
     vector<shared_ptr<ParseNode>> variable_vec;
+    vector<shared_ptr<ParseNode>> expression_vec;
 
     root_node->addChildrenVec("literal", literal_vec);
     root_node->addChildrenVec("variable", variable_vec);
-
+    root_node->addChildrenVec("expression", expression_vec);
     if (!literal_vec.empty()) {
-        dynamic_pointer_cast<expression>(parentAstNode)->set_expressionType("literal");
-
         vector<shared_ptr<ParseNode>> string_vec;
         vector<shared_ptr<ParseNode>> integer_vec;
         vector<shared_ptr<ParseNode>> char_vec;
@@ -361,23 +369,22 @@ void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, 
         if (!string_vec.empty()) {
             shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
             stringNode->set_stringLiteral(string_vec[0]->getValue());
-            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(stringNode);
             astNodeQueue.push(astNodeQueueElem(stringNode, string_vec[0]));
+            return stringNode;
         } else if (!integer_vec.empty()) {
             shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
             intNode->set_integerLiteral(stol(integer_vec[0]->getValue()));
-            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(intNode);
             astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
+            return intNode;
         } else if (!char_vec.empty()) {
             shared_ptr<charLiteral> charNode = make_shared<charLiteral>();
             charNode->set_charLiteral(char_vec[0]->getValue()[0]);
-            dynamic_pointer_cast<expression>(parentAstNode)->set_expression(charNode);
             astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
+            return charNode;
         }
     }
 
     if (!variable_vec.empty()) {
-        dynamic_pointer_cast<expression>(parentAstNode)->set_expressionType("variable");
         shared_ptr<variable> variableNode = make_shared<variable>();
 
         vector<shared_ptr<ParseNode>> identifier_vec;
@@ -387,9 +394,400 @@ void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, 
             variableNode->set_variableName(identifier_vec[0]->getValue());
         }
 
-        dynamic_pointer_cast<expression>(parentAstNode)->set_expression(variableNode);
         astNodeQueue.push(astNodeQueueElem(variableNode, variable_vec[0]));
+        return variableNode;
     }
+
+    if(!expression_vec.empty()){
+        shared_ptr<expression> expression_ptr = shared_ptr<expression>(new expression);
+        astNodeQueueElem elem = astNodeQueueElem(expression_ptr,expression_vec[0]);
+        astNodeQueue.push(elem);
+
+        return expression_ptr;
+    }
+
+
+}
+shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue, string current_level) {
+
+    cout<<"Top level"<<endl;
+    if(current_level == "prec0"){
+        cout<<"prec0"<<endl;
+
+        if(root_node->findChildren("unary_operators").size()>0){
+            // We only have on unary operator for now
+            shared_ptr<unaryExpression> unaryNode = shared_ptr<unaryExpression>(new unaryExpression);
+            unaryNode->set_operation("!");
+            shared_ptr<AstNode> node;
+            node = explore_term(root_node->findChildren("term")[0], astNodeQueue);
+            unaryNode->set_operand(node);
+            return unaryNode;
+
+        }
+        else{
+
+        // In this case there is no expresion so must be a term
+            shared_ptr<AstNode> node;
+            node = explore_term(root_node->findChildren("term")[0], astNodeQueue);
+            return node;
+
+        }
+
+    } else if(current_level == "prec1") {
+            cout<<"prec1"<<endl;
+
+        if (root_node->findChildren("term").size() == 0  && root_node->findChildren("prec1").size() == 0 ){
+            return recursive_expression_explorer(root_node->findChildren("prec0")[0], astNodeQueue, "prec0" );
+        }
+
+        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin1");
+
+        // We will add the binary operators here
+        if(terms.size() == 0){
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            if(root_node->findChildren("prec0").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec0")[0], astNodeQueue, "prec0"));
+
+            }
+            if(root_node->findChildren("prec1").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_leftSide(recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1"));
+
+            }
+            return binaryNode;
+        }
+        if(terms.size() == 1){
+            // Create an AST binary node and connect it with the recursively generated node 
+
+            shared_ptr<AstNode> term = explore_term(terms[0], astNodeQueue);
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(term);
+            if(root_node->findChildren("prec0").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec0")[0], astNodeQueue, "prec0"));
+
+            }
+            else{
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1"));
+            }
+            return binaryNode; // return the binary node
+        }
+        else{
+            /* The only difference here is we are iteratively chaining up 
+                ast subtrees
+            */
+           
+            shared_ptr<AstNode> firstTerm = explore_term(terms[0], astNodeQueue);
+            shared_ptr<AstNode> secondTerm = explore_term(terms[1], astNodeQueue);
+
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(firstTerm);
+            binaryNode->set_rightSide(secondTerm);
+            
+            shared_ptr<binaryExpression> chainedBinaryPointer;
+                cout<<"term "<<terms.size()<<endl;
+
+            for(int i = 2; i < terms.size(); i++){
+                shared_ptr<AstNode> tempTerm = explore_term(terms[i], astNodeQueue);
+
+                chainedBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+                
+                chainedBinaryPointer->set_operation(binary_operations[i - 1]->find_only_child()[0]->getValue());
+
+                chainedBinaryPointer->set_leftSide(binaryNode);
+                chainedBinaryPointer->set_rightSide(tempTerm); 
+                binaryNode = chainedBinaryPointer;
+            }
+            if(terms.size() == 2){
+                chainedBinaryPointer = binaryNode; //For loop did not loop in this case
+            }
+            vector<shared_ptr<ParseNode>> prec0 = root_node->findChildren("prec0"); 
+            vector<shared_ptr<ParseNode>> prec1 = root_node->findChildren("prec1");
+            if(prec0.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[binary_operations.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec0[0], astNodeQueue, "prec0")); 
+                return finalBinaryPointer;
+            }
+            else if(prec1.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[binary_operations.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec1[0], astNodeQueue, "prec1")); 
+                return finalBinaryPointer;
+            }
+            else{
+                return chainedBinaryPointer; // Case where no other precedence levels are explored
+            }
+        }
+
+    } else if(current_level == "prec2") {
+            cout<<"prec2"<<endl;
+
+        if (root_node->findChildren("term").size() == 0 && root_node->findChildren("prec2").size() == 0 ){
+            // Changed recursion target from higher precedence to lower precedence
+            return recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1" );
+        }
+
+        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin2");
+
+        // We will add the binary operators here
+        if(terms.size() == 0){
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            if(root_node->findChildren("prec1").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1"));
+
+            }
+            if(root_node->findChildren("prec2").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_leftSide(recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2"));
+
+            }
+            return binaryNode;
+        }
+        if(terms.size() == 1){
+            // Create an AST binary node and connect it with the recursively generated node 
+
+            shared_ptr<AstNode> term = explore_term(terms[0], astNodeQueue);
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(term);
+            if(root_node->findChildren("prec1").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1"));
+
+            }
+            else{
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2")); // Ensure recursion to lower precedence
+            }
+
+            return binaryNode; // return the binary node
+        }
+        else{
+            /* The only difference here is we are iteratively chaining up 
+                ast subtrees
+            */
+           
+            shared_ptr<AstNode> firstTerm = explore_term(terms[0], astNodeQueue);
+            shared_ptr<AstNode> secondTerm = explore_term(terms[1], astNodeQueue);
+
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(firstTerm);
+            binaryNode->set_rightSide(secondTerm);
+            
+            shared_ptr<binaryExpression> chainedBinaryPointer;
+
+            for(int i = 2; i < terms.size(); i++){
+                shared_ptr<AstNode> tempTerm = explore_term(terms[i], astNodeQueue);
+
+                chainedBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+                chainedBinaryPointer->set_operation(binary_operations[i - 1]->find_only_child()[0]->getValue());
+
+                chainedBinaryPointer->set_leftSide(binaryNode);
+                chainedBinaryPointer->set_rightSide(tempTerm); 
+                binaryNode = chainedBinaryPointer;
+            }
+            if(terms.size() == 2){
+                chainedBinaryPointer = binaryNode;
+            }
+            vector<shared_ptr<ParseNode>> prec2 = root_node->findChildren("prec2"); // Changed to "prec1" to "prec2"
+            vector<shared_ptr<ParseNode>> prec1 = root_node->findChildren("prec1"); // Changed to "prec2" to "prec1"
+            if(prec1.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[terms.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec1[0], astNodeQueue, "prec1")); // Changed from "prec1" to "prec2"
+                return finalBinaryPointer;
+            }
+            else if(prec2.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[terms.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec2[0], astNodeQueue, "prec2")); // Changed from "prec2" to "prec1"
+                return finalBinaryPointer;
+            }
+            else{
+                return chainedBinaryPointer; // Case where no other precedence levels are explored
+            }
+        }
+
+    } else if(current_level == "prec3") {
+            cout<<"prec3"<<endl;
+
+        if (root_node->findChildren("term").size() == 0  && root_node->findChildren("prec3").size() == 0 ){
+            // Changed recursion target from higher precedence to lower precedence
+            return recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2" );
+        }
+
+        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin3");
+
+        // We will add the binary operators here
+        if(terms.size() == 0){
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            if(root_node->findChildren("prec2").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2"));
+
+            }
+            if(root_node->findChildren("prec3").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_leftSide(recursive_expression_explorer(root_node->findChildren("prec3")[0], astNodeQueue, "prec3"));
+
+            }
+            return binaryNode;
+        }
+        if(terms.size() == 1){
+            // Create an AST binary node and connect it with the recursively generated node 
+
+            shared_ptr<AstNode> term = explore_term(terms[0], astNodeQueue);
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(term);
+            if(root_node->findChildren("prec2").size() > 0){// Changed recursion target from higher to lower precedence
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2"));
+
+            }
+            else{
+                binaryNode->set_rightSide(recursive_expression_explorer(root_node->findChildren("prec3")[0], astNodeQueue, "prec3")); // Ensure recursion to lower precedence
+            }
+
+            return binaryNode; // return the binary node
+        }
+        else{
+            /* The only difference here is we are iteratively chaining up 
+                ast subtrees
+            */
+           
+            shared_ptr<AstNode> firstTerm = explore_term(terms[0], astNodeQueue);
+            shared_ptr<AstNode> secondTerm = explore_term(terms[1], astNodeQueue);
+
+            shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
+            binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+            binaryNode->set_leftSide(firstTerm);
+            binaryNode->set_rightSide(secondTerm);
+            
+            shared_ptr<binaryExpression> chainedBinaryPointer;
+
+            for(int i = 2; i < terms.size(); i++){
+                shared_ptr<AstNode> tempTerm = explore_term(terms[i], astNodeQueue);
+
+                chainedBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+                chainedBinaryPointer->set_operation(binary_operations[i - 1]->find_only_child()[0]->getValue());
+
+                chainedBinaryPointer->set_leftSide(binaryNode);
+                chainedBinaryPointer->set_rightSide(tempTerm); 
+                binaryNode = chainedBinaryPointer;
+            }
+            if(terms.size() == 0){
+                chainedBinaryPointer = binaryNode;
+            }
+            vector<shared_ptr<ParseNode>> prec2 = root_node->findChildren("prec2"); // Changed to "prec2" to "prec3"
+            vector<shared_ptr<ParseNode>> prec3 = root_node->findChildren("prec3"); // Changed to "prec3" to "prec2"
+            if(prec2.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[terms.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec2[0], astNodeQueue, "prec2")); // Changed from "prec2" to "prec3"
+                return finalBinaryPointer;
+            }
+            else if(prec3.size() > 0){
+                shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
+
+                finalBinaryPointer->set_operation(binary_operations[terms.size() - 1]->find_only_child()[0]->getValue());
+                finalBinaryPointer->set_leftSide(chainedBinaryPointer);
+                finalBinaryPointer->set_rightSide(recursive_expression_explorer(prec3[0], astNodeQueue, "prec3")); // Changed from "prec3" to "prec2"
+                return finalBinaryPointer;
+            }
+            else{
+                return chainedBinaryPointer; // Case where no other precedence levels are explored
+            }
+        }
+
+    }
+}
+
+
+void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
+    /*
+    Here we are exploring an expression parse node
+
+    Parsing an expression is not a good time, 
+    We have multiple precedence levels, 
+    literals, variables, etc. 
+    So essentially an expression might be a term, binary operation, unary operation or assignment 
+    that does mean we will have to write code for all those cases however.
+
+    The idea is to start from precedence level 3 and go to zero 
+
+
+    So we will check if a precedence has a binary operator if not go down, 
+    until either a binary operator or a literal, variable after which we push that on the 
+    queue and go out. 
+
+    Precedence 3 level :- This is a flow given there is actually a binary operator here, we will 
+    get a term(ie either a variable or literal) iteratively create ast binary ast nodes until 
+    the last term, the last term, will usually come from a precedence 2 parse sub tree, so we recursively get the ast 
+    node from there. 
+    Note while creating the ast nodes iteratively we will connect them left associative, so 
+    connect the first two terms together using an expression, then the next term will be connected to the first two binary node using a new binary operation 
+    node and so on. 
+
+    Precedence 2 level :- We will do the same exact procedure. 
+
+    Precedence 1 level - Same 
+
+    Precedence 0 level- Here we have a few specific options number 1 being that we have a term, which we 
+    will expand to later on to either a variable or literal, or we have a parentheses expression to which we will 
+    just create an expression node to link and push the expression on the queue. 
+    We also have the potential of having possibly unary operations which we will also have to flag
+
+
+    Some helpful functions:
+    explore term (ParseNodePtr, Queue) returns an ast node for the term. 
+
+    recursive_expression_explorer(Current Parse Node, Queue) returns ast node to link up too 
+
+    findChildren(string child) returns a vector of parse nodes that have this key. 
+
+    */
+
+   vector<shared_ptr<ParseNode>> assignmentChildren = root_node->findChildren("assignment");
+
+   shared_ptr<expression> parent_ptr = dynamic_pointer_cast<expression>(parentAstNode);
+
+   if(assignmentChildren.size() > 0){
+        string variable_name = assignmentChildren[0]->findChildren("variable")[0]->findChildren("IDENTIFIER")[0]->getValue();
+
+        shared_ptr<expression> expression_ptr = shared_ptr<expression>(new expression);
+        shared_ptr <ParseNode> expression_parse_node= assignmentChildren[0]->findChildren("expression")[0];
+        astNodeQueue.push(astNodeQueueElem(expression_ptr, expression_parse_node));
+
+        shared_ptr<assignmentExpression> assignment_ptr = shared_ptr<assignmentExpression>(new assignmentExpression);
+
+        assignment_ptr->set_variableName(variable_name);
+        assignment_ptr->set_expression(expression_ptr);
+        parent_ptr->set_type("assignment");
+        parent_ptr->set_expression(assignment_ptr);
+
+   }
+   else{
+    // We explore precedence here 
+    shared_ptr<AstNode> ast_tree_root = recursive_expression_explorer(root_node->findChildren("prec3")[0], astNodeQueue, "prec3");
+    parent_ptr->set_type("other_expression");
+    parent_ptr->set_expression(ast_tree_root);
+
+
+
+   }
 }
 
 void AbstractTreeGenerator::explore_variable(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
@@ -483,72 +881,103 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
         if (!node) return;
 
         int currentId = nodeId++;
-        dotFile << "    node" << currentId << " [label=\"" << node->repr() << "\"];\n";
+        dotFile << "    node" << currentId << " [label=\"" << node->repr() << "\"]\n";
 
         if (auto programNode = dynamic_pointer_cast<program>(node)) {
             if (auto graph = programNode->getGraphDef()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(graph, nodeId);
             }
         } else if (auto graphNode = dynamic_pointer_cast<graphDef>(node)) {
             if (auto memory = graphNode->get_memoryDef()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(memory, nodeId);
             }
             if (auto accept = graphNode->get_afterAccept()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(accept, nodeId);
             }
             if (auto reject = graphNode->get_afterReject()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(reject, nodeId);
             }
             if (auto nodes = graphNode->get_nodeDef()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(nodes, nodeId);
             }
             if (auto transitions = graphNode->get_transitionDef()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(transitions, nodeId);
             }
         } else if (auto memoryNode = dynamic_pointer_cast<memoryDef>(node)) {
             for (const auto& varDef : memoryNode->get_variableDefinitions()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(varDef, nodeId);
             }
         } else if (auto varNode = dynamic_pointer_cast<variableDefintions>(node)) {
             if (auto expr = varNode->get_expression()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(expr, nodeId);
             }
-        } 
-        else if (auto node_def = dynamic_pointer_cast<nodeDef>(node)) {
-                for (const auto& nodeDefStatement : node_def->get_nodeDefStatements()) {
-                    dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
-                    writeNode(nodeDefStatement, nodeId);
-                }
+        } else if (auto node_def = dynamic_pointer_cast<nodeDef>(node)) {
+            for (const auto& nodeDefStatement : node_def->get_nodeDefStatements()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(nodeDefStatement, nodeId);
             }
-        else if (auto node_def = dynamic_pointer_cast<transitionDef>(node)) {
-                for (const auto& transitionDefStatement : node_def->get_transitionDefStatements()) {
-                    dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
-                    writeNode(transitionDefStatement, nodeId);
-                }
-            }           
-        else if (auto express = dynamic_pointer_cast<expression>(node)) {
+        } else if (auto node_def = dynamic_pointer_cast<transitionDef>(node)) {
+            for (const auto& transitionDefStatement : node_def->get_transitionDefStatements()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(transitionDefStatement, nodeId);
+            }
+        } else if (auto express = dynamic_pointer_cast<expression>(node)) {
             if (auto expr = express->get_expression()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(expr, nodeId);
             }
-        } 
-        else if (auto transitionNode = dynamic_pointer_cast<transitionDefStatements>(node)) {
+        } else if (auto transitionNode = dynamic_pointer_cast<transitionDefStatements>(node)) {
             for (auto conds : transitionNode->get_conditionExpressions()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(conds, nodeId);
             }
             for (auto ops : transitionNode->get_operationsExpressions()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << ";\n";
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(ops, nodeId);
             }
+        } else if (auto afterAcceptNode = dynamic_pointer_cast<afterAcceptDef>(node)) {
+            if (auto expr = afterAcceptNode->get_Expressions()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(expr, nodeId);
+            }
+        } else if (auto afterRejectNode = dynamic_pointer_cast<afterRejectDef>(node)) {
+            if (auto expr = afterRejectNode->get_Expressions()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(expr, nodeId);
+            }
+        } else if (auto binaryNode = dynamic_pointer_cast<binaryExpression>(node)) {
+            if (auto left = binaryNode->get_leftSide()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(left, nodeId);
+            }
+            if (auto right = binaryNode->get_rightSide()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(right, nodeId);
+            }
+        } else if (auto unaryNode = dynamic_pointer_cast<unaryExpression>(node)) {
+            if (auto operand = unaryNode->get_operand()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(operand, nodeId);
+            }
+        } else if (auto assignmentNode = dynamic_pointer_cast<assignmentExpression>(node)) {
+            if (auto expr = assignmentNode->get_expression()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(expr, nodeId);
+            }
+        } else if (auto stringNode = dynamic_pointer_cast<stringLiteral>(node)) {
+            // String literals do not have children, just represent the node
+        } else if (auto intNode = dynamic_pointer_cast<integerLiteral>(node)) {
+            // Integer literals do not have children, just represent the node
+        } else if (auto charNode = dynamic_pointer_cast<charLiteral>(node)) {
+            // Char literals do not have children, just represent the node
         }
     };
 
@@ -558,4 +987,3 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
     dotFile << "}";
     dotFile.close();
 }
-

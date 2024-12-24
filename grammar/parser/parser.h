@@ -46,18 +46,25 @@ class Parser{
     public:
 
 struct stack_location {
+    bool is_dynamic;
+    bool has_looped; // For kleene stars, if they have looped set this to true
     char special_rule;
     int current_index;
     int current_pos;
+    int original_pos;
     string rule_str;
     string input;
     shared_ptr<ParseNode> node;
-    bool is_dynamic;
+    shared_ptr<ParseNode> prev_node;
     // Constructor initializing members in the same order as their declaration
     stack_location(char sr, int ci, int cp, string& rs, string& inp, bool is_dynamic=false)
-        : special_rule(sr), current_index(ci), current_pos(cp), rule_str(rs), input(inp), is_dynamic(is_dynamic) {
+        : special_rule(sr), current_index(ci), current_pos(cp), rule_str(rs), input(inp), is_dynamic(is_dynamic), original_pos(cp), has_looped(false){
             node = shared_ptr<ParseNode>(new ParseNode(rs, "", is_dynamic));
+            prev_node = shared_ptr<ParseNode>(new ParseNode(rs, "", is_dynamic));
         }
+    void reset(){
+        node = shared_ptr<ParseNode>(new ParseNode(rule_str, "", is_dynamic));
+    }
 };
 
     std::unordered_map<std::string, shared_ptr<stack_location>> dynamicRuleMap;
@@ -68,6 +75,8 @@ struct stack_location {
     int subrule_counter;
 
     Parser() : subrule_counter(0) {}
+
+
 
     // Function to generate a new rule from a subsection of symbols within parentheses
     // Generates a unique rule name and adds the new rule to the rules map
@@ -117,8 +126,6 @@ struct stack_location {
         rules[potential_match] = subsection;
 
         current_index = end;
-
-        cout << "Generated new rule: " << potential_match << " with " << subsection.size() << " symbols.\n";
 
         return potential_match;
         }
@@ -177,14 +184,15 @@ struct stack_location {
         vector<shared_ptr<ParseNode>> vec; // Our vector storing all our nodes, as a token might have a * ? or + thus may be 
         //appear more than one time
         shared_ptr<Token> current_token = x.run(temp_current_pos, temp_input); // Get the current token from the lexer
+
+        cout<<"******"<<endl;
+        cout<<"Current symbol " << current_token->value<<endl;
+        cout<<"Token "<<token_symbol->type<<endl;
+        cout<<ruleDebug<<endl;
+        cout<<"******"<<endl;
         if(current_token->type == "EOF"){
             return false;
         }
-        cout<<"*******"<<endl;
-        // cout<<token_symbol->type<<endl;
-        // cout<<current_token->type<<endl;
-        // cout<<current_token->value<<endl;
-        // cout<<ruleDebug<<endl;
         if(i < (v.size() - 1) && v[i + 1]->special()){
             shared_ptr<SpecialSymbol> special_symbol = dynamic_pointer_cast<SpecialSymbol>(v[i + 1]);
             if(special_symbol->type == '*'){
@@ -204,7 +212,6 @@ struct stack_location {
                 } 
                 else{
                     i = i + 2;
-                    cout<<"*******"<<endl;
                     return false;
                 }
 
@@ -228,7 +235,6 @@ struct stack_location {
         else{
             if(token_symbol->type != current_token->type){
                 i = i + 1;
-                cout<<"*******"<<endl;
                 return false;
             }
             else{
@@ -238,9 +244,7 @@ struct stack_location {
             }
             
             i = i + 1;
-        }
-        cout<<"*******"<<endl;
-    
+        }    
         addToNodeFromVec(node, vec);// Adding the vector to the nodes children one by one
         return true;
     }
@@ -323,12 +327,17 @@ struct stack_location {
           bool found = false;
           // Visit the rule note curent index will never backtrace and so no need to create a copy
           shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules, executionStack.top()->node);
-          
+          cout<<"Rule "<< current_rule<<" " << found <<endl;
+          cout<< "index " << current_index<<endl;
           if (!current_output_ptr){
                 if(found){ // Pop stack and update the top of the previous stack with the new string
                     if (executionStack.top()->special_rule == '*'){
                          //We have to rest the current index to go through the whole input
                         executionStack.top()->current_index = 0;
+                        executionStack.top()->has_looped = true; // The kleene star has looped
+                        executionStack.top()->original_pos = current_pos; // Now the original position is this pos
+                        executionStack.top()->prev_node = executionStack.top()->node->copy();
+    
                     }
                     else if (executionStack.top()->special_rule == '+'){
                         // We do the same as * the only difference is in the not found case 
@@ -359,24 +368,28 @@ struct stack_location {
                         if(pos != -1){ // In the case where we have a * rule and found is false 
                         // Then check if there is an or, if so go and start from that index
                             executionStack.top()->current_index = pos; 
+                            executionStack.top()->reset();
                             goto start;
                         }    
 
                         // We are creating a temp_pos and tempInput because 
                         // the * could have run multiple times, so we want to take the 
                         // last valid position                       
-                        int temp_pos = executionStack.top()->current_pos;
+                        int temp_pos = executionStack.top()->original_pos;
                         string temp_input = executionStack.top()->input;
-
-                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
+                        shared_ptr<ParseNode> ptr = executionStack.top()->prev_node; // Node to add to children
+                        bool has_looped = executionStack.top()->has_looped;
                         executionStack.pop(); 
                         if(!executionStack.empty()){// Only do this if the stack is not empty
-                            if(temp_pos != executionStack.top()->current_pos){// If the pos has not changed then ignore
+                            cout<< "Specific rule : "<< executionStack.top()->rule_str<<endl;
+                            cout<<temp_pos<<endl;
+                            cout<<executionStack.top()->current_pos<<endl;
+                            cout<<input.substr(executionStack.top()->current_pos, 10)<<endl;
+                            if(has_looped){// If the pos has not changed then ignore
                                 addNodeFromStack(executionStack, ptr);// Added children here
+                                executionStack.top()->current_pos = temp_pos; // Update the top of the stack, as there as been atleast one successful parsing
+                                executionStack.top()->input = temp_input;
                             }
-
-                            executionStack.top()->current_pos = temp_pos;
-                            executionStack.top()->input = temp_input;
                         }
                     }
                     else if(executionStack.top()->special_rule == '+'){
@@ -416,17 +429,15 @@ struct stack_location {
                         }
                     }
                     else if(executionStack.top()->special_rule == '?'){
-                        int temp_pos = executionStack.top()->current_pos;
-                        string temp_input = executionStack.top()->input;
-                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
-                        executionStack.pop(); 
-                        if(!executionStack.empty()){// Only do this if the stack is not empty
-                            if(temp_pos != executionStack.top()->current_pos){// If the pos has not changed then ignore
-                                addNodeFromStack(executionStack, ptr);// Added children here
-                            }
-                            executionStack.top()->current_pos = temp_pos;
-                            executionStack.top()->input = temp_input;
-                        }
+                        vector<SymbolPtr> v = rules[executionStack.top()->rule_str];
+                        int pos = search_or(v, executionStack.top()->current_index);
+                        if(pos != -1){ // In the case where we have a * rule and found is false 
+                        // Then check if there is an or, if so go and start from that index
+                            executionStack.top()->current_index = pos; 
+                            executionStack.top()->reset();
+                            goto start;
+                        }    
+                        executionStack.pop();// Pop it, as you do not need this anymore
                     }  
  
                 }
@@ -446,12 +457,16 @@ struct stack_location {
                         int pos = search_or(v, executionStack.top()->current_index);
                         if(pos != -1){
                             executionStack.top()->current_index = pos; 
+                            executionStack.top()->current_pos = executionStack.top()->original_pos;
+                            executionStack.top()->reset();
                             goto start;
                         }
 
                         if(executionStack.top()->special_rule != ' '){
                             goto check_symbol;
                         }
+                        cout<<"Popping " << executionStack.top()->rule_str<<endl;
+
                         executionStack.pop();
                     }
                     return false;
@@ -460,6 +475,7 @@ struct stack_location {
          else{
             // The return shared_ptr is not null so you add this to the stack and then evaluate the top
          // But before you need to make sure that teh current pos and string is the same
+            executionStack.top()->current_pos = current_pos;
             executionStack.push(current_output_ptr);
             }
         }

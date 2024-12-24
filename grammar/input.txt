@@ -1,21 +1,17 @@
 graph main {
     memory {
-        counter : (4 + 2),
-        result : ' ',
-        flag : false
+        n: 5 < 7 < 3 < 2,
+        num : 1
     }
+
     nodeDef {
-        start :: startNode;
-        mid;
-        check;
-        accept :: acceptNode;
-        reject :: rejectNode;
+        Start :: startNode;
+        End :: acceptNode;
     }
+
     transitions {
-        start -> mid => conditions : (counter), operations : (counter);
-        mid -> check => conditions : (flag), operations : (flag);
-        check -> accept => conditions : (success), operations : (' ');
-        check -> reject => conditions : (success), operations : (failure);
+        Start -> Start => conditions: (n > 0), operations: (num = num * n, n = n - 1, 'w', 5 * 7 * (9));
+        Start -> End => conditions: (n == 0), operations: ();
     }
 
 }

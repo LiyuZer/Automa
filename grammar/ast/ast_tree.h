@@ -36,5 +36,8 @@ public:
     void explore_charLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
     void explore_afterAccept(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
     void explore_afterReject(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
+    shared_ptr<AstNode> recursive_expression_explorer(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue, string current_level);
+    shared_ptr<AstNode> explore_term(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue);
+
 };
 

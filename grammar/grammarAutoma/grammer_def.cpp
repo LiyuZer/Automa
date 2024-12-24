@@ -36,13 +36,15 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateToken("RIGHT_BRACE") // Closing brace
     }},
     {"graphDef", {
-        CreateParen('('),
         CreateRule("memoryDef"),
+        CreateSpecialSymbol('?'),
         CreateRule("nodeDef"),
-        CreateRule("transitionDef"), // Include transitions
-        CreateRule("afterAccept"), // Include transitions
-        CreateRule("afterReject"), // Include transitions
-        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateRule("transitionDef"), 
+        CreateSpecialSymbol('?'),
+        CreateRule("afterAccept"), 
+        CreateSpecialSymbol('?'),
+        CreateRule("afterReject"), 
         CreateSpecialSymbol('?')
     }},
     {"memoryDef", {
@@ -168,73 +170,130 @@ std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
         CreateToken("COLON"),
         CreateRule("expression"),
     }},
-    // expression : level1 | ( level1 )
-    // level1 : binary_operations | assignment | level2
-    // level2 : unary_operations |  variable | literal 
-    // binary_operations : level2 binary_operators expression 
-    // unary_operations : unary_operators
-    // assignment : variable = expression
-    // binary_operations : + * / % == && || or and <= >= < > == 
-    // unary_operators : ! 
-    // (((5 + 2)))
-    //(5 * 2) * 2
+    /*
+    
+    5 + 4 * 3 + 2 > 3
+    counter : 5 * 2 + 3,
+
+    */
+
+
     {"expression", {
-        CreateToken("LEFT_PAREN"),
+        CreateRule("assignment"),
+        CreateOr(),
+        CreateRule("prec3"),
+    }},
+
+    {"prec0", {
+        CreateRule("unary_operators"),
+        CreateSpecialSymbol('?'),
+        CreateRule("term"),
+        
+    }},
+
+    {"prec1", {
+        CreateRule("term"),
+        CreateParen('('),
+        CreateRule("bin1"),
+        CreateParen('('),
+        CreateRule("term"),
+        CreateRule("bin1"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateRule("prec1"),
+        CreateParen(')'),
+        CreateOr(),
+        CreateRule("prec0"),
+        CreateParen('('),
+        CreateRule("bin1"),
+        CreateRule("prec1"),
+        CreateParen(')'),
+        CreateSpecialSymbol('?')
+    
+    }},
+    {"prec2", {
+        CreateRule("term"),
+        CreateParen('('),
+        CreateRule("bin2"),
+        CreateParen('('),
+        CreateRule("term"),
+        CreateRule("bin2"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateRule("prec2"),
+        CreateParen(')'),
+        CreateOr(),
+        CreateRule("prec1"),
+        CreateParen('('),
+        CreateRule("bin2"),
+        CreateRule("prec2"),
+        CreateParen(')'),
+        CreateSpecialSymbol('?')
+    }},
+    {"prec3", {
+        CreateRule("term"),
+        CreateParen('('),
+        CreateRule("bin3"),
+        CreateParen('('),
+        CreateRule("term"),
+        CreateRule("bin3"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateRule("prec3"),
+        CreateParen(')'),
+        CreateOr(),
+        CreateRule("prec2"),
+        CreateParen('('),
+        CreateRule("bin3"),
+        CreateRule("prec3"),
+        CreateParen(')'),
+        CreateSpecialSymbol('?')
+
+
+
+    }},
+    {"binary_operators", {
+        CreateRule("firstPrec"),
+        CreateOr(),
+        CreateRule("secondPrec"),
+        CreateOr(),
+        CreateRule("thirdPrec"),
+    }},
+    {"unaryfactor", {
+        CreateRule("unary_operators"),
         CreateRule("expression"),
-        CreateToken("RIGHT_PAREN"),
-        CreateOr(),
-        CreateRule("level1"),
- 
     }},
-
-    {"level1", {
-        CreateRule("binary_operations"), 
-        CreateOr(),
-        CreateRule("assignment"), 
-        CreateOr(),
-        CreateRule("level2"), 
-    }},
-
-    {"level2", {
-        CreateRule("unary_operations"), // Handles unary operations first
-        CreateOr(),
+    {"term", {
         CreateRule("variable"), 
         CreateOr(),
         CreateRule("literal"), 
+        CreateOr(),
+        CreateToken("LEFT_PAREN"),
+        CreateRule("expression"),
+        CreateToken("RIGHT_PAREN"),
+
     }},
     {"assignment", {
-        CreateRule("variable"), // Handles unary operations first
+        CreateRule("variable"), 
         CreateToken("ASSIGN"), 
         CreateRule("expression"), 
     }},
-    {"unary_operations", {
+    {"unary_operators", {
         CreateToken("NOT"), 
-        CreateRule("expression"),
     }},
-
-    {"binary_operations", {
-        CreateRule("level2"),
-        CreateRule("binary_operators"), 
-        CreateRule("expression"),
-        CreateOr(),
-        CreateToken("LEFT_PAREN"),
-        CreateRule("expression"), 
-        CreateToken("RIGHT_PAREN"),
-        CreateRule("binary_operators"),
-        CreateRule("expression"), 
-    }},
-
-    {"binary_operators", {
-        CreateToken("PLUS"),
-        CreateOr(),
-        CreateToken("MINUS"),
-        CreateOr(),
+    {"bin1", {
         CreateToken("STAR"),
         CreateOr(),
         CreateToken("DIV"),
         CreateOr(),
         CreateToken("MOD"),
+    }},
+    {"bin2", {
+        CreateToken("PLUS"),
         CreateOr(),
+        CreateToken("MINUS"),
+     }},
+    {"bin3", {
         CreateToken("AND"),
         CreateOr(),
         CreateToken("OR"),

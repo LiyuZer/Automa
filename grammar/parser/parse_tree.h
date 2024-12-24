@@ -43,7 +43,35 @@ public:
 
         return false;
     }
+    vector<shared_ptr<ParseNode>> findChildren(string child) {
+        vector<shared_ptr<ParseNode>> vec;     
 
+        if(children.find(child) != children.end()){
+            vec = children[child];
+            return vec;
+        }
+
+        return vec;
+    }
+    vector<shared_ptr<ParseNode>> find_only_child() {
+        // If there is only one child
+        vector<shared_ptr<ParseNode>> vec;     
+
+        for(auto child : children){
+            return child.second;// This is such a bad method for doing this but here we are
+        }
+    }
+    shared_ptr<ParseNode> copy() const {
+        // Create a new ParseNode with the same type, value, and is_dynamic flag
+        auto new_node = make_shared<ParseNode>(type, value, is_dynamic);
+
+        // Add the same children (shallow copy)
+        for (const auto& [child_type, child_nodes] : children) {
+            new_node->children[child_type] = child_nodes;
+        }
+
+        return new_node;
+    }
     string getType() const {
         return type;
     }

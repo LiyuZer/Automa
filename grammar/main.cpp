@@ -20,9 +20,9 @@ cout << myParser.parse(myLexer,input_text, rules, ptr) << endl;
 if(ptr){
     ptr->collapseDynamicNodes();
     ptr->toDot("parser.dot");
-    // AbstractTreeGenerator ast_generator;
-    // shared_ptr<AstNode> ast_ptr = ast_generator.generateTree(ptr);
-    // write_ast_to_dot(ast_ptr, "graph.dot");
+    AbstractTreeGenerator ast_generator;
+    shared_ptr<AstNode> ast_ptr = ast_generator.generateTree(ptr);
+    write_ast_to_dot(ast_ptr, "graph.dot");
 }
 return 0;
 }
