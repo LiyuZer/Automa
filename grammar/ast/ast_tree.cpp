@@ -17,7 +17,7 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
     shared_ptr<program> program_node = shared_ptr<program>(new program);
 
 
-    vector<shared_ptr<ParseNode>> children;
+    vector<shared_ptr<ParseNode> > children;
     bool found = root_node->addChildrenVec("mainGraph", children);
     
 
@@ -43,7 +43,7 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
     program_node->setGraphDef(graph_def_ptr);// Pointing the program node to the graph def ptr
 
 
-    vector<shared_ptr<ParseNode>> node_vec;
+    vector<shared_ptr<ParseNode> > node_vec;
     root_node->addChildrenVec("nodeDef", node_vec);
     if(node_vec.size() > 0){
         shared_ptr<nodeDef> node_def_ptr = shared_ptr<nodeDef>(new nodeDef);
@@ -147,7 +147,7 @@ void AbstractTreeGenerator:: explore_memoryDef(shared_ptr<ParseNode> root_node, 
     /*
     Here we are exploring a memory def parse node
     */
-    vector<shared_ptr<ParseNode>> node_vec;
+    vector<shared_ptr<ParseNode> > node_vec;
     root_node->addChildrenVec("tupleItems", node_vec);
     root_node = node_vec[0];
     root_node->addChildrenVec("varDefenition", node_vec); 
@@ -167,7 +167,7 @@ void AbstractTreeGenerator::explore_transitionDef(shared_ptr<ParseNode> root_nod
     Here we are exploring a transition definition parse node
     */
 
-    vector<shared_ptr<ParseNode>> transitions;
+    vector<shared_ptr<ParseNode> > transitions;
     root_node->addChildrenVec("transitionStatement", transitions);
     shared_ptr<transitionDef> transitionNode = dynamic_pointer_cast<transitionDef>(parentAstNode);
 
@@ -187,13 +187,13 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
     Here we are exploring a variable definitions parse node
     */
 
-    vector<shared_ptr<ParseNode>> expression_vec;
+    vector<shared_ptr<ParseNode> > expression_vec;
     root_node->addChildrenVec("expression", expression_vec);
 
-    vector<shared_ptr<ParseNode>> variable_vec;
+    vector<shared_ptr<ParseNode> > variable_vec;
     root_node->addChildrenVec("variable", variable_vec);
 
-    vector<shared_ptr<ParseNode>> identifier;
+    vector<shared_ptr<ParseNode> > identifier;
     variable_vec[0]->addChildrenVec("IDENTIFIER", identifier); // Just take the identifier for the variable name
 
     string variable = identifier[0]->getValue();
@@ -221,7 +221,7 @@ void AbstractTreeGenerator::explore_nodeDef(shared_ptr<ParseNode> root_node, sha
     /*
     Here we are exploring a node definition parse node
     */
-    vector<shared_ptr<ParseNode>> node_vec;
+    vector<shared_ptr<ParseNode> > node_vec;
     root_node->addChildrenVec("nodeDefStatement", node_vec);
 
     shared_ptr<nodeDef> nodeDef_ptr = dynamic_pointer_cast<nodeDef>(parentAstNode);
@@ -240,12 +240,12 @@ void AbstractTreeGenerator::explore_nodeDefStatements(shared_ptr<ParseNode> root
     Here we are exploring node definition statements parse node
     */
 
-    vector<shared_ptr<ParseNode>> type_vec;
+    vector<shared_ptr<ParseNode> > type_vec;
     root_node->addChildrenVec("nodeTypes", type_vec);
     string type_identifier = "";
 
     if(!type_vec.empty()){
-        vector<shared_ptr<ParseNode>> type_vec_value;
+        vector<shared_ptr<ParseNode> > type_vec_value;
         type_vec[0]->addChildrenVec("START_NODE", type_vec_value);
 
         if(type_vec_value.empty()){
@@ -264,7 +264,7 @@ void AbstractTreeGenerator::explore_nodeDefStatements(shared_ptr<ParseNode> root
 
     }
 
-    vector<shared_ptr<ParseNode>> node;
+    vector<shared_ptr<ParseNode> > node;
     root_node->addChildrenVec("IDENTIFIER", node);
 
 
@@ -281,23 +281,23 @@ void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode
     */
 
 
-    vector<shared_ptr<ParseNode>> conditions_expressions;
+    vector<shared_ptr<ParseNode> > conditions_expressions;
     root_node->addChildrenVec("conditions", conditions_expressions);
     shared_ptr<ParseNode> conditions_ptr = conditions_expressions[0];
     conditions_ptr->addChildrenVec("conditionStatement", conditions_expressions);
 
-    vector<shared_ptr<ParseNode>> operations_expressions;
+    vector<shared_ptr<ParseNode> > operations_expressions;
     root_node->addChildrenVec("operations", operations_expressions);
     shared_ptr<ParseNode> operations_ptr = operations_expressions[0];
     operations_ptr->addChildrenVec("operationStatement", operations_expressions);
 
 
-    vector<shared_ptr<ParseNode>> fromNode;
+    vector<shared_ptr<ParseNode> > fromNode;
     root_node->addChildrenVec("fromNode", fromNode);
     fromNode[0]->addChildrenVec("IDENTIFIER", fromNode);
 
 
-    vector<shared_ptr<ParseNode>> toNode;
+    vector<shared_ptr<ParseNode> > toNode;
     root_node->addChildrenVec("toNode", toNode);
     toNode[0]->addChildrenVec("IDENTIFIER", toNode);
 
@@ -309,7 +309,7 @@ void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode
 
     for(auto operation_expression : operations_expressions){
 
-        vector<shared_ptr<ParseNode>> expressions;
+        vector<shared_ptr<ParseNode> > expressions;
         operation_expression->addChildrenVec("expression", expressions);
 
 
@@ -327,7 +327,7 @@ void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode
 
     for(auto condition_expression : conditions_expressions){
 
-        vector<shared_ptr<ParseNode>> expressions;
+        vector<shared_ptr<ParseNode> > expressions;
         condition_expression->addChildrenVec("expression", expressions);
 
 
@@ -350,17 +350,17 @@ shared_ptr<AstNode> AbstractTreeGenerator::explore_term(shared_ptr<ParseNode> ro
 This does not point to any specific ast nodes but return an ast node, while also pushing up to the queue 
 */
 
-    vector<shared_ptr<ParseNode>> literal_vec;
-    vector<shared_ptr<ParseNode>> variable_vec;
-    vector<shared_ptr<ParseNode>> expression_vec;
+    vector<shared_ptr<ParseNode> > literal_vec;
+    vector<shared_ptr<ParseNode> > variable_vec;
+    vector<shared_ptr<ParseNode> > expression_vec;
 
     root_node->addChildrenVec("literal", literal_vec);
     root_node->addChildrenVec("variable", variable_vec);
     root_node->addChildrenVec("expression", expression_vec);
     if (!literal_vec.empty()) {
-        vector<shared_ptr<ParseNode>> string_vec;
-        vector<shared_ptr<ParseNode>> integer_vec;
-        vector<shared_ptr<ParseNode>> char_vec;
+        vector<shared_ptr<ParseNode> > string_vec;
+        vector<shared_ptr<ParseNode> > integer_vec;
+        vector<shared_ptr<ParseNode> > char_vec;
 
         literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
         literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
@@ -387,7 +387,7 @@ This does not point to any specific ast nodes but return an ast node, while also
     if (!variable_vec.empty()) {
         shared_ptr<variable> variableNode = make_shared<variable>();
 
-        vector<shared_ptr<ParseNode>> identifier_vec;
+        vector<shared_ptr<ParseNode> > identifier_vec;
         variable_vec[0]->addChildrenVec("IDENTIFIER", identifier_vec);
 
         if (!identifier_vec.empty()) {
@@ -440,8 +440,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             return recursive_expression_explorer(root_node->findChildren("prec0")[0], astNodeQueue, "prec0" );
         }
 
-        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
-        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin1");
+        vector<shared_ptr<ParseNode> > terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode> > binary_operations = root_node->findChildren("bin1");
 
         // We will add the binary operators here
         if(terms.size() == 0){
@@ -503,8 +503,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             if(terms.size() == 2){
                 chainedBinaryPointer = binaryNode; //For loop did not loop in this case
             }
-            vector<shared_ptr<ParseNode>> prec0 = root_node->findChildren("prec0"); 
-            vector<shared_ptr<ParseNode>> prec1 = root_node->findChildren("prec1");
+            vector<shared_ptr<ParseNode> > prec0 = root_node->findChildren("prec0"); 
+            vector<shared_ptr<ParseNode> > prec1 = root_node->findChildren("prec1");
             if(prec0.size() > 0){
                 shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
 
@@ -534,8 +534,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             return recursive_expression_explorer(root_node->findChildren("prec1")[0], astNodeQueue, "prec1" );
         }
 
-        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
-        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin2");
+        vector<shared_ptr<ParseNode> > terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode> > binary_operations = root_node->findChildren("bin2");
 
         // We will add the binary operators here
         if(terms.size() == 0){
@@ -596,8 +596,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             if(terms.size() == 2){
                 chainedBinaryPointer = binaryNode;
             }
-            vector<shared_ptr<ParseNode>> prec2 = root_node->findChildren("prec2"); // Changed to "prec1" to "prec2"
-            vector<shared_ptr<ParseNode>> prec1 = root_node->findChildren("prec1"); // Changed to "prec2" to "prec1"
+            vector<shared_ptr<ParseNode> > prec2 = root_node->findChildren("prec2"); // Changed to "prec1" to "prec2"
+            vector<shared_ptr<ParseNode> > prec1 = root_node->findChildren("prec1"); // Changed to "prec2" to "prec1"
             if(prec1.size() > 0){
                 shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
 
@@ -627,8 +627,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             return recursive_expression_explorer(root_node->findChildren("prec2")[0], astNodeQueue, "prec2" );
         }
 
-        vector<shared_ptr<ParseNode>> terms = root_node->findChildren("term");
-        vector<shared_ptr<ParseNode>> binary_operations = root_node->findChildren("bin3");
+        vector<shared_ptr<ParseNode> > terms = root_node->findChildren("term");
+        vector<shared_ptr<ParseNode> > binary_operations = root_node->findChildren("bin3");
 
         // We will add the binary operators here
         if(terms.size() == 0){
@@ -689,8 +689,8 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             if(terms.size() == 0){
                 chainedBinaryPointer = binaryNode;
             }
-            vector<shared_ptr<ParseNode>> prec2 = root_node->findChildren("prec2"); // Changed to "prec2" to "prec3"
-            vector<shared_ptr<ParseNode>> prec3 = root_node->findChildren("prec3"); // Changed to "prec3" to "prec2"
+            vector<shared_ptr<ParseNode> > prec2 = root_node->findChildren("prec2"); // Changed to "prec2" to "prec3"
+            vector<shared_ptr<ParseNode> > prec3 = root_node->findChildren("prec3"); // Changed to "prec3" to "prec2"
             if(prec2.size() > 0){
                 shared_ptr<binaryExpression> finalBinaryPointer = shared_ptr<binaryExpression>(new binaryExpression);
 
@@ -760,7 +760,7 @@ void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, 
 
     */
 
-   vector<shared_ptr<ParseNode>> assignmentChildren = root_node->findChildren("assignment");
+   vector<shared_ptr<ParseNode> > assignmentChildren = root_node->findChildren("assignment");
 
    shared_ptr<expression> parent_ptr = dynamic_pointer_cast<expression>(parentAstNode);
 
@@ -794,7 +794,7 @@ void AbstractTreeGenerator::explore_variable(shared_ptr<ParseNode> root_node, sh
     /*
     Here we are exploring a variable parse node
     */
-    vector<shared_ptr<ParseNode>> identifier_vec;
+    vector<shared_ptr<ParseNode> > identifier_vec;
     root_node->addChildrenVec("IDENTIFIER", identifier_vec);
 
     if (!identifier_vec.empty()) {
@@ -808,7 +808,7 @@ void AbstractTreeGenerator::explore_stringLiteral(shared_ptr<ParseNode> root_nod
     /*
     Here we are exploring a string literal parse node
     */
-    vector<shared_ptr<ParseNode>> literal_vec;
+    vector<shared_ptr<ParseNode> > literal_vec;
     root_node->addChildrenVec("STRING_LITERAL", literal_vec);
 
     if (!literal_vec.empty()) {
@@ -822,7 +822,7 @@ void AbstractTreeGenerator::explore_integerLiteral(shared_ptr<ParseNode> root_no
     /*
     Here we are exploring an integer literal parse node
     */
-    vector<shared_ptr<ParseNode>> literal_vec;
+    vector<shared_ptr<ParseNode> > literal_vec;
     root_node->addChildrenVec("INTEGER_LITERAL", literal_vec);
 
     if (!literal_vec.empty()) {
@@ -836,7 +836,7 @@ void AbstractTreeGenerator::explore_charLiteral(shared_ptr<ParseNode> root_node,
     /*
     Here we are exploring a char literal parse node
     */
-    vector<shared_ptr<ParseNode>> literal_vec;
+    vector<shared_ptr<ParseNode> > literal_vec;
     root_node->addChildrenVec("CHAR_LITERAL", literal_vec);
 
     if (!literal_vec.empty()) {

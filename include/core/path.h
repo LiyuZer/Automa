@@ -1,3 +1,11 @@
+#include <unordered_map>
+#include <memory>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include "graph.h"
+#include "memory.h"
+#pragma once
 /*
 
 Here we define a path obj. 
@@ -20,3 +28,20 @@ yields back to the operator, very similar to limited time context switching
 by the operating system between processes. 
 
 */
+
+using namespace std;
+class Path{
+    private:
+    int id;
+    string current_node;
+    shared_ptr<Graph> graph_ptr;
+    int max_time;
+    int current_time;
+    shared_ptr<Memory> memory_ptr;
+    unordered_map<int, vector<string> > memory_log;
+
+    public:
+        Path(int id, string current_node, int max_time, int current_time, shared_ptr<Graph> graph_ptr)
+        : id(id), current_node(current_node), max_time(max_time), current_time(current_time), graph_ptr(graph_ptr) {}
+
+};

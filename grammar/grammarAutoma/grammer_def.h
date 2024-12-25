@@ -14,4 +14,4 @@ program : IDENTIFIER : [a]
 
 */
 
-extern std::unordered_map<std::string, std::vector<SymbolPtr>> rules;
+extern std::unordered_map<std::string, std::vector<SymbolPtr> > rules;

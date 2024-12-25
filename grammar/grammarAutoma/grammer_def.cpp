@@ -12,7 +12,7 @@ program : IDENTIFIER : [a]
 
 */
 
-std::unordered_map<std::string, std::vector<SymbolPtr>> rules = {
+std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"program", {
         CreateRule("graphDec"),
         CreateSpecialSymbol('*'),

@@ -18,7 +18,7 @@ private:
     string value;
     bool is_dynamic;
     // Using a map where the key is the child node type, and the value is a vector of child nodes
-    unordered_map<string, vector<shared_ptr<ParseNode>>> children;
+    unordered_map<string, vector<shared_ptr<ParseNode> > > children;
 
 public:
     ParseNode(string type, string value, bool is_dynamic = false) : type(type), value(value), is_dynamic(is_dynamic) {}
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    bool addChildrenVec(string child, vector<shared_ptr<ParseNode>>& vec) {
+    bool addChildrenVec(string child, vector<shared_ptr<ParseNode> >& vec) {
         // for(auto node : children){
         //     cout<<node.first<<endl;
         // }
@@ -43,8 +43,8 @@ public:
 
         return false;
     }
-    vector<shared_ptr<ParseNode>> findChildren(string child) {
-        vector<shared_ptr<ParseNode>> vec;     
+    vector<shared_ptr<ParseNode> > findChildren(string child) {
+        vector<shared_ptr<ParseNode> > vec;     
 
         if(children.find(child) != children.end()){
             vec = children[child];
@@ -53,9 +53,9 @@ public:
 
         return vec;
     }
-    vector<shared_ptr<ParseNode>> find_only_child() {
+    vector<shared_ptr<ParseNode> > find_only_child() {
         // If there is only one child
-        vector<shared_ptr<ParseNode>> vec;     
+        vector<shared_ptr<ParseNode> > vec;     
 
         for(auto child : children){
             return child.second;// This is such a bad method for doing this but here we are

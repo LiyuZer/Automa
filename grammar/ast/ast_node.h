@@ -84,12 +84,12 @@ public:
 
 class memoryDef : public AstNode {
 private:
-    vector<shared_ptr<AstNode>> variableDefintions;
+    vector<shared_ptr<AstNode> > variableDefintions;
 
 public:
     memoryDef() : AstNode("memoryDef") {}
 
-    vector<shared_ptr<AstNode>> get_variableDefinitions() { return variableDefintions; }
+    vector<shared_ptr<AstNode> > get_variableDefinitions() { return variableDefintions; }
     void add_variableDefinition(const shared_ptr<AstNode>& varDef) { variableDefintions.push_back(varDef); }
 
     string repr() override {
@@ -118,12 +118,12 @@ public:
 
 class nodeDef : public AstNode {
 private:
-    vector<shared_ptr<AstNode>> nodeDefStatements;
+    vector<shared_ptr<AstNode> > nodeDefStatements;
 
 public:
     nodeDef() : AstNode("nodeDef") {}
 
-    vector<shared_ptr<AstNode>> get_nodeDefStatements() { return nodeDefStatements; }
+    vector<shared_ptr<AstNode> > get_nodeDefStatements() { return nodeDefStatements; }
     void add_nodeDefStatement(const shared_ptr<AstNode>& statement) { nodeDefStatements.push_back(statement); }
 
     string repr() override {
@@ -152,12 +152,12 @@ public:
 
 class transitionDef : public AstNode {
 private:
-    vector<shared_ptr<AstNode>> transitionDefStatements;
+    vector<shared_ptr<AstNode> > transitionDefStatements;
 
 public:
     transitionDef() : AstNode("transitionDef") {}
 
-    vector<shared_ptr<AstNode>> get_transitionDefStatements() { return transitionDefStatements; }
+    vector<shared_ptr<AstNode> > get_transitionDefStatements() { return transitionDefStatements; }
     void add_transitionDefStatement(const shared_ptr<AstNode>& statement) { transitionDefStatements.push_back(statement); }
 
     string repr() override {
@@ -169,8 +169,8 @@ class transitionDefStatements : public AstNode {
 private:
     string fromNode;
     string toNode;
-    vector<shared_ptr<AstNode>> conditionExpressions;
-    vector<shared_ptr<AstNode>> operationsExpressions;
+    vector<shared_ptr<AstNode> > conditionExpressions;
+    vector<shared_ptr<AstNode> > operationsExpressions;
 
 public:
     transitionDefStatements() : AstNode("transitionDefStatements") {}
@@ -181,10 +181,10 @@ public:
     string get_toNode() { return toNode; }
     void set_toNode(const string& to) { toNode = to; }
 
-    vector<shared_ptr<AstNode>> get_conditionExpressions() { return conditionExpressions; }
+    vector<shared_ptr<AstNode> > get_conditionExpressions() { return conditionExpressions; }
     void add_conditionExpression(const shared_ptr<AstNode>& expr) { conditionExpressions.push_back(expr); }
 
-    vector<shared_ptr<AstNode>> get_operationsExpressions() { return operationsExpressions; }
+    vector<shared_ptr<AstNode> > get_operationsExpressions() { return operationsExpressions; }
     void add_operationsExpression(const shared_ptr<AstNode>& expr) { operationsExpressions.push_back(expr); }
 
     string repr() override {
