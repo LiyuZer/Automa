@@ -30,5 +30,11 @@ class Operator{
     void add_path(shared_ptr<Path> path){
         path_queue.push(path);
     }
+    shared_ptr<Graph> create_graph(shared_ptr<AstNode> graphDef);
+    void set_astTree(shared_ptr<AstNode> ast){
+        astTree = ast;
+    }
+    void initialize_main();
+    void run();
 
 };
