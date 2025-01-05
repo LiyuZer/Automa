@@ -4,8 +4,8 @@ CFLAGS = -Wall -g -std=c++17
 
 all:automa 
 
-automa: main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o
-	$(CC) -o automa main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o
+automa: main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o  path.o
+	$(CC) -o automa main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o path.o
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
@@ -24,3 +24,6 @@ grammer_def.o: grammar/grammarAutoma/grammer_def.cpp
 
 operator.o: include/impl/operator.cpp
 	$(CC) $(CFLAGS) -c include/impl/operator.cpp
+
+path.o: include/impl/path.cpp
+	$(CC) $(CFLAGS) -c include/impl/path.cpp

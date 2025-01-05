@@ -44,4 +44,9 @@ class Path{
         Path(int id, string current_node, int max_time, int current_time, shared_ptr<Graph> graph_ptr)
         : id(id), current_node(current_node), max_time(max_time), current_time(current_time), graph_ptr(graph_ptr) {}
 
+        void run();
+        void set_memory(shared_ptr<AstNode> memory);
+    
+
+
 };

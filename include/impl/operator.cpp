@@ -5,12 +5,6 @@
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
 
-void Operator :: run(){
-/*
-
-
-*/
-}
 
 shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     /* We must traverse the ast tree and create the graph object
@@ -32,20 +26,25 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     shared_ptr<nodeDef> nodeDef_ptr = dynamic_pointer_cast<nodeDef>(node);
     vector<shared_ptr<AstNode> > nodeDefStatements = nodeDef_ptr->get_nodeDefStatements();
     for(auto nodeDefStatement : nodeDefStatements){
-        shared_ptr<nodeDefStatements> nodeDefStatement_ptr = dynamic_pointer_cast<nodeDefStatements>(nodeDefStatement);
-        string node_name = nodeDefStatement_ptr->get_node();
-        string node_type = nodeDefStatement_ptr->get_nodeType();
-        Node n = Node(node_name);
-        if(node_type == "accept"){
-            n.accept = true;
-        }
-        else if(node_type == "reject"){
-            n.reject = true;
-        }
-        else if(node_type == "start"){
-            n.start = true;
-        }
-        graph_ptr->insert_node(node_name, n);
+        //shared_ptr<nodeDefStatements> nodeDefStatement_ptr = dynamic_pointer_cast<nodeDefStatements>(nodeDefStatement);
+        //string node_name = nodeDefStatement_ptr->get_node();
+        // string node_type = nodeDefStatement_ptr->get_nodeType();
+        // Node n = Node(node_name);
+        // if(node_type == "accept"){
+        //     n.accept = true;
+        // }
+        // else if(node_type == "reject"){
+        //     n.reject = true;
+        // }
+        // else if(node_type == "start"){
+        //     n.start = true;
+        //     graph_ptr->set_start_node(node_name);
+        // }
+        // int success = graph_ptr->insert_node(node_name, n);
+        // if(success == -1){
+        //     cerr << "Error in creating node, node already exists" << endl;
+        //     exit(1);
+        // }
     }
 
     //Now we will set the transitions
@@ -53,12 +52,12 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     shared_ptr<transitionDef> transitionDef_ptr = dynamic_pointer_cast<transitionDef>(transition);
     vector<shared_ptr<AstNode> > transitionDefStatements = transitionDef_ptr->get_transitionDefStatements();
     for(auto transitionDefStatement : transitionDefStatements){
-        shared_ptr<transitionDefStatements> transitionDefStatement_ptr = dynamic_pointer_cast<transitionDefStatements>(transitionDefStatement);
-        string fromNode = transitionDefStatement_ptr->get_fromNode();
-        string toNode = transitionDefStatement_ptr->get_toNode();
-        vector<shared_ptr<AstNode> > conditions = transitionDefStatement_ptr->get_conditions();
-        vector<shared_ptr<AstNode> > operations = transitionDefStatement_ptr->get_operations();
-        graph_ptr->add_transition(fromNode, toNode, conditions, operations);
+        // shared_ptr<transitionDefStatements> transitionDefStatement_ptr = dynamic_pointer_cast<transitionDefStatements>(transitionDefStatement);
+        // string fromNode = transitionDefStatement_ptr->get_fromNode();
+        // string toNode = transitionDefStatement_ptr->get_toNode();
+        // vector<shared_ptr<AstNode> > conditions = transitionDefStatement_ptr->get_conditions();
+        // vector<shared_ptr<AstNode> > operations = transitionDefStatement_ptr->get_operations();
+        // graph_ptr->add_transition(fromNode, toNode, conditions, operations);
     }
 
     /* We are done that is the initialization of the graph
@@ -73,6 +72,16 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
 
     return graph_ptr;
 
+}
+
+void Operator :: run(){
+
+    while(!path_queue.empty()){
+        current_path = path_queue.front();
+        path_queue.pop();
+        // Now we will run the path
+        current_path->run();
+    }
 
 
 }

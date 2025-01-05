@@ -30,6 +30,7 @@ struct Node{
     bool accept;
     bool start;
     string name;
+    Node() : reject(false), accept(false), start(false), name("") {}
     Node(string name): name(name){}
 };
 struct transition{
@@ -47,6 +48,7 @@ class Graph{
     shared_ptr<AstNode> graphDef;
     shared_ptr<AstNode> memoryDef;
     shared_ptr<AstNode> memory_def;
+    string start_node=""; 
     public:
     void add_transition(string fromNode, string toNode, vector<shared_ptr<AstNode>> conditions, vector<shared_ptr<AstNode>> operations){
         transition t;
@@ -58,14 +60,27 @@ class Graph{
     vector<transition> get_transitions(string fromNode){
         return node_transitions[fromNode];
     }
-    void insert_node(string name, Node n){
+    int insert_node(string name, Node n){// return 0 if successful, -1 if node already exists
+        if(node_map.find(name) != node_map.end()){
+            return -1;
+        }
         node_map[name] = n;
+        return 0;
     }
     void set_memory_def(shared_ptr<AstNode> memoryDef){
         memory_def = memoryDef;
     }
+    shared_ptr<AstNode> get_memory_def(){
+        return memory_def;
+    }
     void set_graph_def(shared_ptr<AstNode> graphDef){
         graphDef = graphDef;
+    }
+    void set_start_node(string start){
+        start_node = start;
+    }
+    string get_start_node(){
+        return start_node;
     }
     
 };

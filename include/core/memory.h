@@ -42,5 +42,23 @@ class Memory : public AutomaObj{
     unordered_map<int, shared_ptr<SymbolMap> > symbol_map; // The symbol map for the memory container 
     // This can be changed if a non deterministic path is generated and it changes the memory container
     // then a new memory container is created.
+    bool immutable; // Memory containers can be immutable thus we can set this flag to true if we want to make the memory container immutable
 
+    public :
+    Memory() : immutable(false){}
+    void set_immutable(bool immut){
+        immutable = immut;
+    }
+    bool get_immutable(){
+        return immutable;
+    }
+    virtual shared_ptr<Memory> get_memory(string symbol){
+        // Get the memory container for a symbol
+        return symbol_map[0]->map[symbol];
+    }
+    virtual void set_memory(string symbol, shared_ptr<Memory> memory){
+        // Set the memory container for a symbol
+        symbol_map[0]->map[symbol] = memory;
+    }
+    
 };

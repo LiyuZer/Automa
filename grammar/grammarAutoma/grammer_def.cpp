@@ -168,7 +168,7 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"varDefenition", {
         CreateRule("variable"),
         CreateToken("COLON"),
-        CreateRule("expression"),
+        CreateRule("literal"), // For now later we should make this literals, graphs, or other memory containers
     }},
     /*
     

@@ -187,8 +187,8 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
     Here we are exploring a variable definitions parse node
     */
 
-    vector<shared_ptr<ParseNode> > expression_vec;
-    root_node->addChildrenVec("expression", expression_vec);
+    vector<shared_ptr<ParseNode> > literal_vec;// For now only literals
+    root_node->addChildrenVec("literal", literal_vec);
 
     vector<shared_ptr<ParseNode> > variable_vec;
     root_node->addChildrenVec("variable", variable_vec);
@@ -200,14 +200,10 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
 
     shared_ptr<variableDefintions> variableDef_ptr = dynamic_pointer_cast<variableDefintions>(parentAstNode);
 
-    shared_ptr<expression> expr_ptr = shared_ptr<expression>(new expression());
-
     variableDef_ptr->set_variableName(variable);
-    variableDef_ptr->set_expression(expr_ptr);
 
+    // Finish this tomorrow this is important lol
 
-    astNodeQueueElem elem = astNodeQueueElem(expr_ptr, expression_vec[0]);
-    astNodeQueue.push(elem);
 
 }
 
@@ -915,7 +911,7 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 writeNode(varDef, nodeId);
             }
         } else if (auto varNode = dynamic_pointer_cast<variableDefintions>(node)) {
-            if (auto expr = varNode->get_expression()) {
+            if (auto expr = varNode->get_literal()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(expr, nodeId);
             }

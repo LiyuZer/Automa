@@ -34,7 +34,6 @@ class Operator{
     void set_astTree(shared_ptr<AstNode> ast){
         astTree = ast;
     }
-    void initialize_main();
     void run();
 
 };

@@ -100,7 +100,7 @@ public:
 class variableDefintions : public AstNode {
 private:
     string variableName;
-    shared_ptr<AstNode> expression;
+    shared_ptr<AstNode> literal;
 
 public:
     variableDefintions() : AstNode("variableDefintions") {}
@@ -108,8 +108,8 @@ public:
     string get_variableName() { return variableName; }
     void set_variableName(const string& name) { variableName = name; }
 
-    shared_ptr<AstNode> get_expression() { return expression; }
-    void set_expression(const shared_ptr<AstNode>& expr) { expression = expr; }
+    shared_ptr<AstNode> get_literal() { return literal; }
+    void set_literal(const shared_ptr<AstNode>& l) { literal = l; }
 
     string repr() override {
         return "variableDefintions(name=" + variableName + ")";
