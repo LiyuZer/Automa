@@ -32,33 +32,33 @@ such as the integers and the memory container that c is mapping to.
 To make containers as lightweight as possible, we will use structs as the basic building block. 
 */
 using namespace std;
-
 class Memory : public AutomaObj{
       
     private:
-    struct SymbolMap{
-    unordered_map<string, shared_ptr<Memory> > map;
-    };
-    unordered_map<int, shared_ptr<SymbolMap> > symbol_map; // The symbol map for the memory container 
-    // This can be changed if a non deterministic path is generated and it changes the memory container
-    // then a new memory container is created.
-    bool immutable; // Memory containers can be immutable thus we can set this flag to true if we want to make the memory container immutable
 
+        unordered_map<string, shared_ptr<Memory>> map;
+        bool immutable; // Memory containers can be immutable thus we can set this flag to true if we want to make the memory container immutable
+        string type; // The type of the memory container
     public :
-    Memory() : immutable(false){}
-    void set_immutable(bool immut){
-        immutable = immut;
-    }
-    bool get_immutable(){
-        return immutable;
-    }
-    virtual shared_ptr<Memory> get_memory(string symbol){
-        // Get the memory container for a symbol
-        return symbol_map[0]->map[symbol];
-    }
-    virtual void set_memory(string symbol, shared_ptr<Memory> memory){
-        // Set the memory container for a symbol
-        symbol_map[0]->map[symbol] = memory;
-    }
-    
+        Memory() : immutable(false){}
+        Memory(string memory_type) : immutable(false), type(memory_type){}
+        void set_immutable(bool immut){
+            immutable = immut;
+        }
+        bool get_immutable(){
+            return immutable;
+        }
+        virtual shared_ptr<Memory> get_memory(string symbol){
+            // Get the memory container for a symbol
+            return map[symbol];
+        }
+        virtual void set_memory(string symbol, shared_ptr<Memory> memory){
+            // Set the memory container for a symbol
+            map[symbol] = memory;
+        }
+        virtual void evaluate(int path_id){
+            // Evaluate the memory container in case the type is a graph
+
+        }
+        
 };

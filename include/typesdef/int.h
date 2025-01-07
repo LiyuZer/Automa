@@ -5,9 +5,10 @@
 #include "../core/memory.h"
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
+#include "../typesdef/bool.h"
 
 /*
-This is the file for defining integer types(soon to be num type, for all numbers have one type), because I am crazy I will make them arbitrary precision integers. 
+This is the file for defining integer types(soon to be num type, one numbers class to control them all), because I am crazy I will make them arbitrary precision. 
 Why not? Life is short, and I am not going to be the one to tell you that you can't have a 1000 digit integer lol. 
 Let's go! 
 
@@ -28,12 +29,13 @@ What will the memory container have you say?
 {
     val : an arbitrary integer struct
     type : "int"
-    add : a function that takes another memory container and returns a new memory container with the sum of the two
-    sub : a function that takes another memory container and returns a new memory container with the difference of the two
-    mul : a function that takes another memory container and returns a new memory container with the product of the two
-    div : a function that takes another memory container and returns a new memory container with the division of the two
-
 }
+
+For ints all operations will be implemented as part of the class, rather than a symbol pointing to a graph.
+The reason being speed and efficiency, these are the most common operations and we want them to be as fast as possible.
+
+We will implement addition, subtraction, multiplication, division, modulo, equal, not equal, less, greater, less equal, greater equal, and, or, not.
+
 We will store in memory the digits of the integer, and the sign of the integer.
 Let the games begin. 
 */
@@ -43,7 +45,7 @@ class Int : public Memory{
     vector<uint64_t> digits;
     bool negative;
     public:
-    Int(string integer) : Memory(){
+    Int(string integer) : Memory("int"){
         if (integer[0] == '-'){
             negative = true;
             integer = integer.substr(1);
@@ -81,8 +83,6 @@ vector<uint64_t> long_divide_integer_base2_64(vector<uint64_t> dividend, uint64_
         remainder = base_128_dividend % divisor;
         final_remainder = remainder; 
 
-        cout<< "Quotient: " << quotient << " Remainder: " << remainder << endl;
-        cout<< "Base 128 Dividend: " <<(uint64_t)base_128_dividend << endl;
         if(quotient > 0){
             // We shift the remainder to the left by 64 bits and add the next digit
             
@@ -144,9 +144,6 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         current_dividend += dividend[current_index];
         current_index++;
 
-        cout<< "Current Dividend: " << current_dividend << endl;
-        cout<< "Current Index: " << current_index << endl;
-        cout<< "Dividend: " << dividend << endl;
         uint64_t digit; 
         if(current_dividend == ""){
             break;
@@ -157,7 +154,6 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         quotient = digit >> base_2; // Divide by base_2
         remainder = digit & (((uint64_t)1 << base_2) - 1); // Remainder is the last base_2 bits
         final_remainder = remainder;
-        cout<< "Quotient: " << quotient << " Remainder: " << remainder << endl;
         
         if(quotient > 0){
             // We have to store the quotient in the remainder vector 
@@ -205,7 +201,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
 
             if (integer == "0"){
                 digits.push_back(0);
-                negative = false;// Zero is not negative and not positive, but we will consider it positive(easier that way for now lol)
+                negative = false;// Zero is not negative and not positive, but we will consider it positive(easier that way for now)
                 return;
             }
             // remainder is the remainder of the division
@@ -213,7 +209,6 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             while(integer.length() > 0){
                 uint64_t remainder = 0;
                 integer = long_divide_power_2(integer, 32, remainder);
-                cout<< "Integer: " << integer << endl;
                 if(integer != "0"){
                     remainder_vec.push_back(remainder);
                 }
@@ -226,14 +221,6 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
                 }
             }
 
-            // Print the bytes of each remainder
-            for (auto rem : remainder_vec) {
-                cout << "Remainder bytes: ";
-                for (int i = 0; i < 8; ++i) {
-                    cout << ((rem >> (i * 8)) & 0xFF) << " ";
-                }
-                cout << endl;
-            }
 
             /* Now we have to convert the remainder vector to a vector of 64 bit integers
                How do we do this? Simple, we take use a bunch of mask and shifts 
@@ -256,13 +243,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             if(first_found){
                 digits.push_back(prev_num);
             } 
-            for (auto rem : digits) {
-                cout << "Remainder bytes: ";
-                for (int i = 0; i < 8; ++i) {
-                    cout << ((rem >> (i * 8)) & 0xFF) << " ";
-                }
-                cout << endl;
-            }
+
         }
     void print(){
 
@@ -302,7 +283,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         }
     }
 
-    shared_ptr<Memory> add(shared_ptr<Memory> memory){
+    shared_ptr<Int> add_internal(shared_ptr<Int> memory){
         /* 
         We will add the two vectors of 64 bit integers
         This will be effectively a full adder lol. 
@@ -325,7 +306,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         if(!this_negative && !other_negative){
             // Both are positive
             vector<uint64_t> result = add_same_sign(digits, int_memory->get_digits());
-            return shared_ptr<Memory>(new Int(result, false));
+            return shared_ptr<Int>(new Int(result, false));
         }
         else if(this_negative && !other_negative){
             // This is negative, other is positive
@@ -333,10 +314,10 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             //Take whichever is greater 
             bool this_greater = is_greater_or_equal(digits, int_memory->get_digits());
             if(this_greater){
-                return shared_ptr<Memory>(new Int(subtract_different_sign(digits, int_memory->get_digits()), true));
+                return shared_ptr<Int>(new Int(subtract_different_sign(digits, int_memory->get_digits()), true));
             }
             else{
-                return shared_ptr<Memory>(new Int(subtract_different_sign(int_memory->get_digits(), digits), false));
+                return shared_ptr<Int>(new Int(subtract_different_sign(int_memory->get_digits(), digits), false));
             }
         }
         else if(!this_negative && other_negative){
@@ -344,19 +325,31 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             // Take whichever is greater
             bool this_greater = is_greater_or_equal(digits, int_memory->get_digits());
             if(this_greater){
-                return shared_ptr<Memory>(new Int(subtract_different_sign(digits, int_memory->get_digits()), false));
+                return shared_ptr<Int>(new Int(subtract_different_sign(digits, int_memory->get_digits()), false));
             }
             else{
-                return shared_ptr<Memory>(new Int(subtract_different_sign(int_memory->get_digits(), digits), true));
+                return shared_ptr<Int>(new Int(subtract_different_sign(int_memory->get_digits(), digits), true));
             }
         }
         else{
             // Both are negative
             vector<uint64_t> result = add_same_sign(digits, int_memory->get_digits());
-            return shared_ptr<Memory>(new Int(result, true));
+            return shared_ptr<Int>(new Int(result, true));
 
         }
     }
+    shared_ptr<Int> sub_internal(shared_ptr<Int> other_memory){
+        // Essentially the same as add except for the other memory we will negate it
+        // and then call add lol(you see what I did there)
+        shared_ptr<Int> int_memory = dynamic_pointer_cast<Int>(other_memory);
+        int_memory->set_negative(!int_memory->get_negative());
+        return add(int_memory);
+
+    }
+    void set_negative(bool neg){
+        negative = neg;
+    }
+
 
     bool is_greater_or_equal(vector<uint64_t> left, vector<uint64_t> right){
         // Check if left is greater than or equal to right
@@ -409,9 +402,10 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         return result;
     }
     vector<uint64_t> subtract_different_sign(vector<uint64_t> left, vector<uint64_t> right){
-        // Different sign addition 
-        // We know the left is greater than the right
         /*
+            Different sign addition 
+            We know the left is greater than the right
+
             Subtraction is similar to addition, the only difference being, 
             we borrow from right to left, the act of borrowing is  
             subtracting 1 from the digit to the left and adding 2^64 to the digit
@@ -459,4 +453,33 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
     bool get_negative(){
         return negative;
     }
+    // Now define all the operations
+    shared_ptr<Int> add(shared_ptr<Int> int_memory){
+        return add_internal(int_memory);
+    }
+    shared_ptr<Int> sub (shared_ptr<Int> int_memory){
+        return sub_internal(int_memory);
+    }
+    // Return bools for comparison operations
+    // is_greater_or_equal is the main function 
+    shared_ptr<Bool> equal(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(digits == int_memory->get_digits()));
+    }
+    shared_ptr<Bool> not_equal(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(digits != int_memory->get_digits()));
+    }
+    shared_ptr<Bool> less(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(!is_greater_or_equal(digits, int_memory->get_digits())));
+    }
+    shared_ptr<Bool> greater(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(is_greater_or_equal(digits, int_memory->get_digits())));
+    }
+    shared_ptr<Bool> less_equal(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(is_greater_or_equal(int_memory->get_digits(), digits)));
+    }
+    shared_ptr<Bool> greater_equal(shared_ptr<Int> int_memory){
+        return shared_ptr<Bool>(new Bool(is_greater_or_equal(digits, int_memory->get_digits())));
+    }
+
+
 };

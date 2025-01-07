@@ -24,41 +24,43 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     //Now we will set the nodes 
     shared_ptr<AstNode> node = graphDef_ptr->get_nodeDef();
     shared_ptr<nodeDef> nodeDef_ptr = dynamic_pointer_cast<nodeDef>(node);
-    vector<shared_ptr<AstNode> > nodeDefStatements = nodeDef_ptr->get_nodeDefStatements();
-    for(auto nodeDefStatement : nodeDefStatements){
-        //shared_ptr<nodeDefStatements> nodeDefStatement_ptr = dynamic_pointer_cast<nodeDefStatements>(nodeDefStatement);
-        //string node_name = nodeDefStatement_ptr->get_node();
-        // string node_type = nodeDefStatement_ptr->get_nodeType();
-        // Node n = Node(node_name);
-        // if(node_type == "accept"){
-        //     n.accept = true;
-        // }
-        // else if(node_type == "reject"){
-        //     n.reject = true;
-        // }
-        // else if(node_type == "start"){
-        //     n.start = true;
-        //     graph_ptr->set_start_node(node_name);
-        // }
-        // int success = graph_ptr->insert_node(node_name, n);
-        // if(success == -1){
-        //     cerr << "Error in creating node, node already exists" << endl;
-        //     exit(1);
-        // }
+    vector<shared_ptr<AstNode> > node_def_ls = nodeDef_ptr->get_nodeDefStatements();
+    for(auto nodeDefStatement : node_def_ls){
+        shared_ptr<nodeDefStatements> nodeDefStatement_ptr = dynamic_pointer_cast<nodeDefStatements>(nodeDefStatement);
+        string node_name = nodeDefStatement_ptr->get_node();
+        string node_type = nodeDefStatement_ptr->get_nodeType();
+        Node n = Node(node_name);
+        cout<<"Node Name: "<<node_type<<endl;
+        if(node_type == "acceptNode"){
+            n.accept = true;
+        }
+        else if(node_type == "rejectNode"){
+            n.reject = true;
+        }
+        else if(node_type == "startNode"){
+            n.start = true;
+            graph_ptr->set_start_node(node_name);
+        }
+        int success = graph_ptr->insert_node(node_name, n);
+        if(success == -1){
+            cerr << "Error in creating node, node already exists" << endl;
+            exit(1);
+        }
     }
 
     //Now we will set the transitions
     shared_ptr<AstNode> transition = graphDef_ptr->get_transitionDef();
     shared_ptr<transitionDef> transitionDef_ptr = dynamic_pointer_cast<transitionDef>(transition);
-    vector<shared_ptr<AstNode> > transitionDefStatements = transitionDef_ptr->get_transitionDefStatements();
-    for(auto transitionDefStatement : transitionDefStatements){
-        // shared_ptr<transitionDefStatements> transitionDefStatement_ptr = dynamic_pointer_cast<transitionDefStatements>(transitionDefStatement);
-        // string fromNode = transitionDefStatement_ptr->get_fromNode();
-        // string toNode = transitionDefStatement_ptr->get_toNode();
-        // vector<shared_ptr<AstNode> > conditions = transitionDefStatement_ptr->get_conditions();
-        // vector<shared_ptr<AstNode> > operations = transitionDefStatement_ptr->get_operations();
-        // graph_ptr->add_transition(fromNode, toNode, conditions, operations);
+    vector<shared_ptr<AstNode> > transition_def_ls = transitionDef_ptr->get_transitionDefStatements();
+    for(auto transitionDefStatement : transition_def_ls){
+        shared_ptr<transitionDefStatements> transitionDefStatement_ptr = dynamic_pointer_cast<transitionDefStatements>(transitionDefStatement);
+        string fromNode = transitionDefStatement_ptr->get_fromNode();
+        string toNode = transitionDefStatement_ptr->get_toNode();
+        vector<shared_ptr<AstNode> > conditions = transitionDefStatement_ptr->get_conditionExpressions();
+        vector<shared_ptr<AstNode> > operations = transitionDefStatement_ptr->get_operationsExpressions();
+        graph_ptr->add_transition(fromNode, toNode, conditions, operations);
     }
+    graph_ptr->graph_to_dot(*graph_ptr, "graph_sruct.dot");
 
     /* We are done that is the initialization of the graph
         Recap :-

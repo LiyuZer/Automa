@@ -338,16 +338,16 @@ public:
 
 class integerLiteral : public AstNode {
 private:
-    long integer_literal;
+    string integer_literal;
 
 public:
     integerLiteral() : AstNode("integerLiteral") {}
 
-    long get_integerLiteral() { return integer_literal; }
-    void set_integerLiteral(long value) { integer_literal = value; }
+    string get_integerLiteral() { return integer_literal; }
+    void set_integerLiteral(string value) { integer_literal = value; }
 
     string repr() override {
-        return "integerLiteral(value=" + to_string(integer_literal) + ")";
+        return "integerLiteral(value=" + integer_literal + ")";
     }
 };
 

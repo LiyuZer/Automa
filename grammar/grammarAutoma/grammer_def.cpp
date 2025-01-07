@@ -65,8 +65,10 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     }},
     {"nodeDefStatement", {
         CreateToken("IDENTIFIER"),
-        CreateParen('('),
         CreateToken("DOUBLE_COLON"),
+        CreateRule("nodeTypes"),
+        CreateParen('('),
+        CreateToken("COMMA"),
         CreateRule("nodeTypes"),
         CreateParen(')'),
         CreateSpecialSymbol('*'),

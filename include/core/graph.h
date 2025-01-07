@@ -3,6 +3,9 @@
 #include <vector>
 #include <unordered_map>
 #include "/Users/liyuzerihun/Automa/grammar/ast/ast_node.h"
+#include <fstream>
+#include <iostream>
+
 #pragma once
 
 /*
@@ -82,5 +85,69 @@ class Graph{
     string get_start_node(){
         return start_node;
     }
-    
+    // a function to check if a node is an accept node
+    bool is_accept_node(string node){
+        return node_map[node].accept;
+    }
+    void graph_to_dot(const Graph& graph, const string& filename) {
+    std::ofstream dotFile(filename);
+    if (!dotFile.is_open()) {
+        std::cerr << "Error: Unable to open file " << filename << std::endl;
+        return;
+    }
+
+    // Begin the DOT file
+    dotFile << "digraph G {\n";
+
+    // Add nodes
+    for (const auto& [name, node] : graph.node_map) {
+        dotFile << "    \"" << name << "\"";
+        if (node.start) {
+            dotFile << " [shape=doublecircle, color=green, style=bold];\n";
+        } else if (node.accept) {
+            dotFile << " [shape=doublecircle, color=blue];\n";
+        } else if (node.reject) {
+            dotFile << " [shape=doublecircle, color=red];\n";
+        } else {
+            dotFile << " [shape=circle];\n";
+        }
+    }
+
+    // Add transitions
+    for (const auto& [fromNode, transitions] : graph.node_transitions) {
+        for (const auto& transition : transitions) {
+            dotFile << "    \"" << fromNode << "\" -> \"" << transition.toNode << "\"";
+
+            // Add label with conditions and operations if present
+            if (!transition.conditions.empty() || !transition.operations.empty()) {
+                dotFile << " [label=\"";
+                if (!transition.conditions.empty()) {
+                    dotFile << "Conditions: ";
+                    for (const auto& condition : transition.conditions) {
+                        dotFile << condition->repr() << " ";
+                    }
+                }
+                if (!transition.operations.empty()) {
+                    if (!transition.conditions.empty()) {
+                        dotFile << "\\n";
+                    }
+                    dotFile << "Operations: ";
+                    for (const auto& operation : transition.operations) {
+                        dotFile << operation->repr() << " ";
+                    }
+                }
+                dotFile << "\"]";
+            }
+
+            dotFile << ";\n";
+        }
+    }
+
+    // End the DOT file
+    dotFile << "}\n";
+
+    dotFile.close();
+    std::cout << "DOT file saved to " << filename << std::endl;
+}
+
 };

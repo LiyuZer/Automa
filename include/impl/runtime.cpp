@@ -15,6 +15,7 @@ void RunTime :: run(string input_file){
 
         if(ptr){
             ptr->collapseDynamicNodes();
+            ptr->toDot("parse_tree.dot");
             AbstractTreeGenerator ast_generator;
             shared_ptr<AstNode> ast_ptr = ast_generator.generateTree(ptr);
             write_ast_to_dot(ast_ptr, "graph.dot"); //Writing to a graph file
@@ -26,7 +27,7 @@ void RunTime :: run(string input_file){
             shared_ptr<graphDef> graphDef_ptr = dynamic_pointer_cast<graphDef>(program_ptr->getGraphDef());
             operator_ptr->set_astTree(ast_ptr);
             shared_ptr<Graph> graph = operator_ptr->create_graph(graphDef_ptr);
-            operator_ptr->add_path(shared_ptr<Path>(new Path(0, graph->get_start_node(), 100, 0, graph)));
+            operator_ptr->add_path(shared_ptr<Path>(new Path(0, graph->get_start_node(), 1000000, 0, graph)));
             operator_ptr->run();// Now it is up to the operator to run the paths
         }
         else{

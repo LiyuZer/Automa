@@ -202,7 +202,35 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
 
     variableDef_ptr->set_variableName(variable);
 
-    // Finish this tomorrow this is important lol
+    // Now we will explore the literal
+    if (!literal_vec.empty()) {
+        vector<shared_ptr<ParseNode> > string_vec;
+        vector<shared_ptr<ParseNode> > integer_vec;
+        vector<shared_ptr<ParseNode> > char_vec;
+
+        literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
+        literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
+        literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
+
+        if (!string_vec.empty()) {
+            shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
+            stringNode->set_stringLiteral(string_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(stringNode, string_vec[0]));
+            variableDef_ptr->set_literal(stringNode);
+        } else if (!integer_vec.empty()) {
+            shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
+            intNode->set_integerLiteral(integer_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
+            variableDef_ptr->set_literal(intNode);
+        } else if (!char_vec.empty()) {
+            shared_ptr<charLiteral> charNode = make_shared<charLiteral>();
+            charNode->set_charLiteral(char_vec[0]->getValue()[0]);
+            astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
+            variableDef_ptr->set_literal(charNode);
+        }
+    }
+
+    
 
 
 }
@@ -369,7 +397,7 @@ This does not point to any specific ast nodes but return an ast node, while also
             return stringNode;
         } else if (!integer_vec.empty()) {
             shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
-            intNode->set_integerLiteral(stol(integer_vec[0]->getValue()));
+            intNode->set_integerLiteral(integer_vec[0]->getValue());
             astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
             return intNode;
         } else if (!char_vec.empty()) {
@@ -822,7 +850,7 @@ void AbstractTreeGenerator::explore_integerLiteral(shared_ptr<ParseNode> root_no
     root_node->addChildrenVec("INTEGER_LITERAL", literal_vec);
 
     if (!literal_vec.empty()) {
-        long value = stol(literal_vec[0]->getValue());
+        string value = literal_vec[0]->getValue();
         shared_ptr<integerLiteral> intNode = dynamic_pointer_cast<integerLiteral>(parentAstNode);
         intNode->set_integerLiteral(value);
     }

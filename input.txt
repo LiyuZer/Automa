@@ -1,7 +1,11 @@
 graph main {
     memory {
-        n: 5 < 7 < 3 < 2,
-        num : 1
+        A: 12345,      
+        B: 6789,       
+        resultAdd: 0,  
+        resultSub: 0,  
+        tempAdd: 0,    
+        tempSub: 0
     }
 
     nodeDef {
@@ -10,8 +14,16 @@ graph main {
     }
 
     transitions {
-        Start -> Start => conditions: (n > 0), operations: (num = num * n, n = n - 1, 'w', 5 * 7 * (9));
-        Start -> End => conditions: (n == 0), operations: ();
-    }
+        Start -> Add => conditions: (), operations: ();
 
+        Add -> Subtract => conditions: (), operations: (
+            tempAdd = A + B,
+            resultAdd = tempAdd
+        );
+
+        Subtract -> End => conditions: (), operations: (
+            tempSub = A - B,
+            resultSub = tempSub
+        );
+    }
 }
