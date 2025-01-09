@@ -318,6 +318,8 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"literal", {
         CreateToken("STRING_LITERAL"),
         CreateOr(),
+        CreateRule("decimalLiteral"),
+        CreateOr(),
         CreateToken("INTEGER_LITERAL"),
         CreateOr(),
         CreateRule("boolLiteral"),
@@ -330,6 +332,17 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateOr(),
         CreateToken("FALSE"),
         CreateParen(')'),
+    }},
+    {"decimalLiteral", {
+        CreateRule("integerPart"),
+        CreateToken("DOT"),
+        CreateRule("decimalPart"),
+    }},
+    {"integerPart", {
+        CreateToken("INTEGER_LITERAL"),
+    }},
+    {"decimalPart", {
+        CreateToken("INTEGER_LITERAL"),
     }},
     {"variable", {
         CreateToken("IDENTIFIER")

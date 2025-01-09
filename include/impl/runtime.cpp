@@ -29,7 +29,7 @@ void RunTime :: run(string input_file){
             shared_ptr<Graph> graph = operator_ptr->create_graph(graphDef_ptr);
             operator_ptr->add_path(shared_ptr<Path>(new Path(0, graph->get_start_node(), 1000000, 0, graph)));
             operator_ptr->run();// Now it is up to the operator to run the paths
-        }
+        } 
         else{
             cout << "Error in parsing, check for syntax errors" << endl;
         }

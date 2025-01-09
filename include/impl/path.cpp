@@ -8,7 +8,7 @@
 #include "../core/memory.h"
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
-#include "../typesdef/int.h"
+#include "../typesdef/num.h"
 #include "../typesdef/bool.h"
 #include "../typesdef/char.h"
 
@@ -80,12 +80,33 @@ void Path :: set_memory(shared_ptr<AstNode> memory){
             string integer_literal = integerLiteral_ptr->get_integerLiteral();
             cout<<"Integer Literal: "<<integer_literal<<endl;
             // Then take the integer literal create a integer object and set the memory container
-            shared_ptr<Int> int_ptr = shared_ptr<Int>(new Int(integer_literal));
+            shared_ptr<Num> int_ptr = shared_ptr<Num>(new Num(integer_literal));
             memory_ptr->set_memory(var_name, int_ptr);
         }
         else if(dynamic_pointer_cast<charLiteral>(literal)){
             shared_ptr<charLiteral> charLiteral_ptr = dynamic_pointer_cast<charLiteral>(literal);
-            // memory_ptr->set_char(var_name, charLiteral_ptr->get_charLiteral());
+            string var_name = var_def_ptr->get_variableName();
+            char char_literal = charLiteral_ptr->get_charLiteral();
+            shared_ptr<Char> char_ptr = shared_ptr<Char>(new Char(char_literal));
+            memory_ptr->set_memory(var_name, char_ptr);
+        }
+        else if (dynamic_pointer_cast<boolLiteral>(literal)){
+            shared_ptr<boolLiteral> boolLiteral_ptr = dynamic_pointer_cast<boolLiteral>(literal);
+            string var_name = var_def_ptr->get_variableName();
+            bool bool_literal = boolLiteral_ptr->get_boolLiteral();
+            shared_ptr<Bool> bool_ptr = shared_ptr<Bool>(new Bool(bool_literal));
+            memory_ptr->set_memory(var_name, bool_ptr);
+        }
+        else if(dynamic_pointer_cast <decimalLiteral>(literal)){
+            shared_ptr<decimalLiteral> decimalLiteral_ptr = dynamic_pointer_cast<decimalLiteral>(literal);
+            string var_name = var_def_ptr->get_variableName();
+            string decimal_literal = decimalLiteral_ptr->get_decimalLiteral();
+            shared_ptr<Num> decimal_ptr = shared_ptr<Num>(new Num(decimal_literal));
+            memory_ptr->set_memory(var_name, decimal_ptr);
+        }
+        else{
+            cerr << "Error, unknown literal type" << endl;
+            exit(1);
         }
     }
 }
@@ -121,10 +142,25 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
    }
    else if (dynamic_pointer_cast<integerLiteral>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
-       stack_elem->type = "integer";
+       stack_elem->type = "num";
        stack_elem->ast_node = ast_node;
        computation_stack.push(stack_elem);
        return stack_elem;
+   }
+   else if(dynamic_pointer_cast<decimalLiteral>(ast_node)){
+         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
+         stack_elem->type = "num";
+         stack_elem->ast_node = ast_node;
+         computation_stack.push(stack_elem);
+         return stack_elem;
+    }
+    else if(dynamic_pointer_cast<boolLiteral>(ast_node)){
+         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
+         stack_elem->type = "bool";
+         stack_elem->ast_node = ast_node;
+         computation_stack.push(stack_elem);
+         return stack_elem;
+
    }
    else if (dynamic_pointer_cast<charLiteral>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
@@ -167,15 +203,15 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
 shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory> left, shared_ptr<Memory> right, string operations){
 // Here we will check first to see if it is a primitive type, by dynamic casting, then if it is, 
 // Evaluate the operation, as of now the primitives are Int(Soon to be Num type), Char and Bool
-    if(dynamic_pointer_cast<Int>(left)){
+    if(dynamic_pointer_cast<Num>(left)){
         // This is an int 
-        shared_ptr<Int> left_int = dynamic_pointer_cast<Int>(left);
+        shared_ptr<Num> left_int = dynamic_pointer_cast<Num>(left);
         // If the right is not an int, the an error will be thrown
-        if(!dynamic_pointer_cast<Int>(right)){
+        if(!dynamic_pointer_cast<Num>(right)){
             cerr << "Error, trying to add a non integer to an integer" << endl;
             exit(1);
         }
-        shared_ptr<Int> right_int = dynamic_pointer_cast<Int>(right);
+        shared_ptr<Num> right_int = dynamic_pointer_cast<Num>(right);
         // Now we will evaluate the operation
         if(operations == "+"){
             return left_int->add(right_int);
@@ -301,8 +337,8 @@ shared_ptr<Memory> Path :: evaluateExpression(){
                 // If the stack element has been evaluated, then we will set the memory container and pop the stack element
                 stack_elem->memory_container = stack_elem->stack_elem_ptr_ls[0]->memory_container;
                 computation_stack.pop();
-            }
-        }
+            }   
+        }        
         else if(stack_elem->type == "binary"){
             cout<< "Evaluating the binary expression" << endl;
             // Evaluate the binary expression
@@ -316,10 +352,10 @@ shared_ptr<Memory> Path :: evaluateExpression(){
                 shared_ptr<stackElement> right_stack_elem = addElementToStack(right);
                 stack_elem->stack_elem_ptr_ls.push_back(left_stack_elem);
                 stack_elem->stack_elem_ptr_ls.push_back(right_stack_elem);                
-            }
-            else{ 
+            }   
+            else{     
                 /* In this case the left and right side have been added and evaluated, thus 
-                we will evaluate the binary expression. Note that for ints, boolean and other primitive types
+                we will evaluate the binary expression. Note that for nums, boolean and other primitive types
                 we don't add a new path for the operations we just evaluate them. 
                 */
                // Get the left and right memory container 
@@ -333,13 +369,13 @@ shared_ptr<Memory> Path :: evaluateExpression(){
                     // If the result is not null, then we will set the memory container and pop the stack element
                     stack_elem->memory_container = result;
                     computation_stack.pop();
-                }
-                else{
+                }  
+                else{  
                     // If the result is null(not a primitive type), then we know that the left and right side are not primitive types
                     // So we have to add a new path to the operator, and yield the current path
                     // TODO :- Add the path to the operator
                 }
-            }
+            }   
         }
         // variable case 
         else if(stack_elem->type == "variable"){
@@ -391,13 +427,28 @@ shared_ptr<Memory> Path :: evaluateExpression(){
         //     stack_elem->memory_container = string_ptr;
         //     computation_stack.pop();
         // }
-        else if(stack_elem->type == "integer"){
-            cout << "Evaluating the integer" << endl;
-            shared_ptr<integerLiteral> integerLiteral_ptr = dynamic_pointer_cast<integerLiteral>(stack_elem->ast_node);
-            string integer_literal = integerLiteral_ptr->get_integerLiteral();
-            shared_ptr<Int> int_ptr = shared_ptr<Int>(new Int(integer_literal));
-            stack_elem->memory_container = int_ptr;
-            computation_stack.pop();
+        else if(stack_elem->type == "num"){
+            cout << "Evaluating the Number" << endl;
+            // Dynamically cast to see if the number is a decimal or an integer
+            if(dynamic_pointer_cast<integerLiteral>(stack_elem->ast_node)){
+                shared_ptr<integerLiteral> integerLiteral_ptr = dynamic_pointer_cast<integerLiteral>(stack_elem->ast_node);
+                string integer_literal = integerLiteral_ptr->get_integerLiteral();
+                shared_ptr<Num> int_ptr = shared_ptr<Num>(new Num(integer_literal));
+                stack_elem->memory_container = int_ptr;
+                computation_stack.pop();
+            } 
+            else if(dynamic_pointer_cast<decimalLiteral>(stack_elem->ast_node)){
+                shared_ptr<decimalLiteral> decimalLiteral_ptr = dynamic_pointer_cast<decimalLiteral>(stack_elem->ast_node);
+                string decimal_literal = decimalLiteral_ptr->get_decimalLiteral();
+                cout<<"Decimal Literal: "<<decimal_literal<<endl;
+                shared_ptr<Num> decimal_ptr = shared_ptr<Num>(new Num(decimal_literal));
+                stack_elem->memory_container = decimal_ptr;
+                computation_stack.pop();
+            }   
+            else{ 
+                cerr << "Error, unknown number type" << endl;
+                exit(1);
+            }
         }
         else if(stack_elem->type == "char"){
             cout << "Evaluating the char" << endl;
@@ -510,10 +561,8 @@ int Path :: run(){
         cout << "Accept Node" << endl;
         cout<< current_node << endl;
         // Let us assuke there is a symbol called currentVal in the memory container and it is an int 
-        shared_ptr<Int> currentVal = dynamic_pointer_cast<Int>(memory_ptr->get_memory("resultAdd"));
-        cout << "resultAdd: ";
-        currentVal->print();
-        cout<<  endl;
+        shared_ptr<Num> currentVal = dynamic_pointer_cast<Num>(memory_ptr->get_memory("n"));
+        cout << "resultAdd: " << currentVal->to_string()<<endl;
         return 1;
     }
     else if(!has_transitioned){

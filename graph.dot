@@ -5,85 +5,33 @@ digraph AST {
     node1 -> node2
     node2 [label="memoryDef"]
     node2 -> node3
-    node3 [label="variableDefintions(name=A)"]
+    node3 [label="variableDefintions(name=n)"]
     node3 -> node4
-    node4 [label="integerLiteral(value=12345)"]
-    node2 -> node5
-    node5 [label="variableDefintions(name=B)"]
-    node5 -> node6
-    node6 [label="integerLiteral(value=6789)"]
-    node2 -> node7
-    node7 [label="variableDefintions(name=resultAdd)"]
+    node4 [label="decimalLiteral(value=5.5)"]
+    node1 -> node5
+    node5 [label="afterAccept"]
+    node1 -> node6
+    node6 [label="afterReject"]
+    node1 -> node7
+    node7 [label="nodeDef"]
     node7 -> node8
-    node8 [label="integerLiteral(value=0)"]
-    node2 -> node9
-    node9 [label="variableDefintions(name=resultSub)"]
-    node9 -> node10
-    node10 [label="integerLiteral(value=0)"]
-    node2 -> node11
-    node11 [label="variableDefintions(name=tempAdd)"]
+    node8 [label="nodeDefStatements(node=Start, type=startNode)"]
+    node7 -> node9
+    node9 [label="nodeDefStatements(node=End, type=acceptNode)"]
+    node1 -> node10
+    node10 [label="transitionDef"]
+    node10 -> node11
+    node11 [label="transitionDefStatements(fromNode=Start, toNode=End)"]
     node11 -> node12
-    node12 [label="integerLiteral(value=0)"]
-    node2 -> node13
-    node13 [label="variableDefintions(name=tempSub)"]
+    node12 [label="expression(type=)"]
+    node12 -> node13
+    node13 [label="assignmentExpression(variable=n)"]
     node13 -> node14
-    node14 [label="integerLiteral(value=0)"]
-    node1 -> node15
-    node15 [label="afterAccept"]
-    node1 -> node16
-    node16 [label="afterReject"]
-    node1 -> node17
-    node17 [label="nodeDef"]
-    node17 -> node18
-    node18 [label="nodeDefStatements(node=Start, type=startNode)"]
-    node17 -> node19
-    node19 [label="nodeDefStatements(node=End, type=acceptNode)"]
-    node1 -> node20
-    node20 [label="transitionDef"]
-    node20 -> node21
-    node21 [label="transitionDefStatements(fromNode=Start, toNode=Add)"]
-    node20 -> node22
-    node22 [label="transitionDefStatements(fromNode=Add, toNode=Subtract)"]
-    node22 -> node23
-    node23 [label="expression(type=)"]
-    node23 -> node24
-    node24 [label="assignmentExpression(variable=tempAdd)"]
-    node24 -> node25
-    node25 [label="expression(type=)"]
-    node25 -> node26
-    node26 [label="binaryExpression(op=+)"]
-    node26 -> node27
-    node27 [label="variable(name=A)"]
-    node26 -> node28
-    node28 [label="variable(name=B)"]
-    node22 -> node29
-    node29 [label="expression(type=)"]
-    node29 -> node30
-    node30 [label="assignmentExpression(variable=resultAdd)"]
-    node30 -> node31
-    node31 [label="expression(type=)"]
-    node31 -> node32
-    node32 [label="variable(name=tempAdd)"]
-    node20 -> node33
-    node33 [label="transitionDefStatements(fromNode=Subtract, toNode=End)"]
-    node33 -> node34
-    node34 [label="expression(type=)"]
-    node34 -> node35
-    node35 [label="assignmentExpression(variable=tempSub)"]
-    node35 -> node36
-    node36 [label="expression(type=)"]
-    node36 -> node37
-    node37 [label="binaryExpression(op=-)"]
-    node37 -> node38
-    node38 [label="variable(name=A)"]
-    node37 -> node39
-    node39 [label="variable(name=B)"]
-    node33 -> node40
-    node40 [label="expression(type=)"]
-    node40 -> node41
-    node41 [label="assignmentExpression(variable=resultSub)"]
-    node41 -> node42
-    node42 [label="expression(type=)"]
-    node42 -> node43
-    node43 [label="variable(name=tempSub)"]
+    node14 [label="expression(type=)"]
+    node14 -> node15
+    node15 [label="binaryExpression(op=+)"]
+    node15 -> node16
+    node16 [label="variable(name=n)"]
+    node15 -> node17
+    node17 [label="decimalLiteral(value=0.1255)"]
 }

@@ -1,29 +1,15 @@
 graph main {
     memory {
-        A: 12345,      
-        B: 6789,       
-        resultAdd: 0,  
-        resultSub: 0,  
-        tempAdd: 0,    
-        tempSub: 0
+        n: 5.5
     }
 
     nodeDef {
         Start :: startNode;
         End :: acceptNode;
     }
-
     transitions {
-        Start -> Add => conditions: (), operations: ();
-
-        Add -> Subtract => conditions: (), operations: (
-            tempAdd = A + B,
-            resultAdd = tempAdd
-        );
-
-        Subtract -> End => conditions: (), operations: (
-            tempSub = A - B,
-            resultSub = tempSub
-        );
+        Start -> End => conditions : (), operations : (n = n + 0.1255); 
     }
+
 }
+ 

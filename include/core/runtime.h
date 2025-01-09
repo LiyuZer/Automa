@@ -24,7 +24,7 @@ class RunTime{
     shared_ptr<Operator> operator_ptr;
     shared_ptr<AstNode> astTreeRoot;
     shared_ptr<Parser> parser_ptr;
-
+ 
     void run(string input_file);
 };
 

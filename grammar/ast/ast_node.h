@@ -351,6 +351,29 @@ public:
     }
 };
 
+class decimalLiteral : public AstNode {
+    private:
+    string decimal_literal;
+    public :
+    decimalLiteral() : AstNode("decimalLiteral") {}
+    string get_decimalLiteral() { return decimal_literal; }
+    void set_decimalLiteral(string value) { decimal_literal = value; }
+    string repr() override {
+        return "decimalLiteral(value=" + decimal_literal + ")";
+    }
+};
+class boolLiteral : public AstNode {
+    private:
+    bool bool_literal;
+    public :
+    boolLiteral() : AstNode("boolLiteral") {}
+    bool get_boolLiteral() { return bool_literal; }
+    void set_boolLiteral(bool value) { bool_literal = value; }
+    string repr() override {
+        string bool_literal_repr = bool_literal ? "true" : "false";
+        return "boolLiteral(value=" + bool_literal_repr + ")";
+    }
+};
 class charLiteral : public AstNode {
 private:
     char char_literal;

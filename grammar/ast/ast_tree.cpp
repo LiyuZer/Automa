@@ -133,7 +133,12 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        else if(type == "charLiteral"){
             explore_charLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        } 
-
+       else if(type == "decimalLiteral"){
+            explore_decimalLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       } 
+       else if(type == "boolLiteral"){
+            explore_boolLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       } 
        astNodeQueue.pop();
 
     }
@@ -207,10 +212,14 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
         vector<shared_ptr<ParseNode> > string_vec;
         vector<shared_ptr<ParseNode> > integer_vec;
         vector<shared_ptr<ParseNode> > char_vec;
+        vector<shared_ptr<ParseNode> > bool_literal_vec;
+        vector<shared_ptr<ParseNode> > decimal_vec;
 
         literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
         literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
         literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
+        literal_vec[0]->addChildrenVec("boolLiteral", bool_literal_vec); // Bool is a rule not a token same with decimal
+        literal_vec[0]->addChildrenVec("decimalLiteral", decimal_vec); // Decimal literal is a rule not a token
 
         if (!string_vec.empty()) {
             shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
@@ -227,6 +236,18 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
             charNode->set_charLiteral(char_vec[0]->getValue()[0]);
             astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
             variableDef_ptr->set_literal(charNode);
+        }
+        else if(!bool_literal_vec.empty()){
+            shared_ptr<boolLiteral> boolNode = make_shared<boolLiteral>();
+            boolNode->set_boolLiteral(bool_literal_vec[0]->getValue() == "true");
+            astNodeQueue.push(astNodeQueueElem(boolNode, bool_literal_vec[0]));
+            variableDef_ptr->set_literal(boolNode);
+        }
+        else if(!decimal_vec.empty()){
+            shared_ptr<decimalLiteral> decimalNode = make_shared<decimalLiteral>();
+            decimalNode->set_decimalLiteral(decimal_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(decimalNode, decimal_vec[0]));
+            variableDef_ptr->set_literal(decimalNode);
         }
     }
 
@@ -385,10 +406,14 @@ This does not point to any specific ast nodes but return an ast node, while also
         vector<shared_ptr<ParseNode> > string_vec;
         vector<shared_ptr<ParseNode> > integer_vec;
         vector<shared_ptr<ParseNode> > char_vec;
+        vector<shared_ptr<ParseNode> > bool_literal_vec;
+        vector<shared_ptr<ParseNode> > decimal_vec;
 
         literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
         literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
         literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
+        literal_vec[0]->addChildrenVec("boolLiteral", bool_literal_vec); // Bool is a rule not a token same with decimal
+        literal_vec[0]->addChildrenVec("decimalLiteral", decimal_vec); // Decimal literal is a rule not a token
 
         if (!string_vec.empty()) {
             shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
@@ -405,6 +430,18 @@ This does not point to any specific ast nodes but return an ast node, while also
             charNode->set_charLiteral(char_vec[0]->getValue()[0]);
             astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
             return charNode;
+        }
+        else if (!bool_literal_vec.empty()) {
+            shared_ptr<boolLiteral> boolNode = make_shared<boolLiteral>();
+            boolNode->set_boolLiteral(bool_literal_vec[0]->getValue() == "true");
+            astNodeQueue.push(astNodeQueueElem(boolNode, bool_literal_vec[0]));
+            return boolNode;
+        }
+        else if (!decimal_vec.empty()) {
+            shared_ptr<decimalLiteral> decimalNode = make_shared<decimalLiteral>();
+            decimalNode->set_decimalLiteral(decimal_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(decimalNode, decimal_vec[0]));
+            return decimalNode;
         }
     }
 
@@ -870,6 +907,77 @@ void AbstractTreeGenerator::explore_charLiteral(shared_ptr<ParseNode> root_node,
     }
 }
 
+void AbstractTreeGenerator::explore_decimalLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
+    /*
+    Here we are exploring a decimal literal parse node
+    A decimal literal as a two parts integerPart and also a decimalPart
+    All we have to do is to get the integer part and the decimal part and set them in the ast node
+
+    The rule can be expressed as 
+        {"decimalLiteral", {
+            CreateRule("integerPart"),
+            CreateToken("DOT"),
+            CreateRule("decimalPart"),
+        }}
+    Where we have an integer part and a decimal part, both are actually integer literals
+    */
+    vector<shared_ptr<ParseNode> > integerPartRule_vec;
+    root_node->addChildrenVec("integerPart", integerPartRule_vec);
+
+    vector<shared_ptr<ParseNode> > decimalPartRule_vec;
+    root_node->addChildrenVec("decimalPart", decimalPartRule_vec);
+
+    shared_ptr<decimalLiteral> decimalNode = dynamic_pointer_cast<decimalLiteral>(parentAstNode);
+
+    // First extract the integer part and then the decimal part and combine them to one string 
+    string integerPart = "";
+    string decimalPart = "";
+    if (!integerPartRule_vec.empty() && !decimalPartRule_vec.empty()) {
+        // Get the integer part, by getting the integer literal value
+        vector<shared_ptr<ParseNode> > integerPartLiteral_vec;
+        integerPartRule_vec[0]->addChildrenVec("INTEGER_LITERAL", integerPartLiteral_vec);
+        if (!integerPartLiteral_vec.empty()) {
+            integerPart = integerPartLiteral_vec[0]->getValue();
+        }
+        // Get the decimal part, by getting the integer literal value
+        vector<shared_ptr<ParseNode> > decimalPartLiteral_vec;
+        decimalPartRule_vec[0]->addChildrenVec("INTEGER_LITERAL", decimalPartLiteral_vec);
+        if (!decimalPartLiteral_vec.empty()) {
+            decimalPart = decimalPartLiteral_vec[0]->getValue();
+        }
+        // Combine the integer part and the decimal part
+        decimalNode->set_decimalLiteral(integerPart + "." + decimalPart);
+    }
+    else{
+        cerr<<"Error in decimal literal"<<endl;
+        exit(1);
+    }
+
+    
+
+}
+
+void AbstractTreeGenerator :: explore_boolLiteral(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
+    /*
+    Here we are exploring a bool literal parse node
+    {"boolLiteral", {
+        CreateParen('('),
+        CreateToken("TRUE"),
+        CreateOr(),
+        CreateToken("FALSE"),
+        CreateParen(')'),
+    }},
+    */
+    vector<shared_ptr<ParseNode> > boolLiteral_vec;
+    root_node->addChildrenVec("boolLiteral", boolLiteral_vec);
+    if(!boolLiteral_vec.empty()){
+        shared_ptr<boolLiteral> boolNode = dynamic_pointer_cast<boolLiteral>(parentAstNode);
+        boolNode->set_boolLiteral(boolLiteral_vec[0]->getValue() == "true");
+    }
+    // We are done here
+
+
+}
 void AbstractTreeGenerator::explore_afterAccept(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring an after accept parse node
@@ -1002,6 +1110,15 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
             // Integer literals do not have children, just represent the node
         } else if (auto charNode = dynamic_pointer_cast<charLiteral>(node)) {
             // Char literals do not have children, just represent the node
+        }
+        else if(auto decimalNode = dynamic_pointer_cast<decimalLiteral>(node)){
+            // Decimal literals do not have children, just represent the node
+        }
+        else if(auto boolNode = dynamic_pointer_cast<boolLiteral>(node)){
+            // Bool literals do not have children, just represent the node
+        }
+        else if(auto variableNode = dynamic_pointer_cast<variable>(node)){
+            // Variable literals do not have children, just represent the node
         }
     };
 

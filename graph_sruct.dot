@@ -1,7 +1,5 @@
 digraph G {
     "End" [shape=doublecircle, color=green, style=bold];
     "Start" [shape=doublecircle, color=green, style=bold];
-    "Subtract" -> "End" [label="Operations: expression(type=) expression(type=) "];
-    "Add" -> "Subtract" [label="Operations: expression(type=) expression(type=) "];
-    "Start" -> "Add";
+    "Start" -> "End" [label="Operations: expression(type=) "];
 }

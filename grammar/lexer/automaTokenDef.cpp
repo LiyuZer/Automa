@@ -60,6 +60,7 @@ std::unordered_map<std::string, std::string> operators = {
         {":", "COLON"},
         {"\"", "QUOTES"},
         {"\'", "SINGLE_QUOTES"},
-        {",", "COMMA"}
+        {",", "COMMA"}, 
+        {".", "DOT"}
     };
 
