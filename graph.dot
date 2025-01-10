@@ -5,33 +5,93 @@ digraph AST {
     node1 -> node2
     node2 [label="memoryDef"]
     node2 -> node3
-    node3 [label="variableDefintions(name=n)"]
+    node3 [label="variableDefintions(name=a)"]
     node3 -> node4
-    node4 [label="decimalLiteral(value=5.5)"]
-    node1 -> node5
-    node5 [label="afterAccept"]
-    node1 -> node6
-    node6 [label="afterReject"]
-    node1 -> node7
-    node7 [label="nodeDef"]
+    node4 [label="integerLiteral(value=0)"]
+    node2 -> node5
+    node5 [label="variableDefintions(name=b)"]
+    node5 -> node6
+    node6 [label="integerLiteral(value=1)"]
+    node2 -> node7
+    node7 [label="variableDefintions(name=n)"]
     node7 -> node8
-    node8 [label="nodeDefStatements(node=Start, type=startNode)"]
-    node7 -> node9
-    node9 [label="nodeDefStatements(node=End, type=acceptNode)"]
-    node1 -> node10
-    node10 [label="transitionDef"]
-    node10 -> node11
-    node11 [label="transitionDefStatements(fromNode=Start, toNode=End)"]
-    node11 -> node12
-    node12 [label="expression(type=)"]
-    node12 -> node13
-    node13 [label="assignmentExpression(variable=n)"]
+    node8 [label="integerLiteral(value=100000)"]
+    node2 -> node9
+    node9 [label="variableDefintions(name=count)"]
+    node9 -> node10
+    node10 [label="integerLiteral(value=0)"]
+    node1 -> node11
+    node11 [label="afterAccept"]
+    node1 -> node12
+    node12 [label="afterReject"]
+    node1 -> node13
+    node13 [label="nodeDef"]
     node13 -> node14
-    node14 [label="expression(type=)"]
-    node14 -> node15
-    node15 [label="binaryExpression(op=+)"]
-    node15 -> node16
-    node16 [label="variable(name=n)"]
-    node15 -> node17
-    node17 [label="decimalLiteral(value=0.1255)"]
+    node14 [label="nodeDefStatements(node=Start, type=startNode)"]
+    node13 -> node15
+    node15 [label="nodeDefStatements(node=End, type=acceptNode)"]
+    node1 -> node16
+    node16 [label="transitionDef"]
+    node16 -> node17
+    node17 [label="transitionDefStatements(fromNode=Start, toNode=Compute)"]
+    node16 -> node18
+    node18 [label="transitionDefStatements(fromNode=Compute, toNode=Compute)"]
+    node18 -> node19
+    node19 [label="expression(type=)"]
+    node19 -> node20
+    node20 [label="binaryExpression(op=<)"]
+    node20 -> node21
+    node21 [label="variable(name=count)"]
+    node20 -> node22
+    node22 [label="variable(name=n)"]
+    node18 -> node23
+    node23 [label="expression(type=)"]
+    node23 -> node24
+    node24 [label="assignmentExpression(variable=temp)"]
+    node24 -> node25
+    node25 [label="expression(type=)"]
+    node25 -> node26
+    node26 [label="binaryExpression(op=+)"]
+    node26 -> node27
+    node27 [label="variable(name=a)"]
+    node26 -> node28
+    node28 [label="variable(name=b)"]
+    node18 -> node29
+    node29 [label="expression(type=)"]
+    node29 -> node30
+    node30 [label="assignmentExpression(variable=a)"]
+    node30 -> node31
+    node31 [label="expression(type=)"]
+    node31 -> node32
+    node32 [label="variable(name=b)"]
+    node18 -> node33
+    node33 [label="expression(type=)"]
+    node33 -> node34
+    node34 [label="assignmentExpression(variable=b)"]
+    node34 -> node35
+    node35 [label="expression(type=)"]
+    node35 -> node36
+    node36 [label="variable(name=temp)"]
+    node18 -> node37
+    node37 [label="expression(type=)"]
+    node37 -> node38
+    node38 [label="assignmentExpression(variable=count)"]
+    node38 -> node39
+    node39 [label="expression(type=)"]
+    node39 -> node40
+    node40 [label="binaryExpression(op=+)"]
+    node40 -> node41
+    node41 [label="variable(name=count)"]
+    node40 -> node42
+    node42 [label="integerLiteral(value=1)"]
+    node16 -> node43
+    node43 [label="transitionDefStatements(fromNode=Compute, toNode=End)"]
+    node43 -> node44
+    node44 [label="expression(type=)"]
+    node44 -> node45
+    node45 [label="binaryExpression(op=>=)"]
+    node45 -> node46
+    node46 [label="variable(name=count)"]
+    node45 -> node47
+    node47 [label="variable(name=n)"]
 }

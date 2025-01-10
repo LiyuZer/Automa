@@ -1,15 +1,30 @@
 graph main {
     memory {
-        n: 5.5
+        a: 0,
+        b: 1,
+        n: 100000,
+        count: 0
     }
 
     nodeDef {
         Start :: startNode;
         End :: acceptNode;
     }
-    transitions {
-        Start -> End => conditions : (), operations : (n = n + 0.1255); 
-    }
 
+    transitions {
+        Start -> Compute => conditions : (), operations : ();
+
+        Compute -> Compute => 
+            conditions : (count < n), 
+            operations : (
+                temp = a + b,
+                a = b,
+                b = temp,
+                count = count + 1
+            );
+
+        Compute -> End => 
+            conditions : (count >= n), 
+            operations : ();
+    }
 }
- 

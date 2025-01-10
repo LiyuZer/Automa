@@ -268,8 +268,8 @@ shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory> l
         else{
             cerr << "Error, unknown operation" << endl;
             exit(1);
-        }
-    }
+        }   
+    }         
     else if(dynamic_pointer_cast<Char>(left)){
         // This is a char
         shared_ptr<Char> left_char = dynamic_pointer_cast<Char>(left);
@@ -561,8 +561,8 @@ int Path :: run(){
         cout << "Accept Node" << endl;
         cout<< current_node << endl;
         // Let us assuke there is a symbol called currentVal in the memory container and it is an int 
-        shared_ptr<Num> currentVal = dynamic_pointer_cast<Num>(memory_ptr->get_memory("n"));
-        cout << "resultAdd: " << currentVal->to_string()<<endl;
+        shared_ptr<Num> currentVal = dynamic_pointer_cast<Num>(memory_ptr->get_memory("a"));
+        cout << "Val: " << currentVal->to_string(1)<<endl;
         return 1;
     }
     else if(!has_transitioned){
