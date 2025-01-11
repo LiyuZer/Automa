@@ -11,6 +11,7 @@
 #include "../typesdef/num.h"
 #include "../typesdef/bool.h"
 #include "../typesdef/char.h"
+#include "../typesdef/list.h"
 
 
 /* 
@@ -59,56 +60,31 @@ We will call these graphs from the memory_container(they are all graphs in the m
 */
 
 void Path :: set_memory(shared_ptr<AstNode> memory){
+    cout<<"Setting memory"<<endl;
     // Loop through the memory defintions and set the memory container
     shared_ptr<memoryDef> memoryDef_ptr = dynamic_pointer_cast<memoryDef>(memory);
     vector<shared_ptr<AstNode> > variableDefinitions = memoryDef_ptr->get_variableDefinitions();
-
+    shared_ptr<Memory> memory_container = shared_ptr<Memory>(new Memory);
     for(auto var_def : variableDefinitions){
         shared_ptr var_def_ptr = dynamic_pointer_cast<variableDefintions>(var_def);
         string var_name = var_def_ptr->get_variableName();
-        shared_ptr<AstNode> literal = var_def_ptr->get_literal();
+        shared_ptr<AstNode> elem = var_def_ptr->get_elem();        
 
-        // Now we will go to the literal and set the memory container, first check the literal type
-        if(dynamic_pointer_cast<stringLiteral>(literal)){
-            shared_ptr<stringLiteral> stringLiteral_ptr = dynamic_pointer_cast<stringLiteral>(literal);
-            
-        }
-        else if(dynamic_pointer_cast<integerLiteral>(literal)){
-            // First get the integer literal
-            shared_ptr<integerLiteral> integerLiteral_ptr = dynamic_pointer_cast<integerLiteral>(literal);
-            string var_name = var_def_ptr->get_variableName();
-            string integer_literal = integerLiteral_ptr->get_integerLiteral();
-            cout<<"Integer Literal: "<<integer_literal<<endl;
-            // Then take the integer literal create a integer object and set the memory container
-            shared_ptr<Num> int_ptr = shared_ptr<Num>(new Num(integer_literal));
-            memory_ptr->set_memory(var_name, int_ptr);
-        }
-        else if(dynamic_pointer_cast<charLiteral>(literal)){
-            shared_ptr<charLiteral> charLiteral_ptr = dynamic_pointer_cast<charLiteral>(literal);
-            string var_name = var_def_ptr->get_variableName();
-            char char_literal = charLiteral_ptr->get_charLiteral();
-            shared_ptr<Char> char_ptr = shared_ptr<Char>(new Char(char_literal));
-            memory_ptr->set_memory(var_name, char_ptr);
-        }
-        else if (dynamic_pointer_cast<boolLiteral>(literal)){
-            shared_ptr<boolLiteral> boolLiteral_ptr = dynamic_pointer_cast<boolLiteral>(literal);
-            string var_name = var_def_ptr->get_variableName();
-            bool bool_literal = boolLiteral_ptr->get_boolLiteral();
-            shared_ptr<Bool> bool_ptr = shared_ptr<Bool>(new Bool(bool_literal));
-            memory_ptr->set_memory(var_name, bool_ptr);
-        }
-        else if(dynamic_pointer_cast <decimalLiteral>(literal)){
-            shared_ptr<decimalLiteral> decimalLiteral_ptr = dynamic_pointer_cast<decimalLiteral>(literal);
-            string var_name = var_def_ptr->get_variableName();
-            string decimal_literal = decimalLiteral_ptr->get_decimalLiteral();
-            shared_ptr<Num> decimal_ptr = shared_ptr<Num>(new Num(decimal_literal));
-            memory_ptr->set_memory(var_name, decimal_ptr);
-        }
-        else{
-            cerr << "Error, unknown literal type" << endl;
-            exit(1);
-        }
+        // Note that the elem is an expression node
+        // All we have to do is evaluate the expression and set the memory container
+        // So push the expression on the stack and evaluate it
+        shared_ptr<stackElement> stack_elem = addElementToStack(elem);
+        shared_ptr<Memory> output = evaluateExpression();
+        
+        //Testint check if the memory
+        cout << "Memory type: " << output->get_type() << endl;
+        // Voila we have the memory container
+        // Now we will symbol to memory container mapping, create 
+        memory_container->set_memory(var_name, output);
+        // That is it for the memory container
     }
+    // Now we will set the memory container
+    this->memory_ptr = memory_container;
 }
 void add_yield(string graph_name, vector<shared_ptr<Memory> > memory_containers){
     /* 
@@ -188,6 +164,14 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
     else if(dynamic_pointer_cast<variable>(ast_node)){
         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
         stack_elem->type = "variable";
+        stack_elem->ast_node = ast_node;
+        computation_stack.push(stack_elem);
+        return stack_elem;
+    }
+    // Can also be a list type
+    else if(dynamic_pointer_cast<list>(ast_node)){
+        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
+        stack_elem->type = "list";
         stack_elem->ast_node = ast_node;
         computation_stack.push(stack_elem);
         return stack_elem;
@@ -458,6 +442,39 @@ shared_ptr<Memory> Path :: evaluateExpression(){
             stack_elem->memory_container = char_ptr;
             computation_stack.pop();
         }
+        else if(stack_elem->type == "bool"){
+            cout << "Evaluating the bool" << endl;
+            shared_ptr<boolLiteral> boolLiteral_ptr = dynamic_pointer_cast<boolLiteral>(stack_elem->ast_node);
+            bool bool_literal = boolLiteral_ptr->get_boolLiteral();
+            shared_ptr<Bool> bool_ptr = shared_ptr<Bool>(new Bool(bool_literal));
+            stack_elem->memory_container = bool_ptr;
+            computation_stack.pop();
+        }
+        else if(stack_elem->type == "list"){
+            cout << "Evaluating the list" << endl;
+            shared_ptr<list> list_ptr = dynamic_pointer_cast<list>(stack_elem->ast_node);
+            vector<shared_ptr<AstNode> > elements = list_ptr->get_list_node();
+            // A list is a bunch of expressions that will be evaluated
+            // If the stack element is not allocated, then we will add the elements to the stack
+
+            if(!stack_elem->memory_container){
+                for(auto elem : elements){
+                    shared_ptr<stackElement> elem_stack_elem = addElementToStack(elem);
+                    stack_elem->stack_elem_ptr_ls.push_back(elem_stack_elem);
+                }
+                shared_ptr<List> list_ptr = shared_ptr<List>(new List);
+                stack_elem->memory_container = list_ptr;
+            }
+            else{
+                // If the stack element is allocated, then we will set the memory container
+                shared_ptr<List> list_ptr = dynamic_pointer_cast<List>(stack_elem->memory_container);
+                for(auto elem : stack_elem->stack_elem_ptr_ls){
+                    list_ptr->add_list_node(elem->memory_container);
+                }
+                stack_elem->memory_container = list_ptr;
+                computation_stack.pop();
+            }
+        }
         else{
             cerr << "Error, unknown stack element type" << endl;
             exit(1);
@@ -510,10 +527,10 @@ int Path :: run(){
                 if(!dynamic_pointer_cast<Bool>(condition_result)){
                     valid = false;
                     cerr << "Error, condition is not a boolean" << endl;
+                    exit(1);
                 }
                 else{
                     shared_ptr<Bool> bool_condition = dynamic_pointer_cast<Bool>(condition_result);
-                    cout<< "Condition: " << bool_condition->get_val() << endl;
                     if(!bool_condition->get_val()){
                         valid = false;
                         all_conditions = false;
@@ -560,7 +577,7 @@ int Path :: run(){
     if(graph_ptr->is_accept_node(current_node) && !has_transitioned){
         cout << "Accept Node" << endl;
         cout<< current_node << endl;
-        // Let us assuke there is a symbol called currentVal in the memory container and it is an int 
+        // Let us assume there is a symbol called currentVal in the memory container and it is an int 
         shared_ptr<Num> currentVal = dynamic_pointer_cast<Num>(memory_ptr->get_memory("a"));
         cout << "Val: " << currentVal->to_string(1)<<endl;
         return 1;

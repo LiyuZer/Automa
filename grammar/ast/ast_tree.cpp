@@ -124,6 +124,15 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        else if(type == "variable"){
             explore_variable(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        } 
+       else if(type == "list"){
+            explore_list(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
+       else if(type == "listAccess"){
+            explore_list_access(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
+       else if(type == "listSlice"){
+            explore_list_slice(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
        else if(type == "stringLiteral"){
             explore_stringLiteral(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
@@ -190,10 +199,13 @@ void AbstractTreeGenerator::explore_transitionDef(shared_ptr<ParseNode> root_nod
 void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a variable definitions parse node
+    Here is the rule for the variable definition
+    {"varDefenition", {
+        CreateRule("variable"),
+        CreateToken("COLON"),
+        CreateRule("expression"),
+    }}
     */
-
-    vector<shared_ptr<ParseNode> > literal_vec;// For now only literals
-    root_node->addChildrenVec("literal", literal_vec);
 
     vector<shared_ptr<ParseNode> > variable_vec;
     root_node->addChildrenVec("variable", variable_vec);
@@ -206,56 +218,126 @@ void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> ro
     shared_ptr<variableDefintions> variableDef_ptr = dynamic_pointer_cast<variableDefintions>(parentAstNode);
 
     variableDef_ptr->set_variableName(variable);
-
-    // Now we will explore the literal
-    if (!literal_vec.empty()) {
-        vector<shared_ptr<ParseNode> > string_vec;
-        vector<shared_ptr<ParseNode> > integer_vec;
-        vector<shared_ptr<ParseNode> > char_vec;
-        vector<shared_ptr<ParseNode> > bool_literal_vec;
-        vector<shared_ptr<ParseNode> > decimal_vec;
-
-        literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
-        literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
-        literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
-        literal_vec[0]->addChildrenVec("boolLiteral", bool_literal_vec); // Bool is a rule not a token same with decimal
-        literal_vec[0]->addChildrenVec("decimalLiteral", decimal_vec); // Decimal literal is a rule not a token
-
-        if (!string_vec.empty()) {
-            shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
-            stringNode->set_stringLiteral(string_vec[0]->getValue());
-            astNodeQueue.push(astNodeQueueElem(stringNode, string_vec[0]));
-            variableDef_ptr->set_literal(stringNode);
-        } else if (!integer_vec.empty()) {
-            shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
-            intNode->set_integerLiteral(integer_vec[0]->getValue());
-            astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
-            variableDef_ptr->set_literal(intNode);
-        } else if (!char_vec.empty()) {
-            shared_ptr<charLiteral> charNode = make_shared<charLiteral>();
-            charNode->set_charLiteral(char_vec[0]->getValue()[0]);
-            astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
-            variableDef_ptr->set_literal(charNode);
-        }
-        else if(!bool_literal_vec.empty()){
-            shared_ptr<boolLiteral> boolNode = make_shared<boolLiteral>();
-            boolNode->set_boolLiteral(bool_literal_vec[0]->getValue() == "true");
-            astNodeQueue.push(astNodeQueueElem(boolNode, bool_literal_vec[0]));
-            variableDef_ptr->set_literal(boolNode);
-        }
-        else if(!decimal_vec.empty()){
-            shared_ptr<decimalLiteral> decimalNode = make_shared<decimalLiteral>();
-            decimalNode->set_decimalLiteral(decimal_vec[0]->getValue());
-            astNodeQueue.push(astNodeQueueElem(decimalNode, decimal_vec[0]));
-            variableDef_ptr->set_literal(decimalNode);
-        }
+    // Now we will see if there is an expression and add it to the queue
+    vector<shared_ptr<ParseNode> > expression_vec;
+    root_node->addChildrenVec("expression", expression_vec);
+    if(expression_vec.size() > 0){
+        // Create a new expression node
+        shared_ptr<expression> expression_node = shared_ptr<expression>(new expression);
+        variableDef_ptr->set_elem(expression_node);
+        // Push the node to the queue
+        astNodeQueueElem elem = astNodeQueueElem(expression_node, expression_vec[0]);
+        astNodeQueue.push(elem);
     }
-
-    
-
 
 }
 
+void AbstractTreeGenerator:: explore_list(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
+    /*
+    Here we are exploring a list parse node
+    Here is the rule 
+    { "list" , { 
+        CreateToken("LEFT_BRACKET"), 
+        CreateParen('('),
+        CreateRule("expression"), 
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("expression"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_BRACKET")
+
+    }},
+    */
+
+    // get a list node
+    shared_ptr<list> list_ptr = dynamic_pointer_cast<list>(parentAstNode);
+    //Loop through the children of the list node
+    vector<shared_ptr<ParseNode> > children;
+    root_node->addChildrenVec("expression", children);
+    for(auto child : children){
+        shared_ptr<expression> expression_ptr = shared_ptr<expression>(new expression);
+        list_ptr->add_list_node(expression_ptr);
+        astNodeQueueElem elem = astNodeQueueElem(expression_ptr, child);
+        astNodeQueue.push(elem);
+    }
+    // This is all we need to do for the list node
+
+   
+}
+void AbstractTreeGenerator:: explore_list_access(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
+    /*
+    Here we are exploring a list access parse node
+    Here is the rule 
+    {"listAccess", {
+        CreateRule("variable"), 
+        CreateToken("LEFT_BRACKET"), 
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("RIGHT_BRACKET"), 
+    }},
+    */
+
+    shared_ptr<listAccess> listAccess_ptr = dynamic_pointer_cast<listAccess>(parentAstNode);
+    vector<shared_ptr<ParseNode> > variable_vec;
+    root_node->addChildrenVec("variable", variable_vec);
+    shared_ptr<variable> variable_ptr = dynamic_pointer_cast<variable>(parentAstNode);
+    if(variable_vec.size() > 0){
+        // Set the variable 
+        listAccess_ptr->set_variable(variable_ptr);
+
+        //Push the variable to the queue
+        astNodeQueueElem elem = astNodeQueueElem(variable_ptr, variable_vec[0]);
+    }
+
+    vector<shared_ptr<ParseNode> > integer_vec;
+    root_node->addChildrenVec("INTEGER_LITERAL", integer_vec);
+    if(integer_vec.size() > 0){
+        listAccess_ptr->set_index(stoi(integer_vec[0]->getValue()));
+    }
+
+}
+
+void AbstractTreeGenerator:: explore_list_slice(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
+    /*
+    Here we are exploring a list slicing parse node
+    Here is the rule 
+    {"listSlice", {
+        CreateRule("variable"), 
+        CreateToken("LEFT_BRACKET"), 
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("COLON"),
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("RIGHT_BRACKET"), 
+    }},
+    */
+
+    shared_ptr<listSlice> listSlice_ptr = dynamic_pointer_cast<listSlice>(parentAstNode);
+    vector<shared_ptr<ParseNode> > variable_vec;
+    root_node->addChildrenVec("variable", variable_vec);
+    shared_ptr<variable> variable_ptr = dynamic_pointer_cast<variable>(parentAstNode);
+    if(variable_vec.size() > 0){
+        // Set the variable 
+        listSlice_ptr->set_variable(variable_ptr);
+
+        //Push the variable to the queue
+        astNodeQueueElem elem = astNodeQueueElem(variable_ptr, variable_vec[0]);
+    }
+
+    vector<shared_ptr<ParseNode> > start_vec;
+    root_node->addChildrenVec("INTEGER_LITERAL", start_vec);
+    if(start_vec.size() > 0){
+        listSlice_ptr->set_start(stoi(start_vec[0]->getValue()));
+    }
+
+    vector<shared_ptr<ParseNode> > end_vec;
+    root_node->addChildrenVec("INTEGER_LITERAL", end_vec);
+    if(end_vec.size() > 0){
+        listSlice_ptr->set_end(stoi(end_vec[0]->getValue()));
+    }
+
+}
 void AbstractTreeGenerator::explore_graphDef(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a graph definition parse node
@@ -393,15 +475,40 @@ void AbstractTreeGenerator::explore_transitionDefStatements(shared_ptr<ParseNode
 shared_ptr<AstNode> AbstractTreeGenerator::explore_term(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue) {
 /*
 This does not point to any specific ast nodes but return an ast node, while also pushing up to the queue 
+This is the rule for a term currently
+{"term", {
+        CreateRule("listAccess"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
+        CreateOr(),
+        CreateRule("listSlice"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
+        CreateOr(),
+        CreateRule("variable"), 
+        CreateOr(),
+        CreateRule("literal"), 
+        CreateOr(),
+        CreateRule("list"), 
+        CreateOr(),
+        CreateToken("LEFT_PAREN"),
+        CreateRule("expression"),
+        CreateToken("RIGHT_PAREN"),
+
+}},
+
 */
 
     vector<shared_ptr<ParseNode> > literal_vec;
     vector<shared_ptr<ParseNode> > variable_vec;
     vector<shared_ptr<ParseNode> > expression_vec;
+    vector<shared_ptr<ParseNode> > list_vec;
+    vector<shared_ptr<ParseNode> > listAccess_vec;
+    vector<shared_ptr<ParseNode> > listSlice_vec;
 
     root_node->addChildrenVec("literal", literal_vec);
     root_node->addChildrenVec("variable", variable_vec);
     root_node->addChildrenVec("expression", expression_vec);
+    root_node->addChildrenVec("list", list_vec);
+    root_node->addChildrenVec("listAccess", listAccess_vec);
+    root_node->addChildrenVec("listSlice", listSlice_vec);
+
     if (!literal_vec.empty()) {
         vector<shared_ptr<ParseNode> > string_vec;
         vector<shared_ptr<ParseNode> > integer_vec;
@@ -466,9 +573,141 @@ This does not point to any specific ast nodes but return an ast node, while also
 
         return expression_ptr;
     }
+    if(!list_vec.empty()){
+        shared_ptr<list> list_ptr = shared_ptr<list>(new list);
+        astNodeQueueElem elem = astNodeQueueElem(list_ptr,list_vec[0]);
+        astNodeQueue.push(elem);
+
+        return list_ptr;
+    }
+    if(!listAccess_vec.empty()){
+        shared_ptr<listAccess> listAccess_ptr = shared_ptr<listAccess>(new listAccess);
+        astNodeQueueElem elem = astNodeQueueElem(listAccess_ptr,listAccess_vec[0]);
+        astNodeQueue.push(elem);
+
+        return listAccess_ptr;
+    }
+    if(!listSlice_vec.empty()){
+        shared_ptr<listSlice> listSlice_ptr = shared_ptr<listSlice>(new listSlice);
+        astNodeQueueElem elem = astNodeQueueElem(listSlice_ptr,listSlice_vec[0]);
+        astNodeQueue.push(elem);
+        return listSlice_ptr;
+    }
 
 
 }
+shared_ptr<AstNode> AbstractTreeGenerator::explore_first_class(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue) {// Very similar to term
+/*
+This does not point to any specific ast nodes but return an ast node, while also pushing up to the queue 
+This is the rule for a term currently
+    {"firstClass", {
+        CreateRule("listAccess"), // The difference between this and the term rule is that there is no expression here, these are all the first class citizens
+        CreateOr(),
+        CreateRule("listSlice"), 
+        CreateOr(),
+        CreateRule("variable"), 
+        CreateOr(),
+        CreateRule("literal"), 
+        CreateOr(),
+        CreateRule("list"), 
+    }},
+
+
+*/
+
+    vector<shared_ptr<ParseNode> > literal_vec;
+    vector<shared_ptr<ParseNode> > variable_vec;
+    vector<shared_ptr<ParseNode> > list_vec;
+    vector<shared_ptr<ParseNode> > listAccess_vec;
+    vector<shared_ptr<ParseNode> > listSlice_vec;
+
+    root_node->addChildrenVec("literal", literal_vec);
+    root_node->addChildrenVec("variable", variable_vec);
+    root_node->addChildrenVec("list", list_vec);
+    root_node->addChildrenVec("listAccess", listAccess_vec);
+    root_node->addChildrenVec("listSlice", listSlice_vec);
+
+    if (!literal_vec.empty()) {
+        vector<shared_ptr<ParseNode> > string_vec;
+        vector<shared_ptr<ParseNode> > integer_vec;
+        vector<shared_ptr<ParseNode> > char_vec;
+        vector<shared_ptr<ParseNode> > bool_literal_vec;
+        vector<shared_ptr<ParseNode> > decimal_vec;
+
+        literal_vec[0]->addChildrenVec("STRING_LITERAL", string_vec);
+        literal_vec[0]->addChildrenVec("INTEGER_LITERAL", integer_vec);
+        literal_vec[0]->addChildrenVec("CHAR_LITERAL", char_vec);
+        literal_vec[0]->addChildrenVec("boolLiteral", bool_literal_vec); // Bool is a rule not a token same with decimal
+        literal_vec[0]->addChildrenVec("decimalLiteral", decimal_vec); // Decimal literal is a rule not a token
+
+        if (!string_vec.empty()) {
+            shared_ptr<stringLiteral> stringNode = make_shared<stringLiteral>();
+            stringNode->set_stringLiteral(string_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(stringNode, string_vec[0]));
+            return stringNode;
+        } else if (!integer_vec.empty()) {
+            shared_ptr<integerLiteral> intNode = make_shared<integerLiteral>();
+            intNode->set_integerLiteral(integer_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(intNode, integer_vec[0]));
+            return intNode;
+        } else if (!char_vec.empty()) {
+            shared_ptr<charLiteral> charNode = make_shared<charLiteral>();
+            charNode->set_charLiteral(char_vec[0]->getValue()[0]);
+            astNodeQueue.push(astNodeQueueElem(charNode, char_vec[0]));
+            return charNode;
+        }
+        else if (!bool_literal_vec.empty()) {
+            shared_ptr<boolLiteral> boolNode = make_shared<boolLiteral>();
+            boolNode->set_boolLiteral(bool_literal_vec[0]->getValue() == "true");
+            astNodeQueue.push(astNodeQueueElem(boolNode, bool_literal_vec[0]));
+            return boolNode;
+        }
+        else if (!decimal_vec.empty()) {
+            shared_ptr<decimalLiteral> decimalNode = make_shared<decimalLiteral>();
+            decimalNode->set_decimalLiteral(decimal_vec[0]->getValue());
+            astNodeQueue.push(astNodeQueueElem(decimalNode, decimal_vec[0]));
+            return decimalNode;
+        }
+    }
+
+    if (!variable_vec.empty()) {
+        shared_ptr<variable> variableNode = make_shared<variable>();
+
+        vector<shared_ptr<ParseNode> > identifier_vec;
+        variable_vec[0]->addChildrenVec("IDENTIFIER", identifier_vec);
+
+        if (!identifier_vec.empty()) {
+            variableNode->set_variableName(identifier_vec[0]->getValue());
+        }
+
+        astNodeQueue.push(astNodeQueueElem(variableNode, variable_vec[0]));
+        return variableNode;
+    }
+
+    if(!list_vec.empty()){
+        shared_ptr<list> list_ptr = shared_ptr<list>(new list);
+        astNodeQueueElem elem = astNodeQueueElem(list_ptr,list_vec[0]);
+        astNodeQueue.push(elem);
+
+        return list_ptr;
+    }
+    if(!listAccess_vec.empty()){
+        shared_ptr<listAccess> listAccess_ptr = shared_ptr<listAccess>(new listAccess);
+        astNodeQueueElem elem = astNodeQueueElem(listAccess_ptr,listAccess_vec[0]);
+        astNodeQueue.push(elem);
+
+        return listAccess_ptr;
+    }
+    if(!listSlice_vec.empty()){
+        shared_ptr<listSlice> listSlice_ptr = shared_ptr<listSlice>(new listSlice);
+        astNodeQueueElem elem = astNodeQueueElem(listSlice_ptr,listSlice_vec[0]);
+        astNodeQueue.push(elem);
+        return listSlice_ptr;
+    }
+
+
+}
+
 shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue, string current_level) {
 
     cout<<"Top level"<<endl;
@@ -1047,7 +1286,7 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 writeNode(varDef, nodeId);
             }
         } else if (auto varNode = dynamic_pointer_cast<variableDefintions>(node)) {
-            if (auto expr = varNode->get_literal()) {
+            if (auto expr = varNode->get_elem()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(expr, nodeId);
             }
@@ -1104,7 +1343,15 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(expr, nodeId);
             }
-        } else if (auto stringNode = dynamic_pointer_cast<stringLiteral>(node)) {
+        }
+        // Exploring a list 
+        else if(auto listNode = dynamic_pointer_cast<list>(node)){
+            for(auto listElem : listNode->get_list_node()){
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(listElem, nodeId);
+            }
+        }
+        else if (auto stringNode = dynamic_pointer_cast<stringLiteral>(node)) {
             // String literals do not have children, just represent the node
         } else if (auto intNode = dynamic_pointer_cast<integerLiteral>(node)) {
             // Integer literals do not have children, just represent the node

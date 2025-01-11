@@ -2,15 +2,17 @@ graph main {
     memory {
         a: 0,
         b: 1,
-        n: 100000,
-        count: 0
+        n: 2,
+        count: 0, 
+        l : 'l', 
+        other : [1, 2, [123]]
     }
 
     nodeDef {
         Start :: startNode;
         End :: acceptNode;
     }
-
+ 
     transitions {
         Start -> Compute => conditions : (), operations : ();
 

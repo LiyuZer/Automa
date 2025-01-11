@@ -27,3 +27,7 @@ operator.o: include/impl/operator.cpp
 
 path.o: include/impl/path.cpp
 	$(CC) $(CFLAGS) -c include/impl/path.cpp
+
+# clean all the .o and executable files
+clean:
+	rm -f *.o automa

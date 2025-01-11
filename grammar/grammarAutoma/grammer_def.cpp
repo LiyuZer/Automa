@@ -170,7 +170,7 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"varDefenition", {
         CreateRule("variable"),
         CreateToken("COLON"),
-        CreateRule("literal"), // For now later we should make this literals, graphs, or other memory containers
+        CreateRule("expression"),
     }},
     /*
     
@@ -266,15 +266,64 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateRule("expression"),
     }},
     {"term", {
+        CreateRule("listAccess"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
+        CreateOr(),
+        CreateRule("listSlice"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
+        CreateOr(),
         CreateRule("variable"), 
         CreateOr(),
         CreateRule("literal"), 
+        CreateOr(),
+        CreateRule("list"), 
         CreateOr(),
         CreateToken("LEFT_PAREN"),
         CreateRule("expression"),
         CreateToken("RIGHT_PAREN"),
 
     }},
+
+    {"firstClass", { // We might not need this after all
+        CreateRule("listAccess"), // The difference between this and the term rule is that there is no expression here, these are all the first class citizens
+        CreateOr(),
+        CreateRule("listSlice"), 
+        CreateOr(),
+        CreateRule("variable"), 
+        CreateOr(),
+        CreateRule("literal"), 
+        CreateOr(),
+        CreateRule("list"), 
+    }},
+
+
+    { "list" , { 
+        CreateToken("LEFT_BRACKET"), 
+        CreateParen('('),
+        CreateRule("expression"), 
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("expression"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_BRACKET")
+
+    }},
+    {"listAccess", {
+        CreateRule("variable"), 
+        CreateToken("LEFT_BRACKET"), 
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("RIGHT_BRACKET"), 
+    }},
+    {"listSlice", {
+        CreateRule("variable"), 
+        CreateToken("LEFT_BRACKET"), 
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("COLON"),
+        CreateToken("INTEGER_LITERAL"),
+        CreateToken("RIGHT_BRACKET"), 
+    }},
+
     {"assignment", {
         CreateRule("variable"), 
         CreateToken("ASSIGN"), 

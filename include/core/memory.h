@@ -60,5 +60,8 @@ class Memory : public AutomaObj{
             // Evaluate the memory container in case the type is a graph
 
         }
+        virtual string get_type(){
+            return type;
+        }
         
 };

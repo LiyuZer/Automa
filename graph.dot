@@ -7,91 +7,127 @@ digraph AST {
     node2 -> node3
     node3 [label="variableDefintions(name=a)"]
     node3 -> node4
-    node4 [label="integerLiteral(value=0)"]
-    node2 -> node5
-    node5 [label="variableDefintions(name=b)"]
-    node5 -> node6
-    node6 [label="integerLiteral(value=1)"]
-    node2 -> node7
-    node7 [label="variableDefintions(name=n)"]
+    node4 [label="expression(type=)"]
+    node4 -> node5
+    node5 [label="integerLiteral(value=0)"]
+    node2 -> node6
+    node6 [label="variableDefintions(name=b)"]
+    node6 -> node7
+    node7 [label="expression(type=)"]
     node7 -> node8
-    node8 [label="integerLiteral(value=100000)"]
+    node8 [label="integerLiteral(value=1)"]
     node2 -> node9
-    node9 [label="variableDefintions(name=count)"]
+    node9 [label="variableDefintions(name=n)"]
     node9 -> node10
-    node10 [label="integerLiteral(value=0)"]
-    node1 -> node11
-    node11 [label="afterAccept"]
-    node1 -> node12
-    node12 [label="afterReject"]
-    node1 -> node13
-    node13 [label="nodeDef"]
+    node10 [label="expression(type=)"]
+    node10 -> node11
+    node11 [label="integerLiteral(value=2)"]
+    node2 -> node12
+    node12 [label="variableDefintions(name=count)"]
+    node12 -> node13
+    node13 [label="expression(type=)"]
     node13 -> node14
-    node14 [label="nodeDefStatements(node=Start, type=startNode)"]
-    node13 -> node15
-    node15 [label="nodeDefStatements(node=End, type=acceptNode)"]
-    node1 -> node16
-    node16 [label="transitionDef"]
+    node14 [label="integerLiteral(value=0)"]
+    node2 -> node15
+    node15 [label="variableDefintions(name=l)"]
+    node15 -> node16
+    node16 [label="expression(type=)"]
     node16 -> node17
-    node17 [label="transitionDefStatements(fromNode=Start, toNode=Compute)"]
-    node16 -> node18
-    node18 [label="transitionDefStatements(fromNode=Compute, toNode=Compute)"]
+    node17 [label="charLiteral(value=''')"]
+    node2 -> node18
+    node18 [label="variableDefintions(name=other)"]
     node18 -> node19
     node19 [label="expression(type=)"]
     node19 -> node20
-    node20 [label="binaryExpression(op=<)"]
+    node20 [label="list"]
     node20 -> node21
-    node21 [label="variable(name=count)"]
-    node20 -> node22
-    node22 [label="variable(name=n)"]
-    node18 -> node23
+    node21 [label="expression(type=)"]
+    node21 -> node22
+    node22 [label="integerLiteral(value=1)"]
+    node20 -> node23
     node23 [label="expression(type=)"]
     node23 -> node24
-    node24 [label="assignmentExpression(variable=temp)"]
-    node24 -> node25
+    node24 [label="integerLiteral(value=2)"]
+    node20 -> node25
     node25 [label="expression(type=)"]
     node25 -> node26
-    node26 [label="binaryExpression(op=+)"]
+    node26 [label="list"]
     node26 -> node27
-    node27 [label="variable(name=a)"]
-    node26 -> node28
-    node28 [label="variable(name=b)"]
-    node18 -> node29
-    node29 [label="expression(type=)"]
-    node29 -> node30
-    node30 [label="assignmentExpression(variable=a)"]
-    node30 -> node31
-    node31 [label="expression(type=)"]
+    node27 [label="expression(type=)"]
+    node27 -> node28
+    node28 [label="integerLiteral(value=123)"]
+    node1 -> node29
+    node29 [label="afterAccept"]
+    node1 -> node30
+    node30 [label="afterReject"]
+    node1 -> node31
+    node31 [label="nodeDef"]
     node31 -> node32
-    node32 [label="variable(name=b)"]
-    node18 -> node33
-    node33 [label="expression(type=)"]
-    node33 -> node34
-    node34 [label="assignmentExpression(variable=b)"]
+    node32 [label="nodeDefStatements(node=Start, type=startNode)"]
+    node31 -> node33
+    node33 [label="nodeDefStatements(node=End, type=acceptNode)"]
+    node1 -> node34
+    node34 [label="transitionDef"]
     node34 -> node35
-    node35 [label="expression(type=)"]
-    node35 -> node36
-    node36 [label="variable(name=temp)"]
-    node18 -> node37
+    node35 [label="transitionDefStatements(fromNode=Start, toNode=Compute)"]
+    node34 -> node36
+    node36 [label="transitionDefStatements(fromNode=Compute, toNode=Compute)"]
+    node36 -> node37
     node37 [label="expression(type=)"]
     node37 -> node38
-    node38 [label="assignmentExpression(variable=count)"]
+    node38 [label="binaryExpression(op=<)"]
     node38 -> node39
-    node39 [label="expression(type=)"]
-    node39 -> node40
-    node40 [label="binaryExpression(op=+)"]
-    node40 -> node41
-    node41 [label="variable(name=count)"]
-    node40 -> node42
-    node42 [label="integerLiteral(value=1)"]
-    node16 -> node43
-    node43 [label="transitionDefStatements(fromNode=Compute, toNode=End)"]
+    node39 [label="variable(name=count)"]
+    node38 -> node40
+    node40 [label="variable(name=n)"]
+    node36 -> node41
+    node41 [label="expression(type=)"]
+    node41 -> node42
+    node42 [label="assignmentExpression(variable=temp)"]
+    node42 -> node43
+    node43 [label="expression(type=)"]
     node43 -> node44
-    node44 [label="expression(type=)"]
+    node44 [label="binaryExpression(op=+)"]
     node44 -> node45
-    node45 [label="binaryExpression(op=>=)"]
-    node45 -> node46
-    node46 [label="variable(name=count)"]
-    node45 -> node47
-    node47 [label="variable(name=n)"]
+    node45 [label="variable(name=a)"]
+    node44 -> node46
+    node46 [label="variable(name=b)"]
+    node36 -> node47
+    node47 [label="expression(type=)"]
+    node47 -> node48
+    node48 [label="assignmentExpression(variable=a)"]
+    node48 -> node49
+    node49 [label="expression(type=)"]
+    node49 -> node50
+    node50 [label="variable(name=b)"]
+    node36 -> node51
+    node51 [label="expression(type=)"]
+    node51 -> node52
+    node52 [label="assignmentExpression(variable=b)"]
+    node52 -> node53
+    node53 [label="expression(type=)"]
+    node53 -> node54
+    node54 [label="variable(name=temp)"]
+    node36 -> node55
+    node55 [label="expression(type=)"]
+    node55 -> node56
+    node56 [label="assignmentExpression(variable=count)"]
+    node56 -> node57
+    node57 [label="expression(type=)"]
+    node57 -> node58
+    node58 [label="binaryExpression(op=+)"]
+    node58 -> node59
+    node59 [label="variable(name=count)"]
+    node58 -> node60
+    node60 [label="integerLiteral(value=1)"]
+    node34 -> node61
+    node61 [label="transitionDefStatements(fromNode=Compute, toNode=End)"]
+    node61 -> node62
+    node62 [label="expression(type=)"]
+    node62 -> node63
+    node63 [label="binaryExpression(op=>=)"]
+    node63 -> node64
+    node64 [label="variable(name=count)"]
+    node63 -> node65
+    node65 [label="variable(name=n)"]
 }

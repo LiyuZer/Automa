@@ -100,7 +100,7 @@ public:
 class variableDefintions : public AstNode {
 private:
     string variableName;
-    shared_ptr<AstNode> literal;
+    shared_ptr<AstNode> elem;// Elem can be a literal or a list
 
 public:
     variableDefintions() : AstNode("variableDefintions") {}
@@ -108,8 +108,9 @@ public:
     string get_variableName() { return variableName; }
     void set_variableName(const string& name) { variableName = name; }
 
-    shared_ptr<AstNode> get_literal() { return literal; }
-    void set_literal(const shared_ptr<AstNode>& l) { literal = l; }
+    shared_ptr<AstNode> get_elem() { return elem; }
+    void set_elem(const shared_ptr<AstNode>& e) { elem = e; }
+
 
     string repr() override {
         return "variableDefintions(name=" + variableName + ")";
@@ -317,6 +318,59 @@ public:
     string repr() override {
         return "assignmentExpression(variable=" + variableName + ")";
     }
+};
+
+    class list : public AstNode {
+    private: 
+        vector<shared_ptr<AstNode>> list_node;
+        string var_nam;
+
+    public:
+        list() : AstNode("list") {}
+ 
+        string repr() override {
+            return "list";
+        }
+        void add_list_node(const shared_ptr<AstNode>& node) { list_node.push_back(node); }
+        vector<shared_ptr<AstNode>> get_list_node() { return list_node; }
+        void set_var_name(const string& name) { var_nam = name; }
+        string get_var_name() { return var_nam; }
+    };
+
+class listAccess : public AstNode {
+    private:
+        int index;
+        shared_ptr<AstNode> variable;
+    public:
+        listAccess() : AstNode("listAccess") {}
+
+        string repr() override {
+            return "listAccess + index=" + to_string(index);
+        }
+        void set_index(const int& idx) { index = idx; }
+        int get_index() { return index; }
+        void set_variable(const shared_ptr<AstNode>& var) { variable = var; }
+        shared_ptr<AstNode> get_variable() { return variable; }
+};
+
+class listSlice : public AstNode{
+    private:
+        int start;
+        int end;
+
+    public:
+        shared_ptr<AstNode> variable;
+        listSlice() : AstNode("listSlice") {}
+
+        string repr() override {
+            return "listSlice + start=" + to_string(start) + "end=" + to_string(end);
+        }
+        void set_start(const int& s) { start = s; }
+        int get_start() { return start; }
+        void set_end(const int& e) { end = e; }
+        int get_end() { return end; }
+        void set_variable(const shared_ptr<AstNode>& var) { variable = var; }
+        shared_ptr<AstNode> get_variable() { return variable; }
 };
 
 
