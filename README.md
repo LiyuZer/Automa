@@ -12,12 +12,17 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 
 ## Philosophy 
 The philosophy of Automa is to create a closed programming language that only interacts with the development environment and memory if the computation is accepted, the goal being 
-to create a programming language where rollback is inherent and isolation is guaranteed. Hopefully, this will develop safe and robust programs that are transparent in the description.
+to create a programming language where rollback is inherent and isolation is ensured. Hopefully, this will develop safe and robust programs that are transparent in the description.
 
-Another crucial philosophical framework for Automa is quantifying computation into discreet steps, represented as a finite state machine. This way, computation becomes a first-class citizen much more granularly than traditional functions. Traditional programs are viewed as statements to be executed one after the other, performing some tasks. 
-Automa, on the other hand, is a structure-based programming language; we are running the structure rather than statement-by-statement flows. 
+Another crucial philosophical framework for Automa is representing computation using discreet steps, represented as a finite state machine. This way, computation becomes a first-class citizen much more granularly than traditional functions. Traditional programs are viewed as statements to be executed one after the other, performing some tasks. 
+Automa, on the other hand, is a structure-based programming language; we are running the structure rather than statement-by-statement flows. This way, we can take and optimize the structure, make it faster, evolve it over time, and create new structures using previous structures.  
 
-Finally, programming should be more intuitive. With a graph-based programming language, visual representations of code will be more straightforward. Hopefully, this will make it easier to teach code and demonstrate workflows. 
+Finally, programming should be more intuitive. With a graph-based programming language, visual representations of code will be more straightforward. Hopefully, this will make it easier to debug code, teach code, and demonstrate workflows; in other words, I am so tired of reading Python errors :)
+
+## Personal Motivations 
+I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
+
+This is for me primarily, lol, my little world :)
 
 ## Key Features  
 - **Graph-Based Computation**: Every computation is modeled as a graph traversal.  
@@ -32,7 +37,7 @@ Finally, programming should be more intuitive. With a graph-based programming la
 Each graph operates within one of the following states:  
 1. **Execution State**: Actively traversing nodes and transitions.  
 2. **Reject State**: The graph rejects the current computation.  
-3. **Accept State**: The graph successfully completes and accepts the computation.  
+3. **Accept State**: The graph completes and accepts the computation.  
 4. **Void State**: The graph is idle or inactive.  
 
 Graphs may also be **non-halting**, enabling infinitely running computations where appropriate.  
@@ -118,12 +123,17 @@ Run an Automa program:
 - **Version 1 Goals**:  
   - Deterministic and nondeterministic graph traversal.  
   - Basic data structures: lists, dictionaries, and memory containers.  
-  - Core primitive types: integers, strings, characters.  
+  - Core primitive types: num, characters.
+  - Full IO setup
+  - A working garbage collection(painful)
 
-- **Future Features**:  
-  - Built-in support for advanced automata (e.g., Turing machines).  
-  - Custom helper graphs for modular and reusable computations.  
-  - Optimizations for memory and graph traversal.  
+- **Future Endeavours**:  
+  - Optimizations for memory and graph traversal.
+  - Dynamic graph creation(very excited about this!!!!)
+  - Graph inheritance(kinda cool)
+  - Standard Library Creation
+  - Robots Testing Frameworks
+  - Garbage Collector
 
 ---
 
