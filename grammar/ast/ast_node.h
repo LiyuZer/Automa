@@ -33,21 +33,41 @@ public:
 
 class program : public AstNode {
 private:
-    shared_ptr<AstNode> graphDef;
+    vector<shared_ptr<AstNode> > graphDec;
 
 public:
     program() : AstNode("program") {}
 
-    void setGraphDef(const shared_ptr<AstNode>& graph) {
-        graphDef = graph;
+    void addGraphDec(const shared_ptr<AstNode>& graph) {
+        graphDec.push_back(graph);
     }
 
-    shared_ptr<AstNode> getGraphDef() {
-        return graphDef;
+    vector<shared_ptr<AstNode>> get_graphDec() {// Why are you mixing _ and camelCase? 
+        return graphDec;
     }
 
     string repr() override {
         return "program";
+    }
+};
+class graphDec : public AstNode {
+    private:
+    shared_ptr<AstNode> graphDef;
+    string name;
+
+    public:
+    graphDec() : AstNode("graphDec") {}
+    void setGraphDef(const shared_ptr<AstNode>& graph) {
+        graphDef = graph;
+    }
+    shared_ptr<AstNode> getGraphDef() {
+        return graphDef;
+    }
+    void setName(const string& n) {
+        name = n;
+    }
+    string getName() {
+        return name;
     }
 };
 

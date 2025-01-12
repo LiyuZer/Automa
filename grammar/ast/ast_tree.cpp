@@ -17,74 +17,82 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
     shared_ptr<program> program_node = shared_ptr<program>(new program);
 
 
-    vector<shared_ptr<ParseNode> > children;
-    bool found = root_node->addChildrenVec("mainGraph", children);
-    
-
-    if(!found){
-       cerr << "Error program parse node is not initialized properly, fix grammar" << endl; 
-       return nullptr;
-    }
-    root_node = children[0];// For now we will assume there are no other graph definitions
+    vector<shared_ptr<ParseNode> > graph_dec_vec;
+    root_node->addChildrenVec("graphDec", graph_dec_vec);
 
 
-    // Repeat the same patter for main graphs
-    found = root_node->addChildrenVec("graphDef", children);
-
-    if(!found){
-        // TODO this should not be a nullptr in this case there is no graphDefinition so just end the program
-       return nullptr;
+    if( graph_dec_vec.size() == 0){
+        cerr << "Error program parse node is not initialized properly, fix grammar" << endl; 
+        return nullptr;
     }
 
-    root_node = children[0];// For now we will assume there are no other graph definitions
 
-    shared_ptr<graphDef> graph_def_ptr = shared_ptr<graphDef>(new graphDef);
+    for(auto graph_dec_ptr : graph_dec_vec){
 
-    program_node->setGraphDef(graph_def_ptr);// Pointing the program node to the graph def ptr
+        shared_ptr<graphDec> graph_dec_node = shared_ptr<graphDec>(new graphDec);
+        program_node->addGraphDec(graph_dec_node);
 
-
-    vector<shared_ptr<ParseNode> > node_vec;
-    root_node->addChildrenVec("nodeDef", node_vec);
-    if(node_vec.size() > 0){
-        shared_ptr<nodeDef> node_def_ptr = shared_ptr<nodeDef>(new nodeDef);
-        graph_def_ptr->set_nodeDef(node_def_ptr);
-        astNodeQueueElem elem = astNodeQueueElem(node_def_ptr,node_vec[0]);
-        astNodeQueue.push(elem);
-    }
-
-    root_node->addChildrenVec("afterAccept", node_vec);
-    if(node_vec.size() > 0){
-        shared_ptr<afterAcceptDef> afterAccept_ptr = shared_ptr<afterAcceptDef>(new afterAcceptDef);
-        graph_def_ptr->set_afterAccept(afterAccept_ptr);
-        astNodeQueueElem elem = astNodeQueueElem(afterAccept_ptr,node_vec[0]);
-        astNodeQueue.push(elem);
-    }
-
-    root_node->addChildrenVec("afterReject", node_vec);
-    if(node_vec.size() > 0){
-        shared_ptr<afterRejectDef> afterReject_ptr = shared_ptr<afterRejectDef>(new afterRejectDef);
-        graph_def_ptr->set_afterReject(afterReject_ptr);
-        astNodeQueueElem elem = astNodeQueueElem(afterReject_ptr,node_vec[0]);
-        astNodeQueue.push(elem);
+        // Get the name of the graph
+        vector<shared_ptr<ParseNode>> name_vec;
+        graph_dec_ptr->addChildrenVec("IDENTIFIER", name_vec);
+        if(name_vec.size() == 0){
+            cerr << "Error graph name not defined properly, fix grammar" << endl;
+            return nullptr;
         }
+        graph_dec_node->setName(name_vec[0]->getValue());
 
-    root_node->addChildrenVec("memoryDef", node_vec);
-    if(node_vec.size() > 0){
-        shared_ptr<memoryDef> memoryDef_ptr = shared_ptr<memoryDef>(new memoryDef);
-        graph_def_ptr->set_memoryDef(memoryDef_ptr);
-        astNodeQueueElem elem = astNodeQueueElem(memoryDef_ptr,node_vec[0]);
-        astNodeQueue.push(elem);
+        // Add the graph definition child here(if it doesn't exist skip, ie empty graph)
+        vector<shared_ptr<ParseNode>> graph_def_vec;
+        graph_dec_ptr->addChildrenVec("graphDef", graph_def_vec);
+
+
+        if(graph_def_vec.size() > 0){
+            shared_ptr<graphDef> graph_def_ptr = shared_ptr<graphDef>(new graphDef);            
+            graph_dec_node->setGraphDef(graph_def_ptr);
+
+            vector<shared_ptr<ParseNode> > node_vec;
+            graph_def_vec[0]->addChildrenVec("nodeDef", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<nodeDef> node_def_ptr = shared_ptr<nodeDef>(new nodeDef);
+                graph_def_ptr->set_nodeDef(node_def_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(node_def_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+            }
+
+            graph_def_vec[0]->addChildrenVec("afterAccept", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<afterAcceptDef> afterAccept_ptr = shared_ptr<afterAcceptDef>(new afterAcceptDef);
+                graph_def_ptr->set_afterAccept(afterAccept_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(afterAccept_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+            }
+
+            graph_def_vec[0]->addChildrenVec("afterReject", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<afterRejectDef> afterReject_ptr = shared_ptr<afterRejectDef>(new afterRejectDef);
+                graph_def_ptr->set_afterReject(afterReject_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(afterReject_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+                }
+
+            graph_def_vec[0]->addChildrenVec("memoryDef", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<memoryDef> memoryDef_ptr = shared_ptr<memoryDef>(new memoryDef);
+                graph_def_ptr->set_memoryDef(memoryDef_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(memoryDef_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+                }
+
+            graph_def_vec[0]->addChildrenVec("transitionDef", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<transitionDef> transitionDef_ptr = shared_ptr<transitionDef>(new transitionDef);
+                graph_def_ptr->set_transitionDef(transitionDef_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(transitionDef_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+                }
+
         }
-
-    root_node->addChildrenVec("transitionDef", node_vec);
-    if(node_vec.size() > 0){
-        shared_ptr<transitionDef> transitionDef_ptr = shared_ptr<transitionDef>(new transitionDef);
-        graph_def_ptr->set_transitionDef(transitionDef_ptr);
-        astNodeQueueElem elem = astNodeQueueElem(transitionDef_ptr,node_vec[0]);
-        astNodeQueue.push(elem);
-        }
-
-
+    }
     while(!astNodeQueue.empty()){
         /*
         Here we will have an iterative method for creating out Abstract syntax tree! Fun! 
@@ -154,6 +162,7 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
     
     return program_node;
 }
+
 
 
 
@@ -1255,11 +1264,18 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
         dotFile << "    node" << currentId << " [label=\"" << node->repr() << "\"]\n";
 
         if (auto programNode = dynamic_pointer_cast<program>(node)) {
-            if (auto graph = programNode->getGraphDef()) {
+            for (const auto& statement : programNode->get_graphDec()) {
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(statement, nodeId);
+            }
+        } 
+         else if(auto graphDecNode = dynamic_pointer_cast<graphDec>(node)){
+            if(auto graph = graphDecNode->getGraphDef()){
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(graph, nodeId);
             }
-        } else if (auto graphNode = dynamic_pointer_cast<graphDef>(node)) {
+         }
+         else if (auto graphNode = dynamic_pointer_cast<graphDef>(node)) {
             if (auto memory = graphNode->get_memoryDef()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(memory, nodeId);

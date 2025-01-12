@@ -16,10 +16,6 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"program", {
         CreateRule("graphDec"),
         CreateSpecialSymbol('*'),
-        CreateRule("mainGraph"), // Main graph as the entry point
-        CreateRule("graphDec"),
-        CreateSpecialSymbol('*'),
-
     }},
     {"graphDec", {
         CreateToken("GRAPH"), // Keyword "graph"
@@ -28,16 +24,9 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateRule("graphDef"),
         CreateToken("RIGHT_BRACE") // Closing brace
     }},
-    {"mainGraph", {
-        CreateToken("GRAPH"), // Keyword "graph"
-        CreateToken("MAIN"), // Graph name
-        CreateToken("LEFT_BRACE"),
-        CreateRule("graphDef"),
-        CreateToken("RIGHT_BRACE") // Closing brace
-    }},
     {"graphDef", {
         CreateRule("memoryDef"),
-        CreateSpecialSymbol('?'),
+        CreateSpecialSymbol('*'),
         CreateRule("nodeDef"),
         CreateSpecialSymbol('?'),
         CreateRule("transitionDef"), 

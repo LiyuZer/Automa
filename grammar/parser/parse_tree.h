@@ -24,6 +24,7 @@ public:
     ParseNode(string type, string value, bool is_dynamic = false) : type(type), value(value), is_dynamic(is_dynamic) {}
 
     void addChildren(string next_node_type, shared_ptr<ParseNode> next_node) {
+
         if (children.find(next_node_type) != children.end()) {
             children[next_node_type].push_back(next_node);
         }
@@ -111,8 +112,8 @@ public:
         outFile << "    node [shape=box];" << endl;
 
         int node_id = 0; // Unique identifier for each node
-        toDotHelper(outFile, node_id, -1); // -1 indicates no parent for the root
-
+        toDotHelper(outFile, node_id, -1, ""); // -1 indicates no parent for the root
+ 
         outFile << "}" << endl;
         outFile.close();
 
@@ -127,8 +128,9 @@ public:
 private:
     // Helper function for toDot
     // parent_id: The unique ID of the parent node. -1 if current node is root.
+    // edge_label: Label for the edge connecting to the parent.
     // Returns the unique ID of the current node.
-    int toDotHelper(ostream& out, int& current_id, int parent_id) const {
+    int toDotHelper(ostream& out, int& current_id, int parent_id, const string& edge_label) const {
         int my_id = current_id++;
         // Create a label for the current node
         string label = type;
@@ -146,19 +148,25 @@ private:
 
         // If there's a parent, create an edge from parent to current node
         if (parent_id != -1) {
-            out << "    node" << parent_id << " -> node" << my_id << ";" << endl;
+            out << "    node" << parent_id << " -> node" << my_id;
+            if (!edge_label.empty()) {
+                out << " [label=\"" << edge_label << "\"]";
+            }
+            out << ";" << endl;
         }
 
-        // Iterate over all children and recursively add them
+        // Iterate over all children and give each child its own node and edge
         for (const auto& [child_type, child_nodes] : children) {
-            for (const auto& child : child_nodes) {
-                child->toDotHelper(out, current_id, my_id);
+            for (size_t i = 0; i < child_nodes.size(); ++i) {
+                const auto& child = child_nodes[i];
+                // Create an indexed edge label for clarity (e.g., "child1", "child2", ...)
+                string indexed_label = child_type + "[" + to_string(i + 1) + "]";
+                child->toDotHelper(out, current_id, my_id, indexed_label);
             }
         }
 
         return my_id;
     }
-
     // **Helper function to recursively collapse dynamic nodes**
     void collapseDynamicNodesHelper(ParseNode& parent) {
         // Iterate over each entry in the children map

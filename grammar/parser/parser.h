@@ -55,12 +55,10 @@ struct stack_location {
     string rule_str;
     string input;
     shared_ptr<ParseNode> node;
-    shared_ptr<ParseNode> prev_node;
     // Constructor initializing members in the same order as their declaration
     stack_location(char sr, int ci, int cp, string& rs, string& inp, bool is_dynamic=false)
         : special_rule(sr), current_index(ci), current_pos(cp), rule_str(rs), input(inp), is_dynamic(is_dynamic), original_pos(cp), has_looped(false){
             node = shared_ptr<ParseNode>(new ParseNode(rs, "", is_dynamic));
-            prev_node = shared_ptr<ParseNode>(new ParseNode(rs, "", is_dynamic));
         }
     void reset(){
         node = shared_ptr<ParseNode>(new ParseNode(rule_str, "", is_dynamic));
@@ -336,7 +334,18 @@ struct stack_location {
                         executionStack.top()->current_index = 0;
                         executionStack.top()->has_looped = true; // The kleene star has looped
                         executionStack.top()->original_pos = current_pos; // Now the original position is this pos
-                        executionStack.top()->prev_node = executionStack.top()->node->copy();
+                        // We will pop the stack and then add the children to the top of the stack and the push the elem back on the stack 
+                        // Really inefficient but it works
+                        shared_ptr<ParseNode> ptr = executionStack.top()->node;
+                        shared_ptr<stack_location> shared_ptr = executionStack.top();
+                        executionStack.pop();
+                        if(!executionStack.empty()){// Only do this if the stack is not empty
+                            addNodeFromStack(executionStack, ptr);
+                        }
+                        executionStack.push(shared_ptr);// We can re run the same rule again
+                
+                        // Just clean up the node(we have already reset the current index)
+                        executionStack.top()->reset();
     
                     }
                     else if (executionStack.top()->special_rule == '+'){
@@ -377,7 +386,6 @@ struct stack_location {
                         // last valid position                       
                         int temp_pos = executionStack.top()->original_pos;
                         string temp_input = executionStack.top()->input;
-                        shared_ptr<ParseNode> ptr = executionStack.top()->prev_node; // Node to add to children
                         bool has_looped = executionStack.top()->has_looped;
                         executionStack.pop(); 
                         if(!executionStack.empty()){// Only do this if the stack is not empty
@@ -386,7 +394,6 @@ struct stack_location {
                             cout<<executionStack.top()->current_pos<<endl;
                             cout<<input.substr(executionStack.top()->current_pos, 10)<<endl;
                             if(has_looped){// If the pos has not changed then ignore
-                                addNodeFromStack(executionStack, ptr);// Added children here
                                 executionStack.top()->current_pos = temp_pos; // Update the top of the stack, as there as been atleast one successful parsing
                                 executionStack.top()->input = temp_input;
                             }

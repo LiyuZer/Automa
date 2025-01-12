@@ -1,3 +1,39 @@
+
+graph fib {
+    memory {
+        a: 0,
+        b: 1,
+        n: 2,
+        count: 0, 
+        l : 'l', 
+        other : [1, 2, [123]]
+    }
+
+    nodeDef {
+        Start :: startNode;
+        End :: acceptNode;
+    }
+ 
+    transitions {
+        Start -> Compute => conditions : (), operations : ();
+
+        Compute -> Compute => 
+            conditions : (count < n), 
+            operations : (
+                temp = a + b,
+                a = b,
+                b = temp,
+                count = count + 1
+            );
+
+        Compute -> End => 
+            conditions : (count >= n), 
+            operations : ();
+    }
+}
+
+
+
 graph main {
     memory {
         a: 0,
@@ -30,3 +66,4 @@ graph main {
             operations : ();
     }
 }
+

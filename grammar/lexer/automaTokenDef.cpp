@@ -8,7 +8,6 @@ using namespace std;
 
 std::unordered_map<std::string, std::string> keywords = {
         {"transitions", "TRANSITIONS"},
-        {"main", "MAIN"},
         {"memory", "MEMORY"},
         {"graph", "GRAPH"},
         {"afterReject", "AFTER_REJECT"},
