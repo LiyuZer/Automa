@@ -50,24 +50,25 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
 
 ## Road Map 
 
-  ### Version 1 (6 Months)
+  ### Mile 1 (6 Months)
   These are the goals for version 1 
   1. **Traversal Modes Work with rollback** for both deterministic and non-deterministic
   2. **Num primitive functionality** arbitrary number primitive operational for use
   3. **IO operations functioning**
   4. **File operations functioning**
       
-  ### Version 2 ( 9 Months)
+  ### Mile 2 ( 9 Months)
   1. **Modules library**
   2. **C++ API for development**
   3. **Tensor primtive**
   5. **Rigorous testing framework**
   
-  ### Version 3 ( 1 year) 
+  ### Mile 3 ( 1 year) 
   1. **Meta Programming**
   2. **Graph polymorphism basic functionality**
-  3. **Automa v1 release**
-  4. **Unified Environment interaction framework(Sockets, files, etc)**
+  3. **Unified Environment interaction framework(Sockets, files, etc)**
+
+**Version 1 Release**
 
 After each version, I will release and announce the changes. The whole project should take 2 years and three months. I will gladly accept any contributors! 
 Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to perservere. 
