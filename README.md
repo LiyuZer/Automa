@@ -11,8 +11,7 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 
 
 ## Philosophy 
-The philosophy of Automa is to create a closed programming language that only interacts with the development environment and memory if the computation is accepted, the goal being 
-to create a programming language where rollback is inherent, and isolation is ensured. Hopefully, this will develop safe and robust programs that are transparent in the description.
+The philosophy of Automa is to create a closed-environment programming language that only interacts with the development environment and memory if the computation is accepted, the goal being to create a programming language where programmers are guaranteed rollback in case of failure and system isolation. I want to achieve this on the scale and efficiently, ensuring that large complex systems are safe, robust, and easily isolated in case of failure. 
 
 It is explicitly targeted at ML(primarily) and Web Server workflows. In the future, the goal is to create a language naturally designed for machine learning computation and web server operations(expressing them as finite state machines).
 
@@ -24,7 +23,7 @@ Finally, programming should be more intuitive. With a graph-based programming la
 ## Personal Motivations 
 I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
 
-I am also an avid machine-learning enthusiast and have wanted to create my language for machine-learning computation for a long time. I want to develop safe, robust and efficient programs for machine learning research and industry production. 
+I am also an avid machine-learning enthusiast and have wanted to create my own language for machine-learning computation for a long time. I want to develop safe, robust, efficient programs for machine learning research and industry production. 
 
 Why not combine these two into one? A language that is graph-based and also optimized for machine learning! 
 
@@ -60,7 +59,7 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
   ### Mile 2 ( 9 Months)
   1. **Modules library**
   2. **C++ API for development**
-  3. **Tensor primtive**
+  3. **Tensor(Kind of ...) primtive**
   5. **Rigorous testing framework**
   
   ### Mile 3 ( 1 year) 
