@@ -59,7 +59,7 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
   ### Mile 2 ( 9 Months)
   1. **Modules library**
   2. **C++ API for development**
-  3. **Tensor(Kind of ...) primtive**
+  3. **Tensor(Kind of ...) primitive**
   5. **Rigorous testing framework**
   
   ### Mile 3 ( 1 year) 
