@@ -11,14 +11,26 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 
 
 ## Philosophy 
-The philosophy of Automa is to create a closed-environment programming language that only interacts with the development environment and memory if the computation is accepted, the goal being to create a programming language where programmers are guaranteed rollback in case of failure and system isolation. I want to achieve this on the scale and efficiently, ensuring that large complex systems are safe, robust, and easily isolated in case of failure. 
+The essential philosophy of Automa is a graph-based programming language focused on efficiency, speed, and certain computational guarantees. 
+These guarantees are rollback and isolation.
 
-It is explicitly targeted at ML(primarily) and Web Server workflows. In the future, the goal is to create a language naturally designed for machine learning computation and web server operations(expressing them as finite state machines).
+What is Rollback in Automa? 
+Given a graph G and input set S, and a path P that represents a traversal of G with input S, S will be rolled back to its original state in the case of failure. Thus, the input state is invariant in the case of a failure or rejection. 
+Rollback implies another interesting outcome: environment interactions, i.e., file IO, etc., are committed, not automatically executed. Ensuring that the system is closed to an extent from the environment. 
 
-Another crucial philosophical framework for Automa is representing computation using discreet steps, represented as a finite state machine. This way, computation becomes a first-class citizen much more granularly than traditional functions. Traditional programs are viewed as statements to be executed one after the other, performing some tasks. 
-Automa, on the other hand, is a structure-based programming language; we are running the structure rather than statement-by-statement flows. This way, we can take and optimize the structure, make it faster, evolve it over time, and create new structures using previous structures.  
+What is Isolation in Automa? 
+Each graph has two modes of possible traversal: deterministic and non-deterministic. In the case of non-deterministic travel, all paths, P, will maintain separate copies of the computation state; essentially, each path represents an alternate world of computation. Maintaining concurrency, while keeping the memory safe. 
 
-Finally, programming should be more intuitive. With a graph-based programming language, visual representations of code will be more straightforward. Hopefully, this will make it easier to debug code, teach code, and demonstrate workflows; in other words, I am so tired of reading Python errors :)
+These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer has no worry about them.
+
+The targetted areas are in order, as well as machine learning and web server workflows. The goal is to create a swift and efficient language for these purposes.
+
+These are the priorities in order :
+  All computation is graph-based
+  Speed
+  Simplicity
+  Efficiency 
+
 
 ## Personal Motivations 
 I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
@@ -58,8 +70,9 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
       
   ### Mile 2 ( 9 Months)
   1. **Modules library**
-  2. **C++ API for development**
-  3. **Tensor(Kind of ...) primitive**
+  2. **Add Type System** very important for the future
+  3. **C++ API for development**
+  4. **Tensor(Kind of ...) primitive**
   5. **Rigorous testing framework**
   
   ### Mile 3 ( 1 year) 
