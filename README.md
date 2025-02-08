@@ -15,13 +15,15 @@ The essential philosophy of Automa is a graph-based programming language focused
 These guarantees are rollback and isolation.
 
 What is Rollback in Automa? 
-Given a graph G and input set S, and a path P that represents a traversal of G with input S, S will be rolled back to its original state in the case of failure. Thus, the input state is invariant in the case of a failure or rejection. 
+Given a graph G and input set S, and a path P that represents a traversal of G with input S, S is immutable, so it will never change within the graph execution. However, the program might still interact with the environment, leading to cases where rejected computations need to be rolled back. One of these cases is file IO when a file is written to, but the underlying computation is rejected, it is not sensical for the original write to remain persistent. Automa rolls back these changes, creating a system where, in failure, the states of the program are effectively rolled back.
+
+
 Rollback implies another interesting outcome: environment interactions, i.e., file IO, etc., are committed, not automatically executed. Ensuring that the system is closed to an extent from the environment. 
 
 What is Isolation in Automa? 
-Each graph has two modes of possible traversal: deterministic and non-deterministic. In the case of non-deterministic travel, all paths, P, will maintain separate copies of the computation state; essentially, each path represents an alternate world of computation. Maintaining concurrency, while keeping the memory safe. 
+Each graph has two modes of possible traversal: deterministic and non-deterministic. In the case of non-deterministic travel, all paths, P, will maintain separate copies of the computation state; essentially, each path represents an alternate world of computation. Maintaining concurrency while keeping the memory safe.  
 
-These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer has no worry about them.
+These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer does not worry about them.
 
 The targetted areas are in order, as well as machine learning and web server workflows. The goal is to create a swift and efficient language for these purposes.
 
