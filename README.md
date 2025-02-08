@@ -61,27 +61,35 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
 
 ## Road Map 
 
-  ### Mile 1 (6 Months)
+  ### Mile 1 (1 Year)
   These are the goals for version 1 
   1. **Traversal Modes Work with rollback** for both deterministic and non-deterministic
   2. **Num primitive functionality** arbitrary number primitive operational for use
   3. **IO operations functioning**
   4. **File operations functioning**
       
-  ### Mile 2 ( 9 Months)
+  ### Mile 2 ( 2 Years Months)
   1. **Modules library**
   2. **Add Type System** very important for the future
   3. **C++ API for development**
   4. **Tensor(Kind of ...) primitive**
   5. **Rigorous testing framework**
   
-  ### Mile 3 ( 1 year) 
+  ### Mile 3 ( 2 year) 
   1. **Meta Programming**
   2. **Graph polymorphism basic functionality**
   3. **Unified Environment interaction framework(Sockets, files, etc)**
 
 **Version 1 Release**
 
-After each version, I will release and announce the changes. The whole project should take 2 years and three months. I will gladly accept any contributors! 
+## Future Goals 
+I want Automa to be an accelerated programming language, so the most logical next step, once these sections are done is 
+1. **GPU Integration**
+2. **FPGA Integration**
+The future goal of the language is to have natural speedups from working with external accelerators, the goals being to have a language taht is accelerated naturally by your hardware. You won't have to worry about anything!
+
+**The first-ever hardware-accelerated programming language**
+
+After each version, I will release and announce the changes. The whole project should take about 5 years. I will gladly accept any contributors, it would be great help, I want to accelerate the process!
 Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to perservere. 
    
