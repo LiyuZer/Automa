@@ -43,6 +43,7 @@ vector<shared_ptr<AstNode> > conditions;
 vector<shared_ptr<AstNode> > operations;
 
 };
+
 using namespace std;
 class Graph{
     private:
@@ -51,6 +52,7 @@ class Graph{
     shared_ptr<AstNode> graphDef;
     shared_ptr<AstNode> memoryDef;
     shared_ptr<AstNode> memory_def;
+    shared_ptr<AstNode> accept;
     string start_node=""; 
     public:
     void add_transition(string fromNode, string toNode, vector<shared_ptr<AstNode>> conditions, vector<shared_ptr<AstNode>> operations){
@@ -75,6 +77,12 @@ class Graph{
     }
     shared_ptr<AstNode> get_memory_def(){
         return memory_def;
+    }
+    void set_accept(shared_ptr<AstNode> a){
+        accept = a;
+    }
+    shared_ptr<AstNode> get_accept(){
+        return accept;
     }
     void set_graph_def(shared_ptr<AstNode> graphDef){
         graphDef = graphDef;

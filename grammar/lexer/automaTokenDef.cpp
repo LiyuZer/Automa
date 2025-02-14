@@ -10,8 +10,7 @@ std::unordered_map<std::string, std::string> keywords = {
         {"transitions", "TRANSITIONS"},
         {"memory", "MEMORY"},
         {"graph", "GRAPH"},
-        {"afterReject", "AFTER_REJECT"},
-        {"afterAccept", "AFTER_ACCEPT"},
+        {"accept", "ACCEPT"},
         {"symbols", "SYMBOLS"},
         {"array", "ARRAY"},
         {"dict", "DICT"},
@@ -26,7 +25,8 @@ std::unordered_map<std::string, std::string> keywords = {
         {"operator", "OPERATOR"},
         {"edgeDef" , "EDGE_DEF" }, 
         {"true" , "TRUE" },
-        {"false" , "FALSE" }
+        {"false" , "FALSE" }, 
+        {"return" , "RETURN" }
     };
 
 std::unordered_map<std::string, std::string> operators = {

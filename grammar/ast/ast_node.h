@@ -78,6 +78,7 @@ private:
     shared_ptr<AstNode> afterReject;
     shared_ptr<AstNode> nodeDef;
     shared_ptr<AstNode> transitionDef;
+    shared_ptr<AstNode> accept;
 
 public:
     graphDef() : AstNode("graphDef") {}
@@ -97,11 +98,38 @@ public:
     shared_ptr<AstNode> get_transitionDef() { return transitionDef; }
     void set_transitionDef(const shared_ptr<AstNode>& trans) { transitionDef = trans; }
 
+    shared_ptr<AstNode> get_accept() { return accept; }
+    void set_accept(const shared_ptr<AstNode>& acc) { accept = acc; }
+
     string repr() override {
         return "graphDef";
     }
 };
 
+class graphCall : public AstNode {
+    private:
+    vector<shared_ptr<AstNode> > arguments;
+    string graphName;
+
+    public:
+    graphCall() : AstNode("graphCall") {}
+    void addArgument(const shared_ptr<AstNode>& arg) {
+        arguments.push_back(arg);
+    }
+    vector<shared_ptr<AstNode>> get_arguments() {
+        return arguments;
+    }
+
+    void setGraphName(const string& name) {
+        graphName = name;
+    }
+    string getGraphName() {
+        return graphName;
+    }
+    string repr () override {
+        return "graphCall " + graphName;
+    }
+};
 class memoryDef : public AstNode {
 private:
     vector<shared_ptr<AstNode> > variableDefintions;
@@ -137,6 +165,18 @@ public:
     }
 };
 
+class accept : public AstNode {
+private:
+    shared_ptr<AstNode> expression;
+public:
+    accept() : AstNode("accept") {}
+
+    shared_ptr<AstNode> get_expression() { return expression; }
+    void set_expression(const shared_ptr<AstNode>& expr) { expression = expr; }
+    string repr() override {
+        return "accept";
+    }
+};
 class nodeDef : public AstNode {
 private:
     vector<shared_ptr<AstNode> > nodeDefStatements;

@@ -15,7 +15,7 @@ program : IDENTIFIER : [a]
 std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"program", {
         CreateRule("graphDec"),
-        CreateSpecialSymbol('*'),
+        CreateSpecialSymbol('*')
     }},
     {"graphDec", {
         CreateToken("GRAPH"), // Keyword "graph"
@@ -26,15 +26,13 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     }},
     {"graphDef", {
         CreateRule("memoryDef"),
-        CreateSpecialSymbol('*'),
+        CreateSpecialSymbol('?'),
         CreateRule("nodeDef"),
         CreateSpecialSymbol('?'),
         CreateRule("transitionDef"), 
         CreateSpecialSymbol('?'),
-        CreateRule("afterAccept"), 
+        CreateRule("accept"), 
         CreateSpecialSymbol('?'),
-        CreateRule("afterReject"), 
-        CreateSpecialSymbol('?')
     }},
     {"memoryDef", {
         CreateToken("MEMORY"),
@@ -131,16 +129,15 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateParen(')'),
         CreateSpecialSymbol('?'), 
     }},
-    {"afterAccept", {
-        CreateToken("AFTER_ACCEPT"),
+    /*
+    accept{
+        return expression
+    }
+    */
+    {"accept", {
+        CreateToken("ACCEPT"),
         CreateToken("LEFT_BRACE"), 
-        CreateRule("expression"),
-        CreateToken("SEMICOLON"), 
-        CreateToken("RIGHT_BRACE"), 
-    }},
-    {"afterReject", {
-        CreateToken("AFTER_REJECT"),
-        CreateToken("LEFT_BRACE"), 
+        CreateToken("RETURN"),
         CreateRule("expression"),
         CreateToken("SEMICOLON"), 
         CreateToken("RIGHT_BRACE"), 
@@ -156,18 +153,16 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateParen(')'),
         CreateSpecialSymbol('?'), 
     }},
+    {"keyValue", {
+        CreateToken("IDENTIFIER"),
+        CreateToken("COLON"),
+        CreateRule("expression"),
+    }},
     {"varDefenition", {
         CreateRule("variable"),
         CreateToken("COLON"),
         CreateRule("expression"),
     }},
-    /*
-    
-    5 + 4 * 3 + 2 > 3
-    counter : 5 * 2 + 3,
-
-    */
-
 
     {"expression", {
         CreateRule("assignment"),
@@ -255,6 +250,10 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateRule("expression"),
     }},
     {"term", {
+        CreateRule("graphCall"),
+        CreateOr(),
+        CreateRule("memoryContainer"),
+        CreateOr(),
         CreateRule("listAccess"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
         CreateOr(),
         CreateRule("listSlice"), // The reason why list access is here is because list access has a variable,and as the parser is greedy it will always try to match the first rule
@@ -297,6 +296,19 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateSpecialSymbol('?'),
         CreateToken("RIGHT_BRACKET")
 
+    }},
+    { "memoryContainer" , {  // Our defined memory container class this is 
+        CreateToken("LEFT_BRACE"),
+        CreateParen('('),
+        CreateRule("keyValue"),
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("keyValue"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_BRACE")
     }},
     {"listAccess", {
         CreateRule("variable"), 
@@ -351,7 +363,22 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateToken("GREATER_EQUAL"),
     }},
 
-
+    // Defining a graph call here
+    {"graphCall", {
+        CreateToken("IDENTIFIER"),
+        CreateToken("LEFT_PAREN"),
+        CreateParen('('),
+        CreateRule("expression"),
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("expression"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_PAREN"),
+        }
+    },
 
     {"literal", {
         CreateToken("STRING_LITERAL"),

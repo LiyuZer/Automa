@@ -1,69 +1,20 @@
 
-graph fib {
-    memory {
-        a: 0,
-        b: 1,
-        n: 2,
-        count: 0, 
-        l : 'l', 
-        other : [1, 2, [123]]
-    }
+'''
+Syntax is very similar to python, except functions are now graph. 
+'''
 
-    nodeDef {
-        Start :: startNode;
-        End :: acceptNode;
-    }
+def main (c : 0):
+    nodes :
+        Start :: startNode
+        accept :: acceptNode
  
-    transitions {
-        Start -> Compute => conditions : (), operations : ();
+    transitions:
 
-        Compute -> Compute => 
-            conditions : (count < n), 
-            operations : (
-                temp = a + b,
-                a = b,
-                b = temp,
-                count = count + 1
-            );
+        start -> once => (x < 5):
+            x = f
+            for i in range(0, 1):
+                m = m + 1
+            l = 2
 
-        Compute -> End => 
-            conditions : (count >= n), 
-            operations : ();
-    }
-}
-
-
-
-graph main {
-    memory {
-        a: 0,
-        b: 1,
-        n: 2,
-        count: 0, 
-        l : 'l', 
-        other : [1, 2, [123]]
-    }
-
-    nodeDef {
-        Start :: startNode;
-        End :: acceptNode;
-    }
- 
-    transitions {
-        Start -> Compute => conditions : (), operations : ();
-
-        Compute -> Compute => 
-            conditions : (count < n), 
-            operations : (
-                temp = a + b,
-                a = b,
-                b = temp,
-                count = count + 1
-            );
-
-        Compute -> End => 
-            conditions : (count >= n), 
-            operations : ();
-    }
-}
-
+    accept:
+        return c

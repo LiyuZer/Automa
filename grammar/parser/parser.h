@@ -183,11 +183,6 @@ struct stack_location {
         //appear more than one time
         shared_ptr<Token> current_token = x.run(temp_current_pos, temp_input); // Get the current token from the lexer
 
-        cout<<"******"<<endl;
-        cout<<"Current symbol " << current_token->value<<endl;
-        cout<<"Token "<<token_symbol->type<<endl;
-        cout<<ruleDebug<<endl;
-        cout<<"******"<<endl;
         if(current_token->type == "EOF"){
             return false;
         }
@@ -325,11 +320,9 @@ struct stack_location {
           bool found = false;
           // Visit the rule note curent index will never backtrace and so no need to create a copy
           shared_ptr<stack_location> current_output_ptr = visit_rule(x, current_index, current_rule, input, current_pos, found, rules, executionStack.top()->node);
-          cout<<"Rule "<< current_rule<<" " << found <<endl;
-          cout<< "index " << current_index<<endl;
           if (!current_output_ptr){
                 if(found){ // Pop stack and update the top of the previous stack with the new string
-                    if (executionStack.top()->special_rule == '*'){
+                    if (executionStack.top()->special_rule == '*' || executionStack.top()->special_rule == '+'){
                          //We have to rest the current index to go through the whole input
                         executionStack.top()->current_index = 0;
                         executionStack.top()->has_looped = true; // The kleene star has looped
@@ -348,13 +341,6 @@ struct stack_location {
                         executionStack.top()->reset();
     
                     }
-                    else if (executionStack.top()->special_rule == '+'){
-                        // We do the same as * the only difference is in the not found case 
-                        // In that case we check if the top stacks pos is the same as the 
-                        // The second topmost stack elem(thus no change) return false
-                        executionStack.top()->current_index = 0;
-                    }
-
                     else if (executionStack.top()->special_rule != '*'){ // If it is a kleene star then try again
                         shared_ptr<ParseNode> ptr = executionStack.top()->node;
                         executionStack.pop();
@@ -389,10 +375,6 @@ struct stack_location {
                         bool has_looped = executionStack.top()->has_looped;
                         executionStack.pop(); 
                         if(!executionStack.empty()){// Only do this if the stack is not empty
-                            cout<< "Specific rule : "<< executionStack.top()->rule_str<<endl;
-                            cout<<temp_pos<<endl;
-                            cout<<executionStack.top()->current_pos<<endl;
-                            cout<<input.substr(executionStack.top()->current_pos, 10)<<endl;
                             if(has_looped){// If the pos has not changed then ignore
                                 executionStack.top()->current_pos = temp_pos; // Update the top of the stack, as there as been atleast one successful parsing
                                 executionStack.top()->input = temp_input;
@@ -407,11 +389,11 @@ struct stack_location {
                             goto start;
                         }
                         
-                        int old_current_pos = executionStack.top()->current_pos;
-                        string old_input = executionStack.top()->input;
-                        shared_ptr<ParseNode> ptr = executionStack.top()->node; // Node to add to children
+                        int temp_pos = executionStack.top()->original_pos;
+                        string temp_input = executionStack.top()->input;
+                        bool has_looped = executionStack.top()->has_looped;
                         executionStack.pop();
-                        if(!executionStack.empty() && (old_current_pos == executionStack.top()->current_pos)){
+                        if(!executionStack.empty() && !has_looped){// If the stack is not empty and has not looped then pop until you find a special symbol 
                             while(!executionStack.empty()){
                                 /* A detailed explanation of what the hell is happening here
                                 While we are iteratively reducing the stack to see if there is some element 
@@ -426,13 +408,14 @@ struct stack_location {
                                 executionStack.pop();
                             }
                         }
-                        if(!executionStack.empty() ){// If the execution stack is not empty
-                            executionStack.top()->current_pos = old_current_pos;
-                            executionStack.top()->input = old_input;
-                            addNodeFromStack(executionStack, ptr);//Added children here
+                        if(!executionStack.empty() ){// If the execution stack is not empty, 
+                        //this is the case where the the rule has been looped before, ie the stack has not been fully popped
+                            executionStack.top()->current_pos = temp_pos;
+                            executionStack.top()->input = temp_input;
+
                         }
                         else{ 
-                            return false; 
+                            return false; // If the stack is empty then return false
                         }
                     }
                     else if(executionStack.top()->special_rule == '?'){
@@ -472,7 +455,6 @@ struct stack_location {
                         if(executionStack.top()->special_rule != ' '){
                             goto check_symbol;
                         }
-                        cout<<"Popping " << executionStack.top()->rule_str<<endl;
 
                         executionStack.pop();
                     }

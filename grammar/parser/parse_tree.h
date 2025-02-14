@@ -28,15 +28,13 @@ public:
         if (children.find(next_node_type) != children.end()) {
             children[next_node_type].push_back(next_node);
         }
-        else {
-            children[next_node_type] = { next_node };
+        else {// If the key does not exist, then we create a new vector and add the node to the vector
+            children[next_node_type] = vector<shared_ptr<ParseNode> >{next_node};
         }
     }
 
     bool addChildrenVec(string child, vector<shared_ptr<ParseNode> >& vec) {
-        // for(auto node : children){
-        //     cout<<node.first<<endl;
-        // }
+
         if(children.find(child) != children.end()){
             vec = children[child];
             return true;

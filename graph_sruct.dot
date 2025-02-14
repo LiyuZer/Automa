@@ -1,7 +1,5 @@
 digraph G {
-    "End" [shape=doublecircle, color=green, style=bold];
+    "Once" [shape=doublecircle, color=green, style=bold];
     "Start" [shape=doublecircle, color=green, style=bold];
-    "Compute" -> "Compute" [label="Conditions: expression(type=) \nOperations: expression(type=) expression(type=) expression(type=) expression(type=) "];
-    "Compute" -> "End" [label="Conditions: expression(type=) "];
-    "Start" -> "Compute";
+    "Start" -> "Once" [label="Operations: expression(type=) "];
 }

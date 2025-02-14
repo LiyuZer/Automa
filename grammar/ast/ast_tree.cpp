@@ -90,6 +90,13 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
                 astNodeQueueElem elem = astNodeQueueElem(transitionDef_ptr,node_vec[0]);
                 astNodeQueue.push(elem);
                 }
+            graph_def_vec[0]->addChildrenVec("accept", node_vec);
+            if(node_vec.size() > 0){
+                shared_ptr<accept> accept_ptr = shared_ptr<accept>(new accept);
+                graph_def_ptr->set_accept(accept_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(accept_ptr,node_vec[0]);
+                astNodeQueue.push(elem);
+                }
 
         }
     }
@@ -117,6 +124,9 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
             explore_transitionDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
 
        }
+       else if(type == "accept"){
+            explore_accept(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
        else if(type == "transitionDefStatements"){
             explore_transitionDefStatements(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
@@ -132,6 +142,9 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        else if(type == "variable"){
             explore_variable(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        } 
+       else if(type == "graphCall"){
+            explore_graphCall(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       }
        else if(type == "list"){
             explore_list(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
@@ -203,6 +216,21 @@ void AbstractTreeGenerator::explore_transitionDef(shared_ptr<ParseNode> root_nod
     }
 
 
+}
+
+void AbstractTreeGenerator:: explore_accept(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
+    /*
+    Here we are exploring an accept parse node
+    */
+    shared_ptr<accept> accept_ptr = dynamic_pointer_cast<accept>(parentAstNode);
+    vector<shared_ptr<ParseNode> > expression_vec;
+    root_node->addChildrenVec("expression", expression_vec);
+    if(expression_vec.size() > 0){
+        shared_ptr<expression> expression_ptr = shared_ptr<expression>(new expression);
+        accept_ptr->set_expression(expression_ptr);
+        astNodeQueueElem elem = astNodeQueueElem(expression_ptr, expression_vec[0]);
+        astNodeQueue.push(elem);
+    }
 }
 
 void AbstractTreeGenerator::explore_variableDefinitions(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
@@ -510,6 +538,7 @@ This is the rule for a term currently
     vector<shared_ptr<ParseNode> > list_vec;
     vector<shared_ptr<ParseNode> > listAccess_vec;
     vector<shared_ptr<ParseNode> > listSlice_vec;
+    vector<shared_ptr<ParseNode> > graphCall_vec;
 
     root_node->addChildrenVec("literal", literal_vec);
     root_node->addChildrenVec("variable", variable_vec);
@@ -517,6 +546,7 @@ This is the rule for a term currently
     root_node->addChildrenVec("list", list_vec);
     root_node->addChildrenVec("listAccess", listAccess_vec);
     root_node->addChildrenVec("listSlice", listSlice_vec);
+    root_node->addChildrenVec("graphCall", graphCall_vec);
 
     if (!literal_vec.empty()) {
         vector<shared_ptr<ParseNode> > string_vec;
@@ -601,6 +631,12 @@ This is the rule for a term currently
         astNodeQueueElem elem = astNodeQueueElem(listSlice_ptr,listSlice_vec[0]);
         astNodeQueue.push(elem);
         return listSlice_ptr;
+    }
+    if(!graphCall_vec.empty()){
+        shared_ptr<graphCall> graphCall_ptr = shared_ptr<graphCall>(new graphCall);
+        astNodeQueueElem elem = astNodeQueueElem(graphCall_ptr,graphCall_vec[0]);
+        astNodeQueue.push(elem);
+        return graphCall_ptr;
     }
 
 
@@ -719,9 +755,7 @@ This is the rule for a term currently
 
 shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue, string current_level) {
 
-    cout<<"Top level"<<endl;
     if(current_level == "prec0"){
-        cout<<"prec0"<<endl;
 
         if(root_node->findChildren("unary_operators").size()>0){
             // We only have on unary operator for now
@@ -743,7 +777,6 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
         }
 
     } else if(current_level == "prec1") {
-            cout<<"prec1"<<endl;
 
         if (root_node->findChildren("term").size() == 0  && root_node->findChildren("prec1").size() == 0 ){
             return recursive_expression_explorer(root_node->findChildren("prec0")[0], astNodeQueue, "prec0" );
@@ -796,7 +829,6 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             binaryNode->set_rightSide(secondTerm);
             
             shared_ptr<binaryExpression> chainedBinaryPointer;
-                cout<<"term "<<terms.size()<<endl;
 
             for(int i = 2; i < terms.size(); i++){
                 shared_ptr<AstNode> tempTerm = explore_term(terms[i], astNodeQueue);
@@ -836,7 +868,6 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
         }
 
     } else if(current_level == "prec2") {
-            cout<<"prec2"<<endl;
 
         if (root_node->findChildren("term").size() == 0 && root_node->findChildren("prec2").size() == 0 ){
             // Changed recursion target from higher precedence to lower precedence
@@ -929,7 +960,6 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
         }
 
     } else if(current_level == "prec3") {
-            cout<<"prec3"<<endl;
 
         if (root_node->findChildren("term").size() == 0  && root_node->findChildren("prec3").size() == 0 ){
             // Changed recursion target from higher precedence to lower precedence
@@ -1098,6 +1128,45 @@ void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, 
 
    }
 }
+
+void AbstractTreeGenerator:: explore_graphCall(shared_ptr<ParseNode> root_node,shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
+/*
+Here we are exploring a graph call
+    {"graphCall", {
+        CreateToken("IDENTIFIER"),
+        CreateToken("LEFT_PAREN"),
+        CreateParen('('),
+        CreateRule("expression"),
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateToken("expression"),
+        CreateParen(')'),
+        CreateSpecialSymbol('*'),
+        CreateParen(')'),
+        CreateSpecialSymbol('?'),
+        CreateToken("RIGHT_PAREN"),
+        }
+    },
+*/
+    vector<shared_ptr<ParseNode> > identifier_vec;
+    root_node->addChildrenVec("IDENTIFIER", identifier_vec);
+
+    shared_ptr<graphCall> graphCallNode = dynamic_pointer_cast<graphCall>(parentAstNode);
+    if (!identifier_vec.empty()) {
+        string graphName = identifier_vec[0]->getValue();
+        graphCallNode->setGraphName(graphName);
+    }
+
+    vector<shared_ptr<ParseNode> > expression_vec;
+    root_node->addChildrenVec("expression", expression_vec);
+    // Loop through the list of expression and add them to the graph call node,(also add them to the queue)
+    for (auto expression_node : expression_vec) {
+        shared_ptr<expression> expressionNode = shared_ptr<expression>(new expression);
+        astNodeQueue.push(astNodeQueueElem(expressionNode, expression_node));
+        graphCallNode->addArgument(expressionNode);
+    }
+}
+
 
 void AbstractTreeGenerator::explore_variable(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
@@ -1280,14 +1349,6 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(memory, nodeId);
             }
-            if (auto accept = graphNode->get_afterAccept()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
-                writeNode(accept, nodeId);
-            }
-            if (auto reject = graphNode->get_afterReject()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
-                writeNode(reject, nodeId);
-            }
             if (auto nodes = graphNode->get_nodeDef()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(nodes, nodeId);
@@ -1295,7 +1356,12 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
             if (auto transitions = graphNode->get_transitionDef()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(transitions, nodeId);
+            }   
+            if(auto accept = graphNode->get_accept()){
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(accept, nodeId);
             }
+
         } else if (auto memoryNode = dynamic_pointer_cast<memoryDef>(node)) {
             for (const auto& varDef : memoryNode->get_variableDefinitions()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
@@ -1311,7 +1377,13 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(nodeDefStatement, nodeId);
             }
-        } else if (auto node_def = dynamic_pointer_cast<transitionDef>(node)) {
+        } else if(auto acceptStatement = dynamic_pointer_cast<accept>(node)){
+            if(auto expr = acceptStatement->get_expression()){
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(expr, nodeId);
+            }
+        } 
+        else if (auto node_def = dynamic_pointer_cast<transitionDef>(node)) {
             for (const auto& transitionDefStatement : node_def->get_transitionDefStatements()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(transitionDefStatement, nodeId);
@@ -1365,6 +1437,13 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
             for(auto listElem : listNode->get_list_node()){
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(listElem, nodeId);
+            }
+        }
+        // GraphCall
+        else if(auto graphNode = dynamic_pointer_cast<graphCall>(node)){
+            for(auto arg : graphNode->get_arguments()){
+                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
+                writeNode(arg, nodeId);
             }
         }
         else if (auto stringNode = dynamic_pointer_cast<stringLiteral>(node)) {

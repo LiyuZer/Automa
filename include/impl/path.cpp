@@ -59,37 +59,56 @@ These are the mapping for the operations to symbols.
 We will call these graphs from the memory_container(they are all graphs in the memory container)
 */
 
-void Path :: set_memory(shared_ptr<AstNode> memory){
-    cout<<"Setting memory"<<endl;
+void Path :: set_memory(shared_ptr<AstNode> memory){ 
     // Loop through the memory defintions and set the memory container
     shared_ptr<memoryDef> memoryDef_ptr = dynamic_pointer_cast<memoryDef>(memory);
     vector<shared_ptr<AstNode> > variableDefinitions = memoryDef_ptr->get_variableDefinitions();
-    shared_ptr<Memory> memory_container = shared_ptr<Memory>(new Memory);
+    // Create a memory container if it is not already set
+    if(!(this->memory_ptr)){
+        memory_ptr = shared_ptr<Memory>(new Memory);
+    }
     for(auto var_def : variableDefinitions){
         shared_ptr var_def_ptr = dynamic_pointer_cast<variableDefintions>(var_def);
         string var_name = var_def_ptr->get_variableName();
         shared_ptr<AstNode> elem = var_def_ptr->get_elem();        
 
+    
         // Note that the elem is an expression node
         // All we have to do is evaluate the expression and set the memory container
         // So push the expression on the stack and evaluate it
+        // We do this if the memory ofr the var name is not already set(for cases where we inputted arguments to the memory)
+        if(memory_ptr->get_memory(var_name)){
+            continue;
+        }
         shared_ptr<stackElement> stack_elem = addElementToStack(elem);
         shared_ptr<Memory> output = evaluateExpression();
         
-        //Testint check if the memory
-        cout << "Memory type: " << output->get_type() << endl;
-        // Voila we have the memory container
-        // Now we will symbol to memory container mapping, create 
-        memory_container->set_memory(var_name, output);
-        // That is it for the memory container
+        memory_ptr->set_memory(var_name, output);
     }
-    // Now we will set the memory container
+}
+void Path:: addArgument(vector<shared_ptr<Memory>> arg, shared_ptr<Graph> graph_ptr){
+    /* 
+        Add the argument to the memory container
+    */
+    // Loop through the memoryDef of the graph and then add the arg based on that order 
+    shared_ptr<memoryDef> memoryDef_ptr = dynamic_pointer_cast<memoryDef>(graph_ptr->get_memory_def());
+    vector<shared_ptr<AstNode> > variableDefinitions = memoryDef_ptr->get_variableDefinitions();
+    shared_ptr<Memory> memory_container = shared_ptr<Memory>(new Memory);
+    for(int i = 0; i < arg.size(); i++){
+        //We don't need to evaluate the expression, we just need to add the argument to the memory container
+        shared_ptr<Memory> elem = arg[i];
+        shared_ptr<variableDefintions> var_def_ptr = dynamic_pointer_cast<variableDefintions>(variableDefinitions[i]);
+        string var_name = var_def_ptr->get_variableName();
+        memory_container->set_memory(var_name, elem);
+    }
     this->memory_ptr = memory_container;
+
 }
 void add_yield(string graph_name, vector<shared_ptr<Memory> > memory_containers){
     /* 
         Add the specific yield to the operator return
     */
+   // We will 
 }
 shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
     /* Create a stack elem and based on the type of the ast node set the type of the stack element
@@ -99,42 +118,42 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "binary";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
        return stack_elem;
    }
    else if(dynamic_pointer_cast<unaryExpression>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "unary";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
         return stack_elem;
    }
    else if(dynamic_pointer_cast<stringLiteral>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "string";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
         return stack_elem;
    }
    else if (dynamic_pointer_cast<integerLiteral>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "num";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
        return stack_elem;
    }
    else if(dynamic_pointer_cast<decimalLiteral>(ast_node)){
          shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
          stack_elem->type = "num";
          stack_elem->ast_node = ast_node;
-         computation_stack.push(stack_elem);
+         computation_stack->push_back(stack_elem);
          return stack_elem;
     }
     else if(dynamic_pointer_cast<boolLiteral>(ast_node)){
          shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
          stack_elem->type = "bool";
          stack_elem->ast_node = ast_node;
-         computation_stack.push(stack_elem);
+         computation_stack->push_back(stack_elem);
          return stack_elem;
 
    }
@@ -142,14 +161,14 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "char";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
        return stack_elem;
    }
    else if(dynamic_pointer_cast<assignmentExpression>(ast_node)){
        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
        stack_elem->type = "assignment";
        stack_elem->ast_node = ast_node;
-       computation_stack.push(stack_elem);
+       computation_stack->push_back(stack_elem);
        return stack_elem;
    }
     // Also maybe another expression itself 
@@ -157,7 +176,7 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
         stack_elem->type = "expression";
         stack_elem->ast_node = ast_node;
-        computation_stack.push(stack_elem);
+        computation_stack->push_back(stack_elem);
         return stack_elem;
     }
     // Can also be a variable type 
@@ -165,7 +184,7 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
         stack_elem->type = "variable";
         stack_elem->ast_node = ast_node;
-        computation_stack.push(stack_elem);
+        computation_stack->push_back(stack_elem);
         return stack_elem;
     }
     // Can also be a list type
@@ -173,18 +192,24 @@ shared_ptr<stackElement> Path:: addElementToStack(shared_ptr<AstNode> ast_node){
         shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
         stack_elem->type = "list";
         stack_elem->ast_node = ast_node;
-        computation_stack.push(stack_elem);
+        computation_stack->push_back(stack_elem);
         return stack_elem;
     }
-
+    // graph call 
+    else if(dynamic_pointer_cast<graphCall>(ast_node)){
+        shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
+        stack_elem->type = "graph";
+        stack_elem->ast_node = ast_node;
+        computation_stack->push_back(stack_elem);
+        return stack_elem;
+    }
     else{
         cerr << "Error, unknown ast node type" << endl;
         exit(1);
     }
-
 }
 
-shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory> left, shared_ptr<Memory> right, string operations){
+shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory>& left, shared_ptr<Memory>& right, string& operations){
 // Here we will check first to see if it is a primitive type, by dynamic casting, then if it is, 
 // Evaluate the operation, as of now the primitives are Int(Soon to be Num type), Char and Bool
     if(dynamic_pointer_cast<Num>(left)){
@@ -290,204 +315,37 @@ shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory> l
     }
 
 }
-shared_ptr<Memory> Path :: evaluateExpression(){
-// For every stack element evaluate and then pop. 
-    while(!computation_stack.empty()){
-        cout<<"Computation stack size: "<<computation_stack.size()<<endl;
-        shared_ptr<stackElement> stack_elem = computation_stack.top();
-        // If the memory container is not set, then we will evaluate the expression
 
-        if(stack_elem->stack_elem_ptr_ls.size() && stack_elem->stack_elem_ptr_ls[0]->memory_container && computation_stack.size() == 1){
-            // If this is the final condition, then we will return the memory container
-            // And pop the stack element
-            cout << "Returning the memory container" << endl;
-            computation_stack.pop();
-            return stack_elem->stack_elem_ptr_ls[0]->memory_container;
-        }
-        else if(stack_elem->type == "expression"){
-            // Evaluate the expression
-            // Set the vector of stack elements to the next pointer Ast Node
-            cout << "Evaluating the expression" << endl;
-            if(stack_elem->stack_elem_ptr_ls.size() == 0){
-                // If the stack element has not been evaluated, then we will add the next element to the stack
-                shared_ptr<expression> expression_ptr = dynamic_pointer_cast<expression>(stack_elem->ast_node);
-                shared_ptr<AstNode> pointing_expression = expression_ptr->get_expression();
-                // As of now we have either a binary expression, unary expression, literal. or an assignment expression
-                shared_ptr<stackElement> next_stack_elem = addElementToStack(pointing_expression);
-                stack_elem->stack_elem_ptr_ls.push_back(next_stack_elem);// Now this elements value is determined by the next stack element
 
-            }
-            else{
-                // If the stack element has been evaluated, then we will set the memory container and pop the stack element
-                stack_elem->memory_container = stack_elem->stack_elem_ptr_ls[0]->memory_container;
-                computation_stack.pop();
-            }   
-        }        
-        else if(stack_elem->type == "binary"){
-            cout<< "Evaluating the binary expression" << endl;
-            // Evaluate the binary expression
-            shared_ptr<binaryExpression> binaryExpression_ptr = dynamic_pointer_cast<binaryExpression>(stack_elem->ast_node);
-            // If the left and right side have not been added
-            if(stack_elem->stack_elem_ptr_ls.size() == 0){
-                // Get the left and right side of the binary expression, and push them to the stack
-                shared_ptr<AstNode> left = binaryExpression_ptr->get_leftSide();
-                shared_ptr<AstNode> right = binaryExpression_ptr->get_rightSide();
-                shared_ptr<stackElement> left_stack_elem = addElementToStack(left);
-                shared_ptr<stackElement> right_stack_elem = addElementToStack(right);
-                stack_elem->stack_elem_ptr_ls.push_back(left_stack_elem);
-                stack_elem->stack_elem_ptr_ls.push_back(right_stack_elem);                
-            }   
-            else{     
-                /* In this case the left and right side have been added and evaluated, thus 
-                we will evaluate the binary expression. Note that for nums, boolean and other primitive types
-                we don't add a new path for the operations we just evaluate them. 
-                */
-               // Get the left and right memory container 
-               shared_ptr<Memory> left_memory = stack_elem->stack_elem_ptr_ls[0]->memory_container;
-               shared_ptr<Memory> right_memory = stack_elem->stack_elem_ptr_ls[1]->memory_container;
-                // Get the operation
-                string operation = binaryExpression_ptr->get_operation();
-                // If the memory is a primitive then we will evaluate the operation
-                shared_ptr<Memory> result = evaluateBinaryExpressionPrimitive(left_memory, right_memory, operation);
-                if(result){
-                    // If the result is not null, then we will set the memory container and pop the stack element
-                    stack_elem->memory_container = result;
-                    computation_stack.pop();
-                }  
-                else{  
-                    // If the result is null(not a primitive type), then we know that the left and right side are not primitive types
-                    // So we have to add a new path to the operator, and yield the current path
-                    // TODO :- Add the path to the operator
-                }
-            }   
-        }
-        // variable case 
-        else if(stack_elem->type == "variable"){
-            cout << "Evaluating the variable" << endl;
-            // Get the variable name
-            shared_ptr<variable> variable_ptr = dynamic_pointer_cast<variable>(stack_elem->ast_node);
-            string variable_name = variable_ptr->get_variableName();
-            // Get the memory container
-            shared_ptr<Memory> memory = memory_ptr->get_memory(variable_name);
-            // Set the memory container
-            stack_elem->memory_container = memory;
-            computation_stack.pop();
-        }
-        // Assignment case
-        else if(stack_elem->type == "assignment"){
-            cout << "Evaluating the assignment" << endl;
-            // If we are first evaluating the assignment, then we will add the expression to the stack
 
-            if (stack_elem->stack_elem_ptr_ls.size() == 0){
-                shared_ptr<assignmentExpression> assignmentExpression_ptr = dynamic_pointer_cast<assignmentExpression>(stack_elem->ast_node);
-                // Get the variable name
-                string variable_name = assignmentExpression_ptr->get_variableName();
-                // Get the expression
-                shared_ptr<AstNode> expression = assignmentExpression_ptr->get_expression();
-                // Add the expression to the stack
-                shared_ptr<stackElement> expression_stack_elem = addElementToStack(expression);
-                stack_elem->stack_elem_ptr_ls.push_back(expression_stack_elem);
-            }
-            else{
-                // If the expression has been evaluated, then we will set the memory container
-                shared_ptr<Memory> expression_memory = stack_elem->stack_elem_ptr_ls[0]->memory_container;
-                shared_ptr<assignmentExpression> assignmentExpression_ptr = dynamic_pointer_cast<assignmentExpression>(stack_elem->ast_node);
-                // Get the variable name
-                string variable_name = assignmentExpression_ptr->get_variableName();
-                // Set the memory container
-                memory_ptr->set_memory(variable_name, expression_memory);
-                // The assignment should return the value of the variable
-                stack_elem->memory_container = expression_memory;
-                computation_stack.pop();   
-            }
- 
-        }
-        // Now we will go to literal types 
-        // else if(stack_elem->type == "string"){
-        //     cout << "Evaluating the string" << endl;
-        //     shared_ptr<stringLiteral> stringLiteral_ptr = dynamic_pointer_cast<stringLiteral>(stack_elem->ast_node);
-        //     string string_literal = stringLiteral_ptr->get_stringLiteral();
-        //     shared_ptr<String> string_ptr = shared_ptr<String>(new String(string_literal));
-        //     stack_elem->memory_container = string_ptr;
-        //     computation_stack.pop();
-        // }
-        else if(stack_elem->type == "num"){
-            cout << "Evaluating the Number" << endl;
-            // Dynamically cast to see if the number is a decimal or an integer
-            if(dynamic_pointer_cast<integerLiteral>(stack_elem->ast_node)){
-                shared_ptr<integerLiteral> integerLiteral_ptr = dynamic_pointer_cast<integerLiteral>(stack_elem->ast_node);
-                string integer_literal = integerLiteral_ptr->get_integerLiteral();
-                shared_ptr<Num> int_ptr = shared_ptr<Num>(new Num(integer_literal));
-                stack_elem->memory_container = int_ptr;
-                computation_stack.pop();
-            } 
-            else if(dynamic_pointer_cast<decimalLiteral>(stack_elem->ast_node)){
-                shared_ptr<decimalLiteral> decimalLiteral_ptr = dynamic_pointer_cast<decimalLiteral>(stack_elem->ast_node);
-                string decimal_literal = decimalLiteral_ptr->get_decimalLiteral();
-                cout<<"Decimal Literal: "<<decimal_literal<<endl;
-                shared_ptr<Num> decimal_ptr = shared_ptr<Num>(new Num(decimal_literal));
-                stack_elem->memory_container = decimal_ptr;
-                computation_stack.pop();
-            }   
-            else{ 
-                cerr << "Error, unknown number type" << endl;
-                exit(1);
-            }
-        }
-        else if(stack_elem->type == "char"){
-            cout << "Evaluating the char" << endl;
-            shared_ptr<charLiteral> charLiteral_ptr = dynamic_pointer_cast<charLiteral>(stack_elem->ast_node);
-            char char_literal = charLiteral_ptr->get_charLiteral();
-            shared_ptr<Char> char_ptr = shared_ptr<Char>(new Char(char_literal));
-            stack_elem->memory_container = char_ptr;
-            computation_stack.pop();
-        }
-        else if(stack_elem->type == "bool"){
-            cout << "Evaluating the bool" << endl;
-            shared_ptr<boolLiteral> boolLiteral_ptr = dynamic_pointer_cast<boolLiteral>(stack_elem->ast_node);
-            bool bool_literal = boolLiteral_ptr->get_boolLiteral();
-            shared_ptr<Bool> bool_ptr = shared_ptr<Bool>(new Bool(bool_literal));
-            stack_elem->memory_container = bool_ptr;
-            computation_stack.pop();
-        }
-        else if(stack_elem->type == "list"){
-            cout << "Evaluating the list" << endl;
-            shared_ptr<list> list_ptr = dynamic_pointer_cast<list>(stack_elem->ast_node);
-            vector<shared_ptr<AstNode> > elements = list_ptr->get_list_node();
-            // A list is a bunch of expressions that will be evaluated
-            // If the stack element is not allocated, then we will add the elements to the stack
+shared_ptr< vector<shared_ptr<stackElement> > Path :: initializeStack(shared_ptr<AstNode> expression_node){
+    /* 
+    In this case the stack has not been found in the cache, thus we will initialize the stack 
+    */ 
 
-            if(!stack_elem->memory_container){
-                for(auto elem : elements){
-                    shared_ptr<stackElement> elem_stack_elem = addElementToStack(elem);
-                    stack_elem->stack_elem_ptr_ls.push_back(elem_stack_elem);
-                }
-                shared_ptr<List> list_ptr = shared_ptr<List>(new List);
-                stack_elem->memory_container = list_ptr;
-            }
-            else{
-                // If the stack element is allocated, then we will set the memory container
-                shared_ptr<List> list_ptr = dynamic_pointer_cast<List>(stack_elem->memory_container);
-                for(auto elem : stack_elem->stack_elem_ptr_ls){
-                    list_ptr->add_list_node(elem->memory_container);
-                }
-                stack_elem->memory_container = list_ptr;
-                computation_stack.pop();
-            }
-        }
-        else{
-            cerr << "Error, unknown stack element type" << endl;
-            exit(1);
-        }
-    }
+   // We will add all the elements tot he stack 
+   bool pushed = true;
+
+   while(pushed){
+    // If there is a push, then we will continue to push
+    
+   }
+
 }
+void Path :: update_computation_stack(shared_ptr<Memory> output){
+    /*
+        This function will update the computation stack by setting the memory container of the top stack element 
+        then decrementing the execution pointer.
+    */
 
-int Path :: run(){
-
+    shared_ptr<stackElement> stack_elem = computation_stack->back();
+    stack_elem->memory_container = output;
+    execution_ptr--;
+}
+shared_ptr<operatorReturn> Path :: run(){
     // Here we will define the path logic, the path logic is the main logic for running graph objects
     if(current_time == 0){
-        // Set the memory container
-        memory_ptr = shared_ptr<Memory>(new Memory);
+
         // traverse the memory ast and set the memory container
         shared_ptr<AstNode> memory = graph_ptr->get_memory_def();
         set_memory(memory);
@@ -500,7 +358,6 @@ int Path :: run(){
     while(current_time < max_time){
         // Get graph_nodes transitions for the current node 
         vector<transition> transitions = graph_ptr->get_transitions(current_node);
-        cout<< "Current Node: " << current_node << endl;
         bool has_transitioned = false;
         for(int i = current_transition; i < transitions.size(); i++){
             bool valid = true;
@@ -521,7 +378,7 @@ int Path :: run(){
                 // Evaluate the condition it will return a boolean memory container
                 shared_ptr<Memory> condition_result = evaluateExpression();
                 if(!condition_result){
-                    return 0; // Yields to Pending(if normal yield would be 0), thus the path will be set to pending until a specific condition or operation is met
+                    return nullptr; // Yields to Pending(if normal yield would be 0), thus the path will be set to pending until a specific condition or operation is met
                 }
                 // Dynamic cast the memory container to a boolean, if it is not a boolean then the condition is invalid
                 if(!dynamic_pointer_cast<Bool>(condition_result)){
@@ -552,11 +409,21 @@ int Path :: run(){
                 }
 
                 shared_ptr<expression> operation_ptr = dynamic_pointer_cast<expression>(transition.operations[o]);
+                
+                auto start = std::chrono::high_resolution_clock::now();
                 // Evaluate the operation
                 shared_ptr<Memory> operation_result = evaluateExpression();
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+                std::cout << "Execution took: " << duration.count() << " ns\n";
+
+                // Case where the operation result is a memory container(must be a graph call)
                 if(!operation_result){
-                    return 0; // Yields to Pending(if normal yield would be 0), thus the path will be set to pending until a specific condition or operation is met
+                    // This means that the operation is a graph call, and the path will yield
+                    return operator_return;
                 }
+
                 // If the operation result is a memory container, then we will set the memory container
                 current_operation++;
             }
@@ -575,16 +442,33 @@ int Path :: run(){
     // If the current node is the same as the previous node, then we will return 0. As the path is stuck
     // In the case where the current node is an accept node, then we will return 1
     if(graph_ptr->is_accept_node(current_node) && !has_transitioned){
-        cout << "Accept Node" << endl;
-        cout<< current_node << endl;
-        // Let us assume there is a symbol called currentVal in the memory container and it is an int 
-        shared_ptr<Num> currentVal = dynamic_pointer_cast<Num>(memory_ptr->get_memory("a"));
-        cout << "Val: " << currentVal->to_string(1)<<endl;
-        return 1;
+        //Create a operator return
+        operator_return = shared_ptr<operatorReturn>(new operatorReturn);
+        operator_return->status = 1;
+        // Now if an accept routine is defined then we will run it and return the container there
+        if(graph_ptr->get_accept()){
+            shared_ptr<AstNode> accept_routine = graph_ptr->get_accept();
+            //Dynamically cast it to an accept node 
+            shared_ptr<accept> accept_routine_ptr = dynamic_pointer_cast<accept>(accept_routine);
+
+            // We will take the expression that the accept node points to and evaluate it
+            if(accept_routine_ptr->get_expression()){
+                shared_ptr<stackElement> stack_elem = addElementToStack(accept_routine_ptr->get_expression());
+                shared_ptr<Memory> output = evaluateExpression();
+                operator_return->memory_containers.push_back(output);
+                // Just for deubggin n let us assume the memory contianer is a num
+                cout << "Graph Id: " << id << endl;
+                cout << "Memory type: " << output->get_type() << endl;
+                cout<< "Memory value: " << dynamic_pointer_cast<Num>(output)->to_string(50) << endl;
+            }
+            
+            return operator_return;
+        }
+        return nullptr; // TODO change this to the memory container
     }
     else if(!has_transitioned){
         cout << "Rejected" << endl;
-        return 0;
+        return nullptr; // TODO change this to the memory container
     }
 
 

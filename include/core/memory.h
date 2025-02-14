@@ -49,8 +49,13 @@ class Memory : public AutomaObj{
             return immutable;
         }
         virtual shared_ptr<Memory> get_memory(string symbol){
-            // Get the memory container for a symbol
-            return map[symbol];
+            // Get the memory container for a symbol, if it does not exist return a nullptr
+            if(map.find(symbol) != map.end()){
+                return map[symbol];
+            }
+            else {
+                return nullptr;
+            }
         }
         virtual void set_memory(string symbol, shared_ptr<Memory> memory){
             // Set the memory container for a symbol

@@ -25,6 +25,7 @@ void RunTime :: run(string input_file){
             shared_ptr<program> program_ptr = dynamic_pointer_cast<program>(ast_ptr);
             //Now we will cast the graphDef ast to a graphDef node
             vector<shared_ptr<AstNode>> graphDecelerations = program_ptr->get_graphDec();
+            // Loop through the graph decelerations and create the graphs
             for(auto graphDef_ptr : graphDecelerations){
                 shared_ptr<graphDec> graphDec_ptr = dynamic_pointer_cast<graphDec>(graphDef_ptr);
                 shared_ptr<AstNode> graphDef_node_ptr = graphDec_ptr->getGraphDef();
@@ -39,7 +40,7 @@ void RunTime :: run(string input_file){
                 exit(1);
             }
             // Now we will create a path and add it to the operator
-            shared_ptr<Path> path = shared_ptr<Path>(new Path(0, graph->get_start_node(), 1000000, 0, graph));
+            shared_ptr<Path> path = shared_ptr<Path>(new Path(0, graph->get_start_node(), 1000000, 0, graph, -1));// -1 it does not return to any path
             operator_ptr->add_path(path);
             operator_ptr->run();// Now it is up to the operator to run the paths
         } 

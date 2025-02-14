@@ -40,55 +40,66 @@ using namespace std;
     }
 */
 struct stackElement{
+    char status=0;// In special cases we will have a status
     shared_ptr<Memory> memory_container;
     string type;
     vector<shared_ptr<stackElement> > stack_elem_ptr_ls;
     shared_ptr<AstNode> ast_node;
 };
-struct operatorReturn{
 /*
-This will have two values 
+Here we define the return value from the operator
 */
-int status; 
-string graph_name;
-shared_ptr<Memory> memory_containers; // The argument to be passed to the graph
+struct operatorReturn{
+    /*
+    This will have two values 
+    */
+    int status; 
+    string graph_name;
+    vector<shared_ptr<Memory>> memory_containers; // The argument to be passed to the graph
 };
+
 class Path{
     private:
     int id;
+    int id_to_return;
     string current_node;
     shared_ptr<Graph> graph_ptr;
     int max_time;
     int current_time;
-    shared_ptr<Memory> memory_ptr;
+    shared_ptr<Memory> memory_ptr=nullptr;
     unordered_map<int, vector<string> > memory_log;
-    stack<shared_ptr<stackElement> > computation_stack;
+    vector<shared_ptr<stackElement>>* computation_stack;
+    unordered_map<string, shared_ptr<vector<shared_ptr<stackElement>>> > cache_stack;// A cache for the stacks, we will use this for computation
+    int execution_ptr = 0;// The current execution pointer of the stack
+
+    int condition_ptr = 0;
+    int operation_ptr = 0;
+    int accept_ptr = 0;
+    
     int current_condition = 0; // The current condition being evaluated
     int current_operation = 0; // The current operation being evaluated
     int current_transition = 0; // The current transition being evaluated
-    operatorReturn operator_return; // The return value from the operator
+    shared_ptr<operatorReturn> operator_return; // The return value from the operator
 
     shared_ptr<Memory> input; // The input memory container by the operator(if yielded or the path is created as a result of a graph call)
-    int path_to_yield = -1; // The path to yield to the operator, in case of a graph call
-
+    
+    // This will store the current yield(if there is any)
+    operatorReturn yield;
     public:
-        Path(int id, string current_node, int max_time, int current_time, shared_ptr<Graph> graph_ptr)
-        : id(id), current_node(current_node), max_time(max_time), current_time(current_time), graph_ptr(graph_ptr) {}
+        Path(int id, string current_node, int max_time, int current_time, shared_ptr<Graph> graph_ptr, int id_to_return)
+        : id(id), current_node(current_node), max_time(max_time), current_time(current_time), graph_ptr(graph_ptr), id_to_return(id_to_return){}
 
-        int run();
+        shared_ptr<operatorReturn> run();
         void add_yield();
         shared_ptr<Memory> evaluateExpression();
-        shared_ptr<Memory> evaluateBinaryExpressionPrimitive(shared_ptr<Memory> left, shared_ptr<Memory> right, string operations);
+        shared_ptr<Memory> evaluateBinaryExpressionPrimitive(shared_ptr<Memory>& left, shared_ptr<Memory>& right, string& operations);
+        shared_ptr< vector<shared_ptr<stackElement> >> initializeStack(shared_ptr<AstNode> expression_node);
         shared_ptr<stackElement> addElementToStack(shared_ptr<AstNode> ast_node);
+        void addArgument(vector<shared_ptr<Memory>> arg, shared_ptr<Graph> graph_ptr);
         void set_memory(shared_ptr<AstNode> memory);
+        void update_computation_stack(shared_ptr<Memory> output);
         void set_input(shared_ptr<Memory> input){
             this->input = input;
-        }
-        void set_path_to_yield(int path_id){
-            path_to_yield = path_id;
-        }
-        int get_path_to_yield(){
-            return path_to_yield;
         }
         int get_id(){
             return id;
@@ -111,8 +122,8 @@ class Path{
         void change_symbol(string symbol, shared_ptr<Memory> memory){// Change a memory symbol in the memory container
             memory_ptr->set_memory(symbol, memory);
         }
-
-    
-
+        int get_id_to_return(){
+            return id_to_return;
+        }   
 
 };

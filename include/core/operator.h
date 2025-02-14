@@ -21,11 +21,11 @@ using namespace std;
 class Operator{
     private:
     queue<shared_ptr<Path> > path_queue;
-    queue<shared_ptr<Path> > path_pending_queue;
+    unordered_map<int, shared_ptr<Path>> path_pending_queue; // T
     shared_ptr<Path> current_path;
     unordered_map<string, shared_ptr<AstNode>> graphDecMap;// This will store the root ast node declarations for the graphs
     unordered_map<string, shared_ptr<Graph> > graph_map;// This will store the graph objects
-
+    int path_id = 0;
     public:
 
     void add_path(shared_ptr<Path> path){

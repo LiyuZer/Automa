@@ -41,6 +41,8 @@ public:
     void explore_list(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
     void explore_list_slice(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
     void explore_list_access(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
+    void explore_accept(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
+    void explore_graphCall(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue);
     shared_ptr<AstNode> explore_first_class(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue);
     shared_ptr<AstNode> recursive_expression_explorer(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue, string current_level);
     shared_ptr<AstNode> explore_term(shared_ptr<ParseNode> root_node, queue<astNodeQueueElem>& astNodeQueue);

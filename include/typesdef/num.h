@@ -7,6 +7,8 @@
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
 #include "../typesdef/bool.h"
+#include <chrono>    // For high-resolution time points and durations
+#include <ctime>     // For traditional C-style time functions
 
 /*
 This is the file for defining the num type(one numbers class to control them all), because I am crazy I will make them arbitrary precision. 
@@ -576,7 +578,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             digits = digits.substr(1);
         }
     }     
-    shared_ptr<Num> add_internal(shared_ptr<Num> memory){
+    shared_ptr<Num> add_internal(vector<uint64_t>& right, bool is_negative, int exponent_right){
         /* 
         We will add the two vectors of 64 bit integers
         This will be effectively a full adder lol. 
@@ -590,49 +592,45 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         The trickiest part is dealing with the decimal, we will have to pad the smaller number with virtual zeros 
         and then add them together, as if they were the same size.
          */
-        // Cast to Int
-        if(!dynamic_pointer_cast<Num>(memory)){
-            cerr << "Error, trying to add a non integer to an integer" << endl;
-            exit(1);
-        }
-        shared_ptr<Num> int_memory = dynamic_pointer_cast<Num>(memory);
+
         bool this_negative = negative;
-        bool other_negative = int_memory->get_negative();
+        bool other_negative = is_negative;
+        
  
         if(!this_negative && !other_negative){
             int new_exponent = 0;
             // Both are positive
-            vector<uint64_t> result = add_same_sign(digits, int_memory->get_digits(), exponent, int_memory->get_exponent(), new_exponent);
-            return shared_ptr<Num>(new Num(result, false, new_exponent));
+            
+            return shared_ptr<Num>(new Num(add_same_sign(digits, right, exponent, exponent_right, new_exponent), false, new_exponent));
         }
         else if(this_negative && !other_negative){
             // This is negative, other is positive
             int new_exponent = 0;
             //Take whichever is greater 
-            bool this_greater = is_greater_or_equal(digits, int_memory->get_digits(), exponent, int_memory->get_exponent());
+            bool this_greater = is_greater_or_equal(digits, right, exponent, exponent_right);
             if(this_greater){
-                return shared_ptr<Num>(new Num(subtract_different_sign(digits, int_memory->get_digits(), exponent, int_memory->get_exponent(), new_exponent), true, new_exponent));
+                return shared_ptr<Num>(new Num(subtract_different_sign(digits, right, exponent, exponent_right, new_exponent), true, new_exponent));
             }
             else{
-                return shared_ptr<Num>(new Num(subtract_different_sign(int_memory->get_digits(), digits, int_memory->get_exponent(), exponent, new_exponent), false, new_exponent));
+                return shared_ptr<Num>(new Num(subtract_different_sign(right, digits, exponent_right, exponent, new_exponent), false, new_exponent));
             }
         }
         else if(!this_negative && other_negative){
             // This is positive, other is negative
             // Take whichever is greater
             int new_exponent = 0;
-            bool this_greater = is_greater_or_equal(digits, int_memory->get_digits(), exponent, int_memory->get_exponent());
+            bool this_greater = is_greater_or_equal(digits, right, exponent, exponent_right);
             if(this_greater){
-                return shared_ptr<Num>(new Num(subtract_different_sign(digits, int_memory->get_digits(), exponent, int_memory->get_exponent(), new_exponent), false, new_exponent));
+                return shared_ptr<Num>(new Num(subtract_different_sign(digits, right, exponent, exponent_right, new_exponent), false, new_exponent));
             }
             else{
-                return shared_ptr<Num>(new Num(subtract_different_sign(int_memory->get_digits(), digits, int_memory->get_exponent(), exponent, new_exponent), true, new_exponent));
+                return shared_ptr<Num>(new Num(subtract_different_sign(right, digits, exponent_right, exponent, new_exponent), true, new_exponent));
             }
         }
         else{
             // Both are negative
             int new_exponent = 0;
-            vector<uint64_t> result = add_same_sign(digits, int_memory->get_digits() , exponent, int_memory->get_exponent(), new_exponent);
+            vector<uint64_t> result = add_same_sign(digits, right, exponent, exponent_right, new_exponent);
             return shared_ptr<Num>(new Num(result, true, new_exponent));
 
         }
@@ -641,9 +639,12 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         // Essentially the same as add except for the other memory we will negate it
         // and then call add lol(you see what I did there)
         shared_ptr<Num> int_memory = dynamic_pointer_cast<Num>(other_memory);
-        int_memory->set_negative(!int_memory->get_negative());
-        return add(int_memory);
-
+        
+        // Take the negative of the other memory
+        bool right_negative = int_memory->get_negative();
+        vector<uint64_t> right_digits = int_memory->get_digits();
+        int right_exponent = int_memory->get_exponent();
+        return add_internal(right_digits, !right_negative, right_exponent);
     }
     shared_ptr<Num> mul_internal(shared_ptr<Num> other_memory){
         /*
@@ -714,7 +715,7 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         return true;
     }
 
-    vector<uint64_t> add_same_sign(vector<uint64_t> digits1, vector<uint64_t> digits2, int exponent1, int exponent2, int& new_exponent){
+    vector<uint64_t> add_same_sign(vector<uint64_t>& digits1, vector<uint64_t>& digits2, int& exponent1, int& exponent2, int& new_exponent){
         /* 
             Same sign addition
             We have two nums, with exponents that we want to add together. 
@@ -722,30 +723,32 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
             We will first add the decimal parts, and then the integer parts. 
             We take the carry over from the decimal part and add it to the integer part. 
         */
+
+
         vector<uint64_t> result;
         __uint128_t carry = 0;
         int max_exponent = max(exponent1, exponent2);
 
-        // Extract the decimal parts 
-        vector<uint64_t> decimal1 = vector<uint64_t>(digits1.begin(), digits1.begin() + exponent1);
-        vector<uint64_t> decimal2 = vector<uint64_t>(digits2.begin(), digits2.begin() + exponent2);
+
         int min_size = min( exponent1, exponent2);
         // Add the remaining digits specifically, remaining digits are lesser significant ones 
-        if(decimal1.size() > decimal2.size()){
+        if(exponent1 > exponent2){
             // If it is then directly add the remaining digits, without any carry
             // Again we will go from the end of decimal1 to the min index
-            for(int i = decimal1.size() - 1; i >= min_size ; i--){
-                result.push_back(decimal1[i]);
+            int i = exponent1 - 1;
+            for(; i >= min_size ; i--){
+                result.push_back(digits1[i]);
             }
         }
-        else if( decimal2.size() > decimal1.size()){
-            for(int i = decimal2.size() - 1; i >= min_size ; i--){
-                result.push_back(decimal2[i]);
+        else if( exponent2 > exponent1){
+            int i = exponent2 - 1;
+            for(; i >= min_size ; i--){
+                result.push_back(digits2[i]);
             }
         } 
         // Now add but in reverse
         for (int i = min_size - 1; i >= 0; i--){
-            __uint128_t sum = (__uint128_t)decimal1[i] + (__uint128_t)decimal2[i] + carry;
+            __uint128_t sum = (__uint128_t)digits1[i] + (__uint128_t)digits2[i] + carry;
             carry = sum >> 64;
             result.push_back(sum);
         }
@@ -755,27 +758,58 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         }
         reverse(result.begin(), result.end());
 
-        // Now we will add the integer parts
-        vector<uint64_t> integer1 = vector<uint64_t>(digits1.begin() + exponent1, digits1.end());
-        vector<uint64_t> integer2 = vector<uint64_t>(digits2.begin() + exponent2, digits2.end());
 
-        // Add padding 
-        while(integer1.size() < integer2.size()){
-            integer1.push_back(0);
+        int integer1_size = digits1.size() - exponent1;
+        int integer2_size = digits2.size() - exponent2;
+
+
+        if(integer1_size > integer2_size){
+            int diff = integer1_size - integer2_size;
+            for(int i = 0 ; i < diff; i++){
+                result.push_back(digits1[exponent1 + i]);
+            }
+
+            for(int i = 0 ; i < integer2_size; i++){ // Most significant digit is last in the vector
+                __uint128_t sum = (__uint128_t)digits1[exponent1 + i + diff] + (__uint128_t)digits2[exponent2 + i] + carry;
+                carry = sum >> 64;
+                result.push_back(sum);
+            }
+            if(carry > 0){
+                result.push_back(carry);
+            }  
+            new_exponent = max_exponent;
+
         }
-        while(integer2.size() < integer1.size()){
-            integer2.push_back(0);
+        else if(integer2_size > integer1_size){
+            int diff = integer2_size - integer1_size;
+            for(int i = 0 ; i < diff; i++){
+                result.push_back(digits2[exponent2 + i]);
+            }
+
+            for(int i = 0 ; i < integer1_size; i++){ // Most significant digit is last in the vector
+                __uint128_t sum = (__uint128_t)digits1[exponent1 + i] + (__uint128_t)digits2[exponent2 + i + diff] + carry;
+                carry = sum >> 64;
+                result.push_back(sum);
+            }  
+            if(carry > 0){
+                result.push_back(carry);
+            }
+            new_exponent = max_exponent;
         }
-        for(int i = 0 ; i < integer1.size(); i++){ // Most significant digit is last in the vector
-            __uint128_t sum = (__uint128_t)integer1[i] + (__uint128_t)integer2[i] + carry;
-            carry = sum >> 64;
-            result.push_back(sum);
+        else{
+            // Same Size integers
+            for(int i = 0 ; i < integer1_size; i++){ // Most significant digit is last in the vector
+                __uint128_t sum = (__uint128_t)digits1[i + exponent1] + (__uint128_t)digits2[i + exponent2] + carry;
+                carry = sum >> 64;
+                result.push_back(sum);
+            }
+            // Add the carry to the result
+            if(carry > 0){
+                result.push_back(carry);
+            }
+            new_exponent = max_exponent;
         }
-        // Add the carry to the result
-        if(carry > 0){
-            result.push_back(carry);
-        }
-        new_exponent = max_exponent;
+
         return result;
     }
     vector<uint64_t> subtract_different_sign(vector<uint64_t> left, vector<uint64_t> right, int exponent1, int exponent2, int& new_exponent){
@@ -866,8 +900,9 @@ string long_divide_power_2(string dividend, int base_2, uint64_t& final_remainde
         return negative;
     }
     // Now define all the operations
-    shared_ptr<Num> add(shared_ptr<Num> int_memory){
-        return add_internal(int_memory);
+    shared_ptr<Num> add(shared_ptr<Num>& int_memory){
+        // Add the two numbers
+        return add_internal(int_memory->get_digits(), int_memory->get_negative(), int_memory->get_exponent());
     }
     shared_ptr<Num> sub (shared_ptr<Num> int_memory){
         // Subtract the two numbers
