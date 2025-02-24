@@ -25,7 +25,7 @@ Each graph has two modes of possible traversal: deterministic and non-determinis
 
 These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer does not worry about them.
 
-The targetted areas are in order, as well as machine learning and web server workflows. The goal is to create a swift and efficient language for these purposes.
+The targetted areas are order, machine learning, and distributed systems. The goal is to create a swift and efficient language for these purposes.
 
 These are the priorities in order :
   All computation is graph-based
