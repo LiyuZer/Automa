@@ -90,8 +90,6 @@ I want Automa to be an accelerated programming language, so the most logical nex
 2. **FPGA Integration**
 The future goal of the language is to have natural speedups from working with external accelerators, the goal being to have a language that is accelerated naturally by your hardware. You won't have to worry about anything!
 
-**The first-ever hardware-accelerated programming language**
-
 After each version, I will release and announce the changes. The whole project should take about 5 years. I will gladly accept any contributors, it would be great help, I want to accelerate the process!
 Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to persevere. 
    
