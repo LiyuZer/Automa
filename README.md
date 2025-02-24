@@ -70,7 +70,7 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
   3. **IO operations functioning**
   4. **File operations functioning**
       
-  ### Mile 2 ( 2 Years Months)
+  ### Mile 2 ( 2 Years)
   1. **Modules library**
   2. **Add Type System** very important for the future
   3. **C++ API for development**
