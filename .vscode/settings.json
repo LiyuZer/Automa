@@ -56,6 +56,22 @@
         "memory_resource": "cpp",
         "queue": "cpp",
         "type_traits": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "exception": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "system_error": "cpp",
+        "utility": "cpp",
+        "format": "cpp",
+        "numbers": "cpp",
+        "span": "cpp"
     }
 }

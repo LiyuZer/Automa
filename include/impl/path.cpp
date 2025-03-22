@@ -316,22 +316,26 @@ shared_ptr<Memory> Path:: evaluateBinaryExpressionPrimitive(shared_ptr<Memory>& 
 
 }
 
-
-
-shared_ptr< vector<shared_ptr<stackElement> > Path :: initializeStack(shared_ptr<AstNode> expression_node){
-    /* 
-    In this case the stack has not been found in the cache, thus we will initialize the stack 
-    */ 
-
-   // We will add all the elements tot he stack 
-   bool pushed = true;
-
-   while(pushed){
-    // If there is a push, then we will continue to push
+shared_ptr<Memory> Path :: evaluateExpression(){
     
-   }
-
+    return nullptr;
 }
+
+
+// shared_ptr< vector<shared_ptr<stackElement> > Path :: initializeStack(shared_ptr<AstNode> expression_node){
+//     /* 
+//     In this case the stack has not been found in the cache, thus we will initialize the stack 
+//     */ 
+
+//    // We will add all the elements tot he stack 
+//    bool pushed = true;
+
+//    while(pushed){
+//     // If there is a push, then we will continue to push
+    
+//    }
+
+// }
 void Path :: update_computation_stack(shared_ptr<Memory> output){
     /*
         This function will update the computation stack by setting the memory container of the top stack element 
@@ -366,11 +370,11 @@ shared_ptr<operatorReturn> Path :: run(){
 
             for(int c = current_condition; c < transition.conditions.size(); c++){
                 // We are setting the expression to the stack if the stack is empty(no previous yield)
-                if(computation_stack.empty()){
+                if(computation_stack->empty()){
                     shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
                     stack_elem->type = "expression"; // We will set the type to expression
                     stack_elem->ast_node = transition.conditions[c]; // The ast node will be the first condition
-                    computation_stack.push(stack_elem);
+                    computation_stack->push_back(stack_elem);
                 }
 
 
@@ -401,11 +405,11 @@ shared_ptr<operatorReturn> Path :: run(){
         if(all_conditions){
             for(int o = current_operation; o < transition.operations.size(); o++){
                 // We are setting the expression to the stack if the stack is empty(no previous yield)
-                if(computation_stack.empty()){
+                if(computation_stack->empty()){
                     shared_ptr<stackElement> stack_elem = shared_ptr<stackElement>(new stackElement);
                     stack_elem->type = "expression"; // We will set the type to expression
                     stack_elem->ast_node = transition.operations[o]; // The ast node will be the first condition
-                    computation_stack.push(stack_elem);
+                    computation_stack->push_back(stack_elem);
                 }
 
                 shared_ptr<expression> operation_ptr = dynamic_pointer_cast<expression>(transition.operations[o]);

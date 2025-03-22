@@ -3,7 +3,7 @@
 #include "ast_tree.h"
 #include "../parser/parser.h"
 #include "ast_node.h"
-
+#include <functional>
 
 shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> root_node){
 
@@ -75,11 +75,11 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
                 astNodeQueue.push(elem);
                 }
 
-            graph_def_vec[0]->addChildrenVec("memoryDef", node_vec);
+            graph_dec_ptr->addChildrenVec("parameterDef", node_vec); // We use graph_dec_ptr because we are in the graphDec node for the parameterDef
             if(node_vec.size() > 0){
-                shared_ptr<memoryDef> memoryDef_ptr = shared_ptr<memoryDef>(new memoryDef);
-                graph_def_ptr->set_memoryDef(memoryDef_ptr);
-                astNodeQueueElem elem = astNodeQueueElem(memoryDef_ptr,node_vec[0]);
+                shared_ptr<parameterDef> parameterDef_ptr = shared_ptr<parameterDef>(new parameterDef);
+                graph_def_ptr->set_parameterDef(parameterDef_ptr);
+                astNodeQueueElem elem = astNodeQueueElem(parameterDef_ptr,node_vec[0]);
                 astNodeQueue.push(elem);
                 }
 
@@ -101,21 +101,10 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
         }
     }
     while(!astNodeQueue.empty()){
-        /*
-        Here we will have an iterative method for creating out Abstract syntax tree! Fun! 
-        The idea is to perform essentially a breadth first search of our parse tree 
-        then add the children of these nodes to the queue. The  queue element will have both the 
-        ast node and the parse node, thus we pop the top element explore its parse node, connect 
-        the ast node to its children and then push that node to the end of the new queue.
-
-        Each AST node type will have it's associated function for exploration that will return  
-        a vector of AST nodes we will then push 
-        */
-
        astNodeQueueElem top = astNodeQueue.front();
        string type = top.astNodeptr->get_type();
-       if(type == "memoryDef"){
-            explore_memoryDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
+       if(type == "parameterDef"){
+            explore_parameterDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
        else if(type == "nodeDef"){
             explore_nodeDef(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
@@ -129,9 +118,6 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        }
        else if(type == "transitionDefStatements"){
             explore_transitionDefStatements(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
-       }
-       else if(type == "variableDefintions"){
-            explore_variableDefinitions(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
        }
        else if(type == "nodeDefStatements"){
             explore_nodeDefStatements(astNodeQueue.front().parseNodeptr,astNodeQueue.front().astNodeptr,  astNodeQueue);
@@ -172,32 +158,60 @@ shared_ptr<AstNode> AbstractTreeGenerator :: generateTree(shared_ptr<ParseNode> 
        astNodeQueue.pop();
 
     }
-    
+
     return program_node;
 }
 
 
 
-
-void AbstractTreeGenerator:: explore_memoryDef(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
+void AbstractTreeGenerator:: explore_parameterDef(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue){
     /*
-    Here we are exploring a memory def parse node
+    {"parameterItem", {
+        CreateParen('('),
+        CreateRule("varDefenition"), // Condition name
+        CreateParen('('),
+        CreateToken("COMMA"),
+        CreateRule("varDefenition"), // Condition name 
+        CreateParen(')'),
+        CreateSpecialSymbol('*'), // Allow multiple conditions
+        CreateParen(')'),
+        CreateSpecialSymbol('?'), 
+    }},
+    {"varDefenition", {
+        CreateToken("IDENTIFIER"),
+        CreateToken("COLON"),
+        CreateRule("expression"),
+    }},
     */
+
     vector<shared_ptr<ParseNode> > node_vec;
-    root_node->addChildrenVec("tupleItems", node_vec);
+    root_node->addChildrenVec("parameterItem", node_vec);
+
     root_node = node_vec[0];
     root_node->addChildrenVec("varDefenition", node_vec); 
-    shared_ptr<memoryDef> memory_ptr = dynamic_pointer_cast<memoryDef>(parentAstNode);
-    if(node_vec.size() > 0){
-        for(auto node : node_vec){
-            shared_ptr<variableDefintions> variable_definiton_ptr = shared_ptr<variableDefintions>(new variableDefintions);
-            memory_ptr->add_variableDefinition(variable_definiton_ptr); 
-            astNodeQueueElem elem = astNodeQueueElem(variable_definiton_ptr, node);
+    shared_ptr<parameterDef> param_ptr = dynamic_pointer_cast<parameterDef>(parentAstNode);
+    
+    //Check if varDefenition is empty
+    if(node_vec.size() != 0){
+        for (auto node : node_vec){
+            // Get the variable name
+            vector<shared_ptr<ParseNode> > variable_vec;
+            node->addChildrenVec("IDENTIFIER", variable_vec);
+            string variable = variable_vec[0]->getValue();
+            // Get the expression
+            vector<shared_ptr<ParseNode> > expression_vec;
+            node->addChildrenVec("expression", expression_vec);
+            shared_ptr<expression> expression_ptr = shared_ptr<expression>(new expression);
+            param_ptr->add_parameterItem(expression_ptr, variable);
+            astNodeQueueElem elem = astNodeQueueElem(expression_ptr, expression_vec[0]);
             astNodeQueue.push(elem);
         }
+
     }
 
 }
+
+
 void AbstractTreeGenerator::explore_transitionDef(shared_ptr<ParseNode> root_node, shared_ptr<AstNode> parentAstNode, queue<astNodeQueueElem>& astNodeQueue) {
     /*
     Here we are exploring a transition definition parse node
@@ -1345,10 +1359,10 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
             }
          }
          else if (auto graphNode = dynamic_pointer_cast<graphDef>(node)) {
-            if (auto memory = graphNode->get_memoryDef()) {
+            if (auto param = graphNode->get_parameterDef()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
-                writeNode(memory, nodeId);
-            }
+                writeNode(param, nodeId);
+            }                
             if (auto nodes = graphNode->get_nodeDef()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(nodes, nodeId);
@@ -1366,11 +1380,6 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
             for (const auto& varDef : memoryNode->get_variableDefinitions()) {
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(varDef, nodeId);
-            }
-        } else if (auto varNode = dynamic_pointer_cast<variableDefintions>(node)) {
-            if (auto expr = varNode->get_elem()) {
-                dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
-                writeNode(expr, nodeId);
             }
         } else if (auto node_def = dynamic_pointer_cast<nodeDef>(node)) {
             for (const auto& nodeDefStatement : node_def->get_nodeDefStatements()) {
@@ -1394,7 +1403,7 @@ void write_ast_to_dot(const shared_ptr<AstNode>& root, const string& filename) {
                 writeNode(expr, nodeId);
             }
         } else if (auto transitionNode = dynamic_pointer_cast<transitionDefStatements>(node)) {
-            for (auto conds : transitionNode->get_conditionExpressions()) {
+            if(auto conds = transitionNode->get_conditionExpression()){
                 dotFile << "    node" << currentId << " -> node" << nodeId << "\n";
                 writeNode(conds, nodeId);
             }

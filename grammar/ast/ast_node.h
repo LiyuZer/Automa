@@ -71,41 +71,64 @@ class graphDec : public AstNode {
     }
 };
 
-class graphDef : public AstNode {
-private:
-    shared_ptr<AstNode> memoryDef;
-    shared_ptr<AstNode> afterAccept;
-    shared_ptr<AstNode> afterReject;
-    shared_ptr<AstNode> nodeDef;
-    shared_ptr<AstNode> transitionDef;
-    shared_ptr<AstNode> accept;
+    class parameterDef : public AstNode {
+    private:
+        unordered_map<string, shared_ptr<AstNode> > parameters;
+    
+    public:
+        parameterDef() : AstNode("parameterDef") {}
+    
+        void add_parameterItem(const shared_ptr<AstNode>& expr, string name) {
+            // Assuming the parameter has a name attribute
+            parameters[name] = expr;
+        }
+        unordered_map<string, shared_ptr<AstNode> > get_parameters() {
+            return parameters;
+        }
+        string repr() override {
+            string parameters_str = "{";
+            for (const auto& param : parameters) {
+                parameters_str += param.first + ": " + param.second->repr() + ", ";
+            }
+            parameters_str += "}";
+            return "parameterDef(" + parameters_str + ")";
+        }
+    };
 
-public:
-    graphDef() : AstNode("graphDef") {}
-
-    shared_ptr<AstNode> get_memoryDef() { return memoryDef; }
-    void set_memoryDef(const shared_ptr<AstNode>& mem) { memoryDef = mem; }
-
-    shared_ptr<AstNode> get_afterAccept() { return afterAccept; }
-    void set_afterAccept(const shared_ptr<AstNode>& accept) { afterAccept = accept; }
-
-    shared_ptr<AstNode> get_afterReject() { return afterReject; }
-    void set_afterReject(const shared_ptr<AstNode>& reject) { afterReject = reject; }
-
-    shared_ptr<AstNode> get_nodeDef() { return nodeDef; }
-    void set_nodeDef(const shared_ptr<AstNode>& node) { nodeDef = node; }
-
-    shared_ptr<AstNode> get_transitionDef() { return transitionDef; }
-    void set_transitionDef(const shared_ptr<AstNode>& trans) { transitionDef = trans; }
-
-    shared_ptr<AstNode> get_accept() { return accept; }
-    void set_accept(const shared_ptr<AstNode>& acc) { accept = acc; }
-
-    string repr() override {
-        return "graphDef";
-    }
-};
-
+    class graphDef : public AstNode {
+    private:
+        shared_ptr<AstNode> parameterDef;
+        shared_ptr<AstNode> afterAccept;
+        shared_ptr<AstNode> afterReject;
+        shared_ptr<AstNode> nodeDef;
+        shared_ptr<AstNode> transitionDef;
+        shared_ptr<AstNode> accept;
+    
+    public:
+        graphDef() : AstNode("graphDef") {}
+    
+        shared_ptr<AstNode> get_parameterDef() { return parameterDef; }
+        void set_parameterDef(const shared_ptr<AstNode>& param) { parameterDef = param; }
+    
+        shared_ptr<AstNode> get_afterAccept() { return afterAccept; }
+        void set_afterAccept(const shared_ptr<AstNode>& accept) { afterAccept = accept; }
+    
+        shared_ptr<AstNode> get_afterReject() { return afterReject; }
+        void set_afterReject(const shared_ptr<AstNode>& reject) { afterReject = reject; }
+    
+        shared_ptr<AstNode> get_nodeDef() { return nodeDef; }
+        void set_nodeDef(const shared_ptr<AstNode>& node) { nodeDef = node; }
+    
+        shared_ptr<AstNode> get_transitionDef() { return transitionDef; }
+        void set_transitionDef(const shared_ptr<AstNode>& trans) { transitionDef = trans; }
+    
+        shared_ptr<AstNode> get_accept() { return accept; }
+        void set_accept(const shared_ptr<AstNode>& acc) { accept = acc; }
+    
+        string repr() override {
+            return "graphDef";
+        }
+    };
 class graphCall : public AstNode {
     private:
     vector<shared_ptr<AstNode> > arguments;
@@ -230,7 +253,7 @@ class transitionDefStatements : public AstNode {
 private:
     string fromNode;
     string toNode;
-    vector<shared_ptr<AstNode> > conditionExpressions;
+    shared_ptr<AstNode> conditionExpression;
     vector<shared_ptr<AstNode> > operationsExpressions;
 
 public:
@@ -242,8 +265,8 @@ public:
     string get_toNode() { return toNode; }
     void set_toNode(const string& to) { toNode = to; }
 
-    vector<shared_ptr<AstNode> > get_conditionExpressions() { return conditionExpressions; }
-    void add_conditionExpression(const shared_ptr<AstNode>& expr) { conditionExpressions.push_back(expr); }
+    shared_ptr<AstNode> get_conditionExpression() { return conditionExpression; }
+    void add_conditionExpression(const shared_ptr<AstNode>& expr) { conditionExpression = expr; }
 
     vector<shared_ptr<AstNode> > get_operationsExpressions() { return operationsExpressions; }
     void add_operationsExpression(const shared_ptr<AstNode>& expr) { operationsExpressions.push_back(expr); }

@@ -7,9 +7,10 @@ using namespace std;
 
 /*
 Sample grammer 
-
 program : IDENTIFIER : [a]
 
+How would one design a parser language 
+One file for the grammer another file for the lexer 
 */
 
 std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
@@ -18,15 +19,13 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateSpecialSymbol('*')
     }},
     {"graphDec", {
-        CreateToken("GRAPH"), // Keyword "graph"
+        CreateToken("DEFINITION"), // Keyword "graph"
         CreateToken("IDENTIFIER"), // Graph name
-        CreateToken("LEFT_BRACE"),
+        CreateRule("parameterDef"), // Memory definition
+        CreateToken("COLON"),
         CreateRule("graphDef"),
-        CreateToken("RIGHT_BRACE") // Closing brace
     }},
     {"graphDef", {
-        CreateRule("memoryDef"),
-        CreateSpecialSymbol('?'),
         CreateRule("nodeDef"),
         CreateSpecialSymbol('?'),
         CreateRule("transitionDef"), 
@@ -34,31 +33,27 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateRule("accept"), 
         CreateSpecialSymbol('?'),
     }},
-    {"memoryDef", {
-        CreateToken("MEMORY"),
-        CreateToken("LEFT_BRACE"),
-        CreateRule("tupleItems"),
-        CreateToken("RIGHT_BRACE"),
+    {"parameterDef", {
+        CreateToken("LEFT_PAREN"),
+        CreateRule("parameterItem"),
+        CreateToken("RIGHT_PAREN"),
     }},
     {"nodeDef", {
         CreateToken("NODE_DEF"),
-        CreateToken("LEFT_BRACE"),
+        CreateToken("COLON"),
         CreateParen('('),
         CreateRule("nodeDefStatement"),
         CreateToken("SEMICOLON"),
         CreateParen(')'),
         CreateSpecialSymbol('*'),
-        CreateToken("RIGHT_BRACE"),
     }},
     {"nodeDefStatement", {
         CreateToken("IDENTIFIER"),
+        CreateParen('('),
         CreateToken("DOUBLE_COLON"),
         CreateRule("nodeTypes"),
-        CreateParen('('),
-        CreateToken("COMMA"),
-        CreateRule("nodeTypes"),
         CreateParen(')'),
-        CreateSpecialSymbol('*'),
+        CreateSpecialSymbol('?'),
 
     }},
     {"nodeTypes", {
@@ -70,24 +65,19 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     }},
     {"transitionDef", {
         CreateToken("TRANSITIONS"), // Keyword "transitions"
-        CreateToken("LEFT_BRACE"),
+        CreateToken("COLON"),
         CreateParen('('),
         CreateRule("transitionStatement"),
         CreateToken("SEMICOLON"),
         CreateParen(')'),
         CreateSpecialSymbol('*'),
-        CreateToken("RIGHT_BRACE")
     }},
     {"transitionStatement", {
         CreateRule("fromNode"), 
         CreateToken("ARROW"), 
         CreateRule("toNode"), 
         CreateToken("ARROW_EQUALS"),
-        CreateToken("CONDITIONS"),
-        CreateToken("COLON"),
         CreateRule("conditions"),
-        CreateToken("COMMA"),
-        CreateToken("OPERATIONS"),
         CreateToken("COLON"),
         CreateRule("operations")
     }},
@@ -98,31 +88,22 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateToken("IDENTIFIER"), 
     }},
     {"conditions", {
-        CreateToken("LEFT_PAREN"),
         CreateRule("conditionStatement"),
-        CreateToken("RIGHT_PAREN"),
     }},
     {"conditionStatement", {
         CreateParen('('),
-        CreateRule("expression"), // Condition name
-        CreateParen('('),
-        CreateToken("COMMA"),
         CreateRule("expression"), // Condition name 
         CreateParen(')'),
-        CreateSpecialSymbol('*'), // Allow multiple conditions
-        CreateParen(')'),
-        CreateSpecialSymbol('?'), 
+        CreateSpecialSymbol('?'), // Allow multiple conditions
     }},
     {"operations", {
-        CreateToken("LEFT_PAREN"),
         CreateRule("operationStatement"),
-        CreateToken("RIGHT_PAREN"),
     }},
     {"operationStatement", {
         CreateParen('('),
         CreateRule("expression"), // Condition name
         CreateParen('('),
-        CreateToken("COMMA"),
+        CreateToken("SEMICOLON"),
         CreateRule("expression"), // Condition name 
         CreateParen(')'),
         CreateSpecialSymbol('*'), // Allow multiple conditions
@@ -136,13 +117,13 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     */
     {"accept", {
         CreateToken("ACCEPT"),
-        CreateToken("LEFT_BRACE"), 
+        CreateToken("COLON"),
         CreateToken("RETURN"),
         CreateRule("expression"),
         CreateToken("SEMICOLON"), 
-        CreateToken("RIGHT_BRACE"), 
+        
     }},
-    {"tupleItems", {
+    {"parameterItem", {
         CreateParen('('),
         CreateRule("varDefenition"), // Condition name
         CreateParen('('),
@@ -159,7 +140,7 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateRule("expression"),
     }},
     {"varDefenition", {
-        CreateRule("variable"),
+        CreateToken("IDENTIFIER"),
         CreateToken("COLON"),
         CreateRule("expression"),
     }},

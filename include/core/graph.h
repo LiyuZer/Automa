@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "/Users/liyuzerihun/Automa/grammar/ast/ast_node.h"
+#include "../../grammar/ast/ast_node.h"
 #include <fstream>
 #include <iostream>
 

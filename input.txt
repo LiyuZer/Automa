@@ -1,20 +1,16 @@
-
-'''
-Syntax is very similar to python, except functions are now graph. 
-'''
-
-def main (c : 0):
+def fib (c : 0):
     nodes :
-        Start :: startNode
-        accept :: acceptNode
+        Start :: ST;
+        final :: ST;
  
     transitions:
-
-        start -> once => (x < 5):
-            x = f
-            for i in range(0, 1):
-                m = m + 1
-            l = 2
-
-    accept:
-        return c
+        start -> once => x < 5:
+            a = 5 + 6;
+def main (c : 0):
+    nodes :
+        Start :: ST;
+        final :: ST;
+ 
+    transitions:
+        start -> once => x < 5:
+            a = 5 + 6;

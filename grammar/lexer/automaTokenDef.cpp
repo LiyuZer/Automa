@@ -18,15 +18,16 @@ std::unordered_map<std::string, std::string> keywords = {
         {"conditions", "CONDITIONS"},
         {"operations", "OPERATIONS"},
         {"None", "NONE"},
-        {"nodeDef", "NODE_DEF"},
-        {"startNode", "START_NODE"},
-        {"acceptNode", "ACCEPT_NODE"},
-        {"rejectNode", "REJECT_NODE"},
+        {"nodes", "NODE_DEF"},
+        {"ST", "START_NODE"},
+        {"AC", "ACCEPT_NODE"},
+        {"RJ", "REJECT_NODE"},
         {"operator", "OPERATOR"},
         {"edgeDef" , "EDGE_DEF" }, 
         {"true" , "TRUE" },
         {"false" , "FALSE" }, 
-        {"return" , "RETURN" }
+        {"return" , "RETURN" },
+        {"def" , "DEFINITION" }
     };
 
 std::unordered_map<std::string, std::string> operators = {
