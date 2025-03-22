@@ -4,35 +4,18 @@ Automa - A Graph-Based Programming Language
 Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action on memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
 
 At its core, every program in Automa is a **graph** consisting of nodes and transitions. Transitions define paths between nodes and are represented as tuples of **conditions** and **operations**:  
-- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid. **Cannot** change the graph's memory, thus having no side effects.  
+- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid.
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
 Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
 
 
 ## Philosophy 
-The essential philosophy of Automa is a graph-based programming language focused on efficiency, speed, and certain computational guarantees. 
-These guarantees are rollback and isolation.
+At its core, Automa derives its foundations from three principles: strong isolation, decentralized execution, and the theory of finite state Automata.  
 
-What is Rollback in Automa? 
-Given a graph G and input set S, and a path P that represents a traversal of G with input S, S is immutable, so it will never change within the graph execution. However, the program might still interact with the environment, leading to cases where rejected computations need to be rolled back. One of these cases is file IO when a file is written to, but the underlying computation is rejected, it is not sensical for the original write to remain persistent. Automa rolls back these changes, creating a system where, in failure, the states of the program are effectively rolled back.
-
-
-Rollback implies another interesting outcome: environment interactions, i.e., file IO, etc., are committed, not automatically executed. Ensuring that the system is closed to an extent from the environment. 
-
-What is Isolation in Automa? 
-Each graph has two modes of possible traversal: deterministic and non-deterministic. In the case of non-deterministic travel, all paths, P, will maintain separate copies of the computation state; essentially, each path represents an alternate world of computation. Maintaining concurrency while keeping the memory safe.  
-
-These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer does not worry about them.
-
-The targetted areas are order, machine learning, and distributed systems. The goal is to create a swift and efficient language for these purposes.
-
-These are the priorities in order :
-  All computation is graph-based
-  Speed
-  Simplicity
-  Efficiency 
-
+Finite State Automata Theory -> Every computation is described by a path that traverses some graph. The path encapsulates that universe of computations, specifically the variables, state, time, etc., Very similar to the idea of a processor with the OS. In the long run, the idea is to model the programming language partly using OS principles. A centralized operator handles these paths but can run in a decentralized manner, each path for itself.  
+Isolation -> Paths are totally isolated from one another; they cannot access the same memory; in the case of nondeterministic exploration, a new sprouted path essentially represents an entirely new 'universe' of computation, an alternate path for how the computation could have gone. Requiring a deep copy of the inputs and current graph state. While this might be slow at first, the goal is to make it more effective using copy-on-write techniques and developing methods of programming that utilize more lightweight nondeterministic paths that, after sprouting, take up more memory. This way, you can generate thousands of non-deterministic paths and run them efficiently without the worry of parallel programming. Additionally, paths can run on different machines quickly. 
+Decentralized execution -> Each path executes with a singular purposes 
 
 ## Personal Motivations 
 I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
@@ -49,8 +32,6 @@ This is for me primarily, lol, my little world :)
 - **Deterministic and Nondeterministic Support**: Explore multiple parallel paths for nondeterministic computations.  
 - **Immutable Graphs**: Graphs cannot be modified after creation, ensuring a consistent and predictable execution model.  
 - **Minimal Constructs**: No loops, conditionals, or procedures—just transitions, nodes, and memory.  
-- **Memory Rollback**: Memory is only set **after** an accept state has been reached and a path has been completed,
-  ensuring that only Accepted computations make persistent changes to memory. 
 
 ## Graph States  
 Each graph operates within one of the following states:  
