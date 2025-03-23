@@ -13,14 +13,20 @@ Automa supports deterministic and (soon-to-be fully implemented) **nondeterminis
 ## Philosophy 
 At its core, Automa derives its foundations from three principles: strong isolation, decentralized execution, and the theory of finite state Automata.  
 
-Finite State Automata Theory -> Every computation is described by a path that traverses some graph. The path encapsulates that universe of computations, specifically the variables, state, time, etc., Very similar to the idea of a processor with the OS. In the long run, the idea is to model the programming language partly using OS principles. A centralized operator handles these paths but can run in a decentralized manner, each path for itself.  
-Isolation -> Paths are totally isolated from one another; they cannot access the same memory; in the case of nondeterministic exploration, a new sprouted path essentially represents an entirely new 'universe' of computation, an alternate path for how the computation could have gone. Requiring a deep copy of the inputs and current graph state. While this might be slow at first, the goal is to make it more effective using copy-on-write techniques and developing methods of programming that utilize more lightweight nondeterministic paths that, after sprouting, take up more memory. This way, you can generate thousands of non-deterministic paths and run them efficiently without the worry of parallel programming. Additionally, paths can run on different machines quickly. 
-Decentralized execution -> Each path executes with a singular purposes 
+***Finite State Automata Theory** **->** Every computation is described by a path traversing a graph. This path traverses a graph representing some finite state machine.
+The idea is that a computation contains two key parts: the algorithm and storage. The algorithm is represented by the transitions between the states of the finite state machine, and 
+these transitions can act on memory. The states represent discreet fixtures in that algorithm, division across execution representing where you are in your computation.
+
+The path encapsulates that universe of computations, specifically the variables, state, time, etc., Very similar to the idea of a processor with the OS. In the long run, the idea is to model the programming language partly using OS principles. A centralized operator handles these paths but can run in a decentralized manner, each path for itself.  
+
+***Isolation*** **->** Paths are isolated from one another; they cannot access the same memory; in the case of nondeterministic exploration, a new sprouted path essentially represents an entirely new 'universe' of computation, an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be slow at first, the goal is to make it more effective using copy-on-write techniques and developing methods of programming that utilize more lightweight nondeterministic paths that, after sprouting, take up more memory. This way, you can generate thousands of non-deterministic paths and run them efficiently without worrying about parallel programming. Additionally, paths can run on different machines quickly. 
+
+***Decentralized execution*** **->** Each path executes separately if parallel. The operator serves as a coordinator between the paths. 
 
 ## Personal Motivations 
 I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
 
-I am also an avid machine-learning enthusiast and have wanted to create my own language for machine-learning computation for a long time. I want to develop safe, robust, efficient programs for machine learning research and industry production. 
+I am also an avid machine-learning enthusiast. For a long time, I have wanted to create my own language for machine-learning computation. I want to develop safe, robust, and efficient programs for machine learning research and industry production. 
 
 Why not combine these two into one? A language that is graph-based and also optimized for machine learning! 
 
