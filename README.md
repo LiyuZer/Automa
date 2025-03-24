@@ -4,40 +4,33 @@ Automa - A Graph-Based Programming Language
 Automa is a programming language where all computation revolves around graphs. The idea is to create a programming language where calculation at any point is in 3 distinct states: accepted, rejected, or pending. Automa does this by representing all computations as graph traversals combined with some action on memory, so given a particular graph and input memory, the memory will either be transformed by the computation(i.e., the calculation is accepted) or rejected. 
 
 At its core, every program in Automa is a **graph** consisting of nodes and transitions. Transitions define paths between nodes and are represented as tuples of **conditions** and **operations**:  
-- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid. **Cannot** change the graph's memory, thus having no side effects.  
+- **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid.
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
 Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
 
 
 ## Philosophy 
-The essential philosophy of Automa is a graph-based programming language focused on efficiency, speed, and certain computational guarantees. 
-These guarantees are rollback and isolation.
+At its core, Automa derives its foundations from three principles: strong isolation, decentralized execution, and the theory of finite state Automata.  
 
-What is Rollback in Automa? 
-Given a graph G and input set S, and a path P that represents a traversal of G with input S, S is immutable, so it will never change within the graph execution. However, the program might still interact with the environment, leading to cases where rejected computations need to be rolled back. One of these cases is file IO when a file is written to, but the underlying computation is rejected, it is not sensical for the original write to remain persistent. Automa rolls back these changes, creating a system where, in failure, the states of the program are effectively rolled back.
+### Finite State Automata Theory
 
+Every computation is described by a path traversing a graph. This path traverses a graph representing some finite state machine.
+The idea is that a computation contains two key parts: the algorithm and storage. The algorithm is represented by the transitions between the states of the finite state machine, and 
+these transitions can act on memory. The states represent discreet fixtures in that algorithm, division across execution representing where you are in your computation.
 
-Rollback implies another interesting outcome: environment interactions, i.e., file IO, etc., are committed, not automatically executed. Ensuring that the system is closed to an extent from the environment. 
+The path encapsulates that universe of computations, specifically the variables, state, time, etc., Very similar to the idea of a processor with the OS. In the long run, the idea is to model the programming language partly using OS principles. A centralized operator handles these paths but can run in a decentralized manner, each path for itself.  
 
-What is Isolation in Automa? 
-Each graph has two modes of possible traversal: deterministic and non-deterministic. In the case of non-deterministic travel, all paths, P, will maintain separate copies of the computation state; essentially, each path represents an alternate world of computation. Maintaining concurrency while keeping the memory safe.  
+### Isolation 
+Paths are isolated from one another; they cannot access the same memory; in the case of nondeterministic exploration, a new sprouted path essentially represents an entirely new 'universe' of computation, an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be slow at first, the goal is to make it more effective using copy-on-write techniques and developing methods of programming that utilize more lightweight nondeterministic paths that, after sprouting, take up more memory. This way, you can generate thousands of non-deterministic paths and run them efficiently without worrying about parallel programming. Additionally, paths can run on different machines quickly. 
 
-These two guarantees allow programs to be written with safety and robustness built into the programming language. These safety mechanisms are built-in, so the developer does not worry about them.
-
-The targetted areas are in order, as well as machine learning and web server workflows. The goal is to create a swift and efficient language for these purposes.
-
-These are the priorities in order :
-  All computation is graph-based
-  Speed
-  Simplicity
-  Efficiency 
-
+### Decentralized execution
+Each path executes separately if parallel. The operator serves as a coordinator between the paths. 
 
 ## Personal Motivations 
 I have always wanted a graph-based programming language, but nothing existed for me to use, so I decided to create my own. Fitting such a general tool into a well-defined framework is challenging. The main reason is that graphs act as structures that can be traversed based on some underlying algorithm. This traversal is unclear initially, as you can traverse a graph in many ways. The idea with Automa is to create a language that can encapsulate graph-based programs using a simple and efficient fundamental axiom. I can make all of my programs with Automa, creating graphs at will and executing them to my desires. 
 
-I am also an avid machine-learning enthusiast and have wanted to create my own language for machine-learning computation for a long time. I want to develop safe, robust, efficient programs for machine learning research and industry production. 
+I am also an avid machine-learning enthusiast. For a long time, I have wanted to create my own language for machine-learning computation. I want to develop safe, robust, and efficient programs for machine learning research and industry production. 
 
 Why not combine these two into one? A language that is graph-based and also optimized for machine learning! 
 
@@ -49,8 +42,6 @@ This is for me primarily, lol, my little world :)
 - **Deterministic and Nondeterministic Support**: Explore multiple parallel paths for nondeterministic computations.  
 - **Immutable Graphs**: Graphs cannot be modified after creation, ensuring a consistent and predictable execution model.  
 - **Minimal Constructs**: No loops, conditionals, or procedures—just transitions, nodes, and memory.  
-- **Memory Rollback**: Memory is only set **after** an accept state has been reached and a path has been completed,
-  ensuring that only Accepted computations make persistent changes to memory. 
 
 ## Graph States  
 Each graph operates within one of the following states:  
@@ -70,7 +61,7 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
   3. **IO operations functioning**
   4. **File operations functioning**
       
-  ### Mile 2 ( 2 Years Months)
+  ### Mile 2 ( 2 Years)
   1. **Modules library**
   2. **Add Type System** very important for the future
   3. **C++ API for development**
@@ -85,13 +76,11 @@ Graphs may also be **non-halting**, enabling infinitely running computations whe
 **Version 1 Release**
 
 ## Future Goals 
-I want Automa to be an accelerated programming language, so the most logical next step, once these sections are done is 
+I want Automa to be an accelerated programming language, so the most logical next step, once these sections are done, is 
 1. **GPU Integration**
 2. **FPGA Integration**
-The future goal of the language is to have natural speedups from working with external accelerators, the goals being to have a language taht is accelerated naturally by your hardware. You won't have to worry about anything!
-
-**The first-ever hardware-accelerated programming language**
+The future goal of the language is to have natural speedups from working with external accelerators, the goal being to have a language that is accelerated naturally by your hardware. You won't have to worry about anything!
 
 After each version, I will release and announce the changes. The whole project should take about 5 years. I will gladly accept any contributors, it would be great help, I want to accelerate the process!
-Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to perservere. 
+Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to persevere. 
    
