@@ -2,18 +2,21 @@
 #include <memory>
 #include "../core/operator.h"
 #include "../core/path.h"
-#include "../core/memory.h"
+#include "../core/aut_obj.h"
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
 #pragma once
 
 /*
-This will be the None memory container, it will be used to represent the absence of a value. 
+This will be the None obj, it will be used to represent the absence of a value. 
 */
 
-class None : public Memory{
+class None : public AutomaObject{
     public:
-    None() : Memory("none"){
+    None() : AutomaObject("none"){
         set_immutable(true);
+    }
+    string repr() override{
+        return "None";
     }
 };

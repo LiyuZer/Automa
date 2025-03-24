@@ -1,5 +1,6 @@
 digraph G {
-    "Once" [shape=doublecircle, color=green, style=bold];
-    "Start" [shape=doublecircle, color=green, style=bold];
-    "Start" -> "Once" [label="Operations: expression(type=) "];
+    "start" [shape=doublecircle, color=green, style=bold];
+    "hey" -> "once" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
+    "start" -> "once" [label="Conditions: expression(type=) \nOperations: expression(type=) expression(type=) "];
+    "start" -> "moon" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
 }

@@ -68,7 +68,6 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateToken("COLON"),
         CreateParen('('),
         CreateRule("transitionStatement"),
-        CreateToken("SEMICOLON"),
         CreateParen(')'),
         CreateSpecialSymbol('*'),
     }},
@@ -102,9 +101,10 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
     {"operationStatement", {
         CreateParen('('),
         CreateRule("expression"), // Condition name
-        CreateParen('('),
         CreateToken("SEMICOLON"),
+        CreateParen('('),
         CreateRule("expression"), // Condition name 
+        CreateToken("SEMICOLON"),
         CreateParen(')'),
         CreateSpecialSymbol('*'), // Allow multiple conditions
         CreateParen(')'),

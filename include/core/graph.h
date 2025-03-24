@@ -1,4 +1,3 @@
-#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -39,7 +38,7 @@ struct Node{
 struct transition{
 
 string toNode;
-vector<shared_ptr<AstNode> > conditions;
+shared_ptr<AstNode> condition;
 vector<shared_ptr<AstNode> > operations;
 
 };
@@ -50,15 +49,14 @@ class Graph{
     unordered_map<string, vector<transition> > node_transitions;
     unordered_map<string, Node> node_map;
     shared_ptr<AstNode> graphDef;
-    shared_ptr<AstNode> memoryDef;
-    shared_ptr<AstNode> memory_def;
+    shared_ptr<AstNode> parameterDef;
     shared_ptr<AstNode> accept;
     string start_node=""; 
     public:
-    void add_transition(string fromNode, string toNode, vector<shared_ptr<AstNode>> conditions, vector<shared_ptr<AstNode>> operations){
+    void add_transition(string fromNode, string toNode, shared_ptr<AstNode> condition, vector<shared_ptr<AstNode>> operations){
         transition t;
         t.toNode = toNode;
-        t.conditions = conditions;
+        t.condition = condition;
         t.operations = operations;
         node_transitions[fromNode].push_back(t);
     }
@@ -72,11 +70,11 @@ class Graph{
         node_map[name] = n;
         return 0;
     }
-    void set_memory_def(shared_ptr<AstNode> memoryDef){
-        memory_def = memoryDef;
+    void set_paramater_def(shared_ptr<AstNode> memoryDef){
+        parameterDef = memoryDef;
     }
-    shared_ptr<AstNode> get_memory_def(){
-        return memory_def;
+    shared_ptr<AstNode> get_parameter_def(){
+        return parameterDef;
     }
     void set_accept(shared_ptr<AstNode> a){
         accept = a;
@@ -127,16 +125,14 @@ class Graph{
             dotFile << "    \"" << fromNode << "\" -> \"" << transition.toNode << "\"";
 
             // Add label with conditions and operations if present
-            if (!transition.conditions.empty() || !transition.operations.empty()) {
+            if (!(transition.condition == nullptr) || !transition.operations.empty()) {
                 dotFile << " [label=\"";
-                if (!transition.conditions.empty()) {
+                if (!(transition.condition == nullptr)) {
                     dotFile << "Conditions: ";
-                    for (const auto& condition : transition.conditions) {
-                        dotFile << condition->repr() << " ";
-                    }
+                    dotFile << transition.condition->repr() << " ";
                 }
                 if (!transition.operations.empty()) {
-                    if (!transition.conditions.empty()) {
+                    if (!(transition.condition == nullptr)) {
                         dotFile << "\\n";
                     }
                     dotFile << "Operations: ";

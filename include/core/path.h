@@ -4,8 +4,8 @@
 #include <vector>
 #include <unordered_map>
 #include "graph.h"
-#include "memory.h"
-#include <stack>
+#include "aut_obj.h"
+#include <queue>
 #pragma once
 /*
 
@@ -17,16 +17,25 @@ Path objects have 4 main parts:-
     path obj 
     timer(to be implemented) -> a count down timer, when this times is finished 
     the graph yields back to the operator. 
-    Memory container -> a ptr to the memory container for executions
-    Memory log(to be implemented) -> a memory log of all changed memory parts, 
-    to be used during acceptance rejection.
-
 
 
 A path is an abstraction for computation it can be accepted, rejected or in a pending 
-state. It is called by an operator, set with the memory container, it runs independently and 
-yields back to the operator, very similar to limited time context switching 
-by the operating system between processes. 
+state. 
+
+During transition evaluation we first put the condition expression and 
+then the operations expressions in an array. They will be in array for the current transition. 
+However we will store the array later in a cache, so that if we revisit the transition we can
+use the cached version. This will help with optimization.
+
+When we get a to a new transition we do the following 
+    1. Check if the transition is in the cache, if so use it 
+    2. If not then evaluate the condition expression and then the operations expressions 
+    3. Store the results in the cache for future use. 
+
+
+Not if it is in the cache we will still evaluate the expression, it is just that we will not remake some constants 
+the stack elements and other things will still be evaluated.
+
 
 */
 
@@ -34,17 +43,26 @@ using namespace std;
 /*
    This is a typical stack element:-
     {
-        memory_container : memory_container
+        AuromaObject : a shared pointer to the object in the graph
         type : ""  (Binary, Unary, Literal. Graph call)
         Stack_elem_ptr_ls : a vector of shared ptr to stack elements that may nor may not be evaluated 
     }
 */
-struct stackElement{
+enum class EvalState {
+    NotStarted,
+    WaitingDependencies,
+    Completed
+};
+struct queueElement{
     char status=0;// In special cases we will have a status
-    shared_ptr<Memory> memory_container;
+    shared_ptr<AutomaObject> object;
     string type;
-    vector<shared_ptr<stackElement> > stack_elem_ptr_ls;
+    vector<shared_ptr<queueElement>> queue_elem_ptr_ls;
     shared_ptr<AstNode> ast_node;
+    EvalState state;
+    int parent_index=-1; // This is the index of the parent element in the queue, only needed if this is the last element needed to evaluate the parent
+
+
 };
 /*
 Here we define the return value from the operator
@@ -55,75 +73,57 @@ struct operatorReturn{
     */
     int status; 
     string graph_name;
-    vector<shared_ptr<Memory>> memory_containers; // The argument to be passed to the graph
+    vector<shared_ptr<AutomaObject>> arguments; // The argument to be passed to the graph
 };
 
 class Path{
     private:
     int id;
-    int id_to_return;
     string current_node;
     shared_ptr<Graph> graph_ptr;
     int max_time;
     int current_time;
-    shared_ptr<Memory> memory_ptr=nullptr;
-    unordered_map<int, vector<string> > memory_log;
-    vector<shared_ptr<stackElement>>* computation_stack;
-    unordered_map<string, shared_ptr<vector<shared_ptr<stackElement>>> > cache_stack;// A cache for the stacks, we will use this for computation
-    int execution_ptr = 0;// The current execution pointer of the stack
+    int parent_path_id = -1; // -1 if no parent path
+    int current_transition_index = 0; // The index of the current transition
+    int current_queue_index = 0; // The index of the current stack element
+    int conditions_queue_end = 0; // The end of the conditions queue
+    bool started_transition = false; // Flag to check if we started the transition
+    shared_ptr<vector<shared_ptr<queueElement>>> queue; // This will store the queue elements
+    unordered_map<string, shared_ptr<vector<shared_ptr<queueElement>>>> queue_cache; // This will store the cached queue elements
 
-    int condition_ptr = 0;
-    int operation_ptr = 0;
-    int accept_ptr = 0;
-    
-    int current_condition = 0; // The current condition being evaluated
-    int current_operation = 0; // The current operation being evaluated
-    int current_transition = 0; // The current transition being evaluated
-    shared_ptr<operatorReturn> operator_return; // The return value from the operator
-
-    shared_ptr<Memory> input; // The input memory container by the operator(if yielded or the path is created as a result of a graph call)
-    
-    // This will store the current yield(if there is any)
-    operatorReturn yield;
     public:
-        Path(int id, string current_node, int max_time, int current_time, shared_ptr<Graph> graph_ptr, int id_to_return)
-        : id(id), current_node(current_node), max_time(max_time), current_time(current_time), graph_ptr(graph_ptr), id_to_return(id_to_return){}
+    Path(int id, shared_ptr<Graph> graph_ptr, int max_time=10000, int parent_path_id = -1){
+        this->parent_path_id = parent_path_id;
+        this->id = id;
+        this->graph_ptr = graph_ptr;
+        this->max_time = max_time;
+        this->current_time = 0;
+    }
 
-        shared_ptr<operatorReturn> run();
-        void add_yield();
-        shared_ptr<Memory> evaluateExpression();
-        shared_ptr<Memory> evaluateBinaryExpressionPrimitive(shared_ptr<Memory>& left, shared_ptr<Memory>& right, string& operations);
-        shared_ptr< vector<shared_ptr<stackElement> >> initializeStack(shared_ptr<AstNode> expression_node);
-        shared_ptr<stackElement> addElementToStack(shared_ptr<AstNode> ast_node);
-        void addArgument(vector<shared_ptr<Memory>> arg, shared_ptr<Graph> graph_ptr);
-        void set_memory(shared_ptr<AstNode> memory);
-        void update_computation_stack(shared_ptr<Memory> output);
-        void set_input(shared_ptr<Memory> input){
-            this->input = input;
-        }
-        int get_id(){
-            return id;
-        }
-        shared_ptr<Memory> get_memory(){
-            return memory_ptr;
-        }
-        shared_ptr<Graph> get_graph(){
-            return graph_ptr;
-        }
-        void set_memory(shared_ptr<Memory> memory){
-            memory_ptr = memory;
-        }
-        void add_symbol(string symbol){// Add a memory symbol to the memory container
-            memory_ptr->set_memory(symbol, shared_ptr<Memory>(new Memory));
-        }
-        shared_ptr<Memory> get_memory_symbol(string symbol){// Get a memory symbol from the memory container
-            return memory_ptr->get_memory(symbol);
-        }
-        void change_symbol(string symbol, shared_ptr<Memory> memory){// Change a memory symbol in the memory container
-            memory_ptr->set_memory(symbol, memory);
-        }
-        int get_id_to_return(){
-            return id_to_return;
-        }   
+    int get_id(){
+        return id;
+    }
+
+    shared_ptr<Graph> get_graph(){
+        return graph_ptr;
+    }
+    int get_parent_path_id(){
+        return parent_path_id;
+    }
+    void set_current_node(string node_name){
+        current_node = node_name;
+    }  
+    shared_ptr<operatorReturn> run();
+    void initialize_queue();
+    shared_ptr<AutomaObject> evaluate_primitve_expression(shared_ptr<AstNode> ast_node);
+    void add_elem_to_queue(shared_ptr<AstNode> elem);
+    void set_current_transition_index(int index){
+        current_transition_index = index;
+    }
+    int get_current_transition_index(){
+        return current_transition_index;
+    }
+    shared_ptr<operatorReturn> forward_evaluation();
+
 
 };

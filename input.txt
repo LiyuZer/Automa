@@ -1,16 +1,20 @@
 def fib (c : 0):
     nodes :
-        Start :: ST;
-        final :: ST;
+        start :: ST;
  
     transitions:
         start -> once => x < 5:
             a = 5 + 6;
+
 def main (c : 0):
     nodes :
-        Start :: ST;
-        final :: ST;
+        start :: ST;
  
     transitions:
         start -> once => x < 5:
+            a = 5 + 6;
+            b = 10 + 8;
+        hey -> once => x < 5:
+            a = 5 + 6;
+        start -> moon => x < 5:
             a = 5 + 6;

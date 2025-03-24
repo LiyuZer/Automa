@@ -3,7 +3,7 @@
 #include <string>
 #include "../core/operator.h"
 #include "../core/path.h"
-#include "../core/memory.h"
+#include "../core/aut_obj.h"
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
 #include "../typesdef/bool.h"
@@ -33,56 +33,51 @@ The list memory container will be an immutable type, and will have a type of "li
 
 */
 
-class List : public Memory{
+class List : public AutomaObject{
     private:
-    vector<shared_ptr<Memory>> list_nodes;
-    
+    vector<shared_ptr<AutomaObject>> val;
     public:
-    List() : Memory("list"){}
-    List(vector<shared_ptr<Memory>> list_nodes) : Memory("list"), list_nodes(list_nodes){}
-    void add_list_node(const shared_ptr<Memory>& node){
-        list_nodes.push_back(node);
+    List(vector<shared_ptr<AutomaObject>> value) : AutomaObject("list"){
+        val = value;
     }
-    vector<shared_ptr<Memory>> get_list_node(){
-        return list_nodes;
+    vector<shared_ptr<AutomaObject>> get_val(){
+        return val;
     }
-    shared_ptr<Memory> get_list_node(int index){
-        return list_nodes[index];
-    }
-    void set_list_node(int index, shared_ptr<Memory> node){
-        list_nodes[index] = node;
-    }
-    void remove_list_node(int index){
-        list_nodes.erase(list_nodes.begin() + index);
-    }
-    void insert_list_node(int index, shared_ptr<Memory> node){
-        list_nodes.insert(list_nodes.begin() + index, node);
-    }
-    shared_ptr<List> slice(int start, int end){
-        shared_ptr<List> new_list = shared_ptr<List>(new List);
-        for(int i = start; i < end; i++){
-            new_list->add_list_node(list_nodes[i]);
-        }
-        return new_list;
-    }
-    void append(shared_ptr<Memory> node){
-        list_nodes.push_back(node);
+    void append(shared_ptr<AutomaObject> element){
+        val.push_back(element);
     }
     void remove(int index){
-        list_nodes.erase(list_nodes.begin() + index);
-    }
-    // We will define the add operation for the list
-    List add(shared_ptr<List> list_memory){
-        List new_list;
-        for(int i = 0; i < list_nodes.size(); i++){
-            new_list.add_list_node(list_nodes[i]);
+        if(index >= 0 && index < val.size()){
+            val.erase(val.begin() + index);
         }
-        for(int i = 0; i < list_memory->get_list_node().size(); i++){
-            new_list.add_list_node(list_memory->get_list_node()[i]);
-        }
-        return new_list;
     }
-
-
-
+    void insert(int index, shared_ptr<AutomaObject> element){
+        if(index >= 0 && index <= val.size()){
+            val.insert(val.begin() + index, element);
+        }
+    }
+    shared_ptr<AutomaObject> get(int index){
+        if(index >= 0 && index < val.size()){
+            return val[index];
+        }
+        return nullptr;
+    }
+    shared_ptr<List> slice(int start, int end){
+        if(start < 0 || end > val.size() || start > end){
+            return nullptr;
+        }
+        vector<shared_ptr<AutomaObject>> new_val(val.begin() + start, val.begin() + end);
+        return shared_ptr<List>(new List(new_val));
+    }
+    string repr() override{
+        string result = "[";
+        for(int i = 0; i < val.size(); i++){
+            result += val[i]->repr();
+            if(i < val.size() - 1){
+                result += ", ";
+            }
+        }
+        result += "]";
+        return result;
+    }
 };

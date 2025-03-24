@@ -5,13 +5,16 @@ It will have things like reference counting, and serve as the base class for all
 */
 
 #pragma once
-
+#include <iostream>
+#include <string>
 
 class AutomaObject {
     private:
     int ref_count;
+    string type;
     public:
     AutomaObject() : ref_count(0) {}
+    AutomaObject(string type) : ref_count(0), type(type) {}
     void increment_ref_count(){
         ref_count++;
     }
