@@ -87,11 +87,5 @@ void Operator :: run(){
         shared_ptr<Path> path = path_queue.front();
         path_queue.pop();
         // Run the path
-        shared_ptr<operatorReturn> result = path->run();
-
-
-        
-
-
     }
 }

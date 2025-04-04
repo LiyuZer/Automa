@@ -82,8 +82,15 @@ class Graph{
     shared_ptr<AstNode> get_accept(){
         return accept;
     }
-    void set_graph_def(shared_ptr<AstNode> graphDef){
-        graphDef = graphDef;
+    vector<string> return_node_list(){
+        vector<string> node_list;
+        for(auto it = node_map.begin(); it != node_map.end(); it++){
+            node_list.push_back(it->first);
+        }
+        return node_list;
+    } 
+    void set_graph_def(shared_ptr<AstNode> gd){
+        graphDef = gd;
     }
     void set_start_node(string start){
         start_node = start;

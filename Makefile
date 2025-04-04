@@ -4,8 +4,8 @@ CFLAGS = -Wall -g -O3 -std=c++20
 
 all:automa 
 
-automa: main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o  path.o
-	$(CC) -o automa main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o path.o
+automa: main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o  path.o vm_compiler.o
+	$(CC) $(CFLAGS) -o automa main.o runtime.o ast_tree.o automaTokenDef.o grammer_def.o operator.o  path.o vm_compiler.o
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
@@ -27,7 +27,8 @@ operator.o: include/impl/operator.cpp
 
 path.o: include/impl/path.cpp
 	$(CC) $(CFLAGS) -c include/impl/path.cpp
-
+vm_compiler.o: include/impl/vm_compiler.cpp
+	$(CC) $(CFLAGS) -c include/impl/vm_compiler.cpp
 # clean all the .o and executable files
 clean:
 	rm -f *.o automa

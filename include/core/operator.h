@@ -6,6 +6,7 @@
 #include <queue>
 #include "path.h"
 #include "../../grammar/ast/ast_node.h"
+#include "vm_compiler.h"
 
 
 #pragma once
@@ -24,7 +25,7 @@ class Operator{
     unordered_map<int, shared_ptr<Path>> path_pending_queue; // T
     shared_ptr<Path> current_path;
     unordered_map<string, shared_ptr<AstNode>> graphDecMap;// This will store the root ast node declarations for the graphs
-    unordered_map<string, shared_ptr<Graph> > graph_map;// This will store the graph objects
+    unordered_map<string, shared_ptr<InstructionSet>> instructionSetMap; // This will store the instruction set for each graph
     int path_id = 0;
     public:
 
@@ -43,12 +44,13 @@ class Operator{
         return nullptr;
     }
     
-    void add_graph(shared_ptr<Graph> graph, string graph_name){
-        graph_map[graph_name] = graph;
+    //Add the instruction set to the map
+    void add_instructionSet(string graph_name, shared_ptr<InstructionSet> instructionSet){
+        instructionSetMap[graph_name] = instructionSet;
     }
-    shared_ptr<Graph> get_graph(string graph_name){
-        if(graph_map.find(graph_name) != graph_map.end()){
-            return graph_map[graph_name];
+    shared_ptr<InstructionSet> get_instructionSet(string graph_name){
+        if(instructionSetMap.find(graph_name) != instructionSetMap.end()){
+            return instructionSetMap[graph_name];
         }
         return nullptr;
     }

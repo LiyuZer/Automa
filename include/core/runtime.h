@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "operator.h"
+#include "vm_compiler.h"
 #include "../../grammar/ast/ast_node.h"
 #include "../../grammar/parser/parser.h"
 #include "../../grammar/ast/ast_tree.h"
@@ -22,6 +23,7 @@ the operator, afterwards it will invoke the graph to start executing.
 class RunTime{
     public:
     shared_ptr<Operator> operator_ptr;
+    VMCompiler vm_compiler_ptr;
     shared_ptr<AstNode> astTreeRoot;
     shared_ptr<Parser> parser_ptr;
  

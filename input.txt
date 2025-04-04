@@ -9,6 +9,7 @@ def fib (c : 0):
 def main (c : 0):
     nodes :
         start :: ST;
+        j;
  
     transitions:
         start -> once => x < 5:
