@@ -44,9 +44,9 @@ These are some of the basic instructions that we will have, we can add more inst
 
 #pragma once
 enum class InstructionType{
-    LOAD,
-    LOAD_CONST,
-    CMP,
+    LOAD, // Load from a variable
+    LOAD_CONST, // Load a constant
+    CMP, // Compare two registers
     JMP_IF,
     JMP_NOT,
     JMP,
@@ -55,9 +55,10 @@ enum class InstructionType{
     MUL,
     DIV,
     MOD,
-    STORE,
+    STORE,//Store to a variable
     STORE_CONST, 
     MARKER,
+    REJECT,
     RETURN
 };
 enum class RegisterType{
@@ -70,8 +71,12 @@ enum class RegisterType{
     R7,
     R8,
     R9,
-    R10
+    R10, 
+    PC, // Program counter
+    SP, // Stack location pointer
+    STACK, // STACK  
 };
+
 struct Instruction{
     InstructionType type;
     RegisterType reg1;
@@ -83,6 +88,7 @@ struct Instruction{
 struct Register{
     RegisterType type;
     shared_ptr<AutomaObject> value; // Pointer to the automa object
+    int index = -1; // This will be used if we are using STACK
     Register(RegisterType type, shared_ptr<AutomaObject> value){
         this->type = type;
         this->value = value;

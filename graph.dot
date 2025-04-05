@@ -48,86 +48,94 @@ digraph AST {
     node23 [label="nodeDefStatements(node=start, type=ST)"]
     node22 -> node24
     node24 [label="nodeDefStatements(node=j, type=)"]
-    node20 -> node25
-    node25 [label="transitionDef"]
-    node25 -> node26
-    node26 [label="transitionDefStatements(fromNode=start, toNode=once)"]
-    node26 -> node27
-    node27 [label="expression(type=)"]
-    node27 -> node28
-    node28 [label="binaryExpression(op=<)"]
+    node22 -> node25
+    node25 [label="nodeDefStatements(node=hey, type=)"]
+    node22 -> node26
+    node26 [label="nodeDefStatements(node=once, type=)"]
+    node22 -> node27
+    node27 [label="nodeDefStatements(node=moon, type=)"]
+    node20 -> node28
+    node28 [label="transitionDef"]
     node28 -> node29
-    node29 [label="variable(name=x)"]
-    node28 -> node30
-    node30 [label="integerLiteral(value=5)"]
-    node26 -> node31
-    node31 [label="expression(type=)"]
+    node29 [label="transitionDefStatements(fromNode=start, toNode=once)"]
+    node29 -> node30
+    node30 [label="expression(type=)"]
+    node30 -> node31
+    node31 [label="binaryExpression(op=<)"]
     node31 -> node32
-    node32 [label="assignmentExpression(variable=a)"]
-    node32 -> node33
-    node33 [label="expression(type=)"]
-    node33 -> node34
-    node34 [label="binaryExpression(op=+)"]
+    node32 [label="variable(name=x)"]
+    node31 -> node33
+    node33 [label="integerLiteral(value=5)"]
+    node29 -> node34
+    node34 [label="expression(type=)"]
     node34 -> node35
-    node35 [label="integerLiteral(value=5)"]
-    node34 -> node36
-    node36 [label="integerLiteral(value=6)"]
-    node26 -> node37
-    node37 [label="expression(type=)"]
+    node35 [label="assignmentExpression(variable=a)"]
+    node35 -> node36
+    node36 [label="expression(type=)"]
+    node36 -> node37
+    node37 [label="binaryExpression(op=+)"]
     node37 -> node38
-    node38 [label="assignmentExpression(variable=b)"]
-    node38 -> node39
-    node39 [label="expression(type=)"]
-    node39 -> node40
-    node40 [label="binaryExpression(op=+)"]
+    node38 [label="integerLiteral(value=5)"]
+    node37 -> node39
+    node39 [label="integerLiteral(value=6)"]
+    node29 -> node40
+    node40 [label="expression(type=)"]
     node40 -> node41
-    node41 [label="integerLiteral(value=10)"]
-    node40 -> node42
-    node42 [label="integerLiteral(value=8)"]
-    node25 -> node43
-    node43 [label="transitionDefStatements(fromNode=hey, toNode=once)"]
+    node41 [label="assignmentExpression(variable=b)"]
+    node41 -> node42
+    node42 [label="expression(type=)"]
+    node42 -> node43
+    node43 [label="binaryExpression(op=+)"]
     node43 -> node44
-    node44 [label="expression(type=)"]
-    node44 -> node45
-    node45 [label="binaryExpression(op=<)"]
-    node45 -> node46
-    node46 [label="variable(name=x)"]
-    node45 -> node47
-    node47 [label="integerLiteral(value=5)"]
-    node43 -> node48
-    node48 [label="expression(type=)"]
+    node44 [label="integerLiteral(value=10)"]
+    node43 -> node45
+    node45 [label="integerLiteral(value=8)"]
+    node28 -> node46
+    node46 [label="transitionDefStatements(fromNode=hey, toNode=once)"]
+    node46 -> node47
+    node47 [label="expression(type=)"]
+    node47 -> node48
+    node48 [label="binaryExpression(op=<)"]
     node48 -> node49
-    node49 [label="assignmentExpression(variable=a)"]
-    node49 -> node50
-    node50 [label="expression(type=)"]
-    node50 -> node51
-    node51 [label="binaryExpression(op=+)"]
+    node49 [label="variable(name=x)"]
+    node48 -> node50
+    node50 [label="integerLiteral(value=5)"]
+    node46 -> node51
+    node51 [label="expression(type=)"]
     node51 -> node52
-    node52 [label="integerLiteral(value=5)"]
-    node51 -> node53
-    node53 [label="integerLiteral(value=6)"]
-    node25 -> node54
-    node54 [label="transitionDefStatements(fromNode=start, toNode=moon)"]
+    node52 [label="assignmentExpression(variable=a)"]
+    node52 -> node53
+    node53 [label="expression(type=)"]
+    node53 -> node54
+    node54 [label="binaryExpression(op=+)"]
     node54 -> node55
-    node55 [label="expression(type=)"]
-    node55 -> node56
-    node56 [label="binaryExpression(op=<)"]
-    node56 -> node57
-    node57 [label="variable(name=x)"]
-    node56 -> node58
-    node58 [label="integerLiteral(value=5)"]
-    node54 -> node59
+    node55 [label="integerLiteral(value=5)"]
+    node54 -> node56
+    node56 [label="integerLiteral(value=6)"]
+    node28 -> node57
+    node57 [label="transitionDefStatements(fromNode=start, toNode=moon)"]
+    node57 -> node58
+    node58 [label="expression(type=)"]
+    node58 -> node59
     node59 [label="expression(type=)"]
     node59 -> node60
-    node60 [label="assignmentExpression(variable=a)"]
+    node60 [label="binaryExpression(op=<)"]
     node60 -> node61
-    node61 [label="expression(type=)"]
-    node61 -> node62
-    node62 [label="binaryExpression(op=+)"]
-    node62 -> node63
-    node63 [label="integerLiteral(value=5)"]
-    node62 -> node64
-    node64 [label="integerLiteral(value=6)"]
-    node20 -> node65
-    node65 [label="accept"]
+    node61 [label="variable(name=x)"]
+    node60 -> node62
+    node62 [label="integerLiteral(value=5)"]
+    node57 -> node63
+    node63 [label="expression(type=)"]
+    node63 -> node64
+    node64 [label="assignmentExpression(variable=a)"]
+    node64 -> node65
+    node65 [label="expression(type=)"]
+    node65 -> node66
+    node66 [label="binaryExpression(op=+)"]
+    node66 -> node67
+    node67 [label="integerLiteral(value=5)"]
+    node66 -> node68
+    node68 [label="integerLiteral(value=6)"]
+    node20 -> node69
+    node69 [label="accept"]
 }

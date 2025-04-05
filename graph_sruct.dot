@@ -1,4 +1,7 @@
 digraph G {
+    "once" [shape=doublecircle, color=green, style=bold];
+    "hey" [shape=doublecircle, color=green, style=bold];
+    "moon" [shape=doublecircle, color=green, style=bold];
     "j" [shape=doublecircle, color=green, style=bold];
     "start" [shape=doublecircle, color=green, style=bold];
     "hey" -> "once" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
