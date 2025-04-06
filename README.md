@@ -27,8 +27,7 @@ Paths are isolated from one another; they cannot access the same memory. In the 
 
 ### Computation as Structure  
 
-What if we viewed algorithms structurally rather than as a set of instructions? What if we could add algorithms, manipulate them, analyze their morphisms, etc.? That is one of the goals with Automa—to view computation not as a series of instructions, but as some structure that is traversed. Hopefully, this leads to cool optimizations and a good time :)  
-(Do I sound crazy yet???)
+What if we viewed algorithms structurally rather than as a set of instructions? What if we could add algorithms, manipulate them, analyze their morphisms, etc.? That is one of the goals with Automa—to view computation not as a series of instructions, but as some structure that is traversed. Hopefully, this leads to different optimizations. 
 
 ---
 
