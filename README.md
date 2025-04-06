@@ -21,7 +21,7 @@ Every computation is described by a path traversing a graph that represents a fi
 
 The path encapsulates the universe of computations—specifically the variables, state, time, etc.—similar to the idea of a processor with the OS. In the long run, the idea is to model the programming language partly using OS principles. A centralized operator handles these paths but can run in a decentralized manner, each path for itself.  
 
-### Isolation  
+### String isolated and decentralized execution
 
 Paths are isolated from one another; they cannot access the same memory. In the case of nondeterministic exploration, a new sprouted path essentially represents an entirely new "universe" of computation—an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be slow at first, the goal is to make it more effective using copy-on-write techniques and develop methods of programming that utilize more lightweight nondeterministic paths that, after sprouting, take up less memory. This way, you can generate thousands of nondeterministic paths and run them efficiently without worrying about parallel programming. Additionally, paths can run on different machines quickly. Each path executes separately if parallel. The operator serves as a coordinator between the paths.  
 
