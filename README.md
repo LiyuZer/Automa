@@ -83,4 +83,5 @@ The future goal of the language is to have natural speedups from working with ex
 
 After each version, I will release and announce the changes. The whole project should take about 5 years. I will gladly accept any contributors, it would be great help, I want to accelerate the process!
 Now, for some honesty. It will be **difficult**, at times challenging, to the verge of defeat, but I hope the pseudo-deterministic universe will allow us the opportunity to persevere. 
+***Contact at liyulg0@gamil.com***
    
