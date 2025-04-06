@@ -3,7 +3,7 @@ def fib (c : 0):
         start :: ST;
  
     transitions:
-        start -> once => x < 5:
+        start -> once => x + 5:
             a = 5 + 6;
 
 def main (c : 0):
@@ -20,5 +20,5 @@ def main (c : 0):
             b = 10 + 8;
         hey -> once => x < 5:
             a = 5 + 6;
-        start -> moon => (x < 5):
+        start -> moon => x < (5 + 2):
             a = 5 + 6;

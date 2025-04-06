@@ -41,6 +41,7 @@ These are some of the basic instructions that we will have, we can add more inst
 #include "graph.h"
 #include "aut_obj.h"
 #include <queue>
+#include <variant>
 
 #pragma once
 enum class InstructionType{
@@ -55,6 +56,11 @@ enum class InstructionType{
     MUL,
     DIV,
     MOD,
+    NOT, // Not operation
+    AND, // And operation
+    OR, // Or operation
+    INC, // Increment
+    POP, // Pop from the stack
     STORE,//Store to a variable
     STORE_CONST, 
     MARKER,
@@ -76,14 +82,32 @@ enum class RegisterType{
     SP, // Stack location pointer
     STACK, // STACK  
 };
-
+enum class ConstantType {
+    Integer,
+    String,
+    Char,
+    Bool,
+    Float
+};
+struct Constant {
+    ConstantType type;
+    std::variant<int, std::string, char, bool, double> value;
+    Constant() : type(ConstantType::Integer), value(0) {} // Default constructor
+    Constant(int v) : type(ConstantType::Integer), value(v) {}
+    Constant(const std::string& v) : type(ConstantType::String), value(v) {}
+    Constant(char v) : type(ConstantType::Char), value(v) {}
+    Constant(bool v) : type(ConstantType::Bool), value(v) {}
+    Constant(double v) : type(ConstantType::Float), value(v) {}
+};
 struct Instruction{
     InstructionType type;
     RegisterType reg1;
     RegisterType reg2;
     RegisterType reg3;
-    string mem_address; // Memory address(usually a variable name)
     string marker; // This is the marker might be empty
+    string variable_name; // This is the variable name
+    Constant constant; // This is the constant value
+    int val ; // A miscellaneous value that we will use for the instruction
 };
 struct Register{
     RegisterType type;
@@ -112,5 +136,6 @@ class VMCompiler{
     int current_instruction = 0;
     public:
     shared_ptr<InstructionSet> compile(shared_ptr<Graph> graph_ptr); // This will compile the graph into a set of instructions
-    void print_instructions(); // Prints out the instructions 
+    void decode_expression(shared_ptr<AstNode> node, shared_ptr<InstructionSet> instruction_set); // This will decode the expression into a set of instructions
+    void print_instructions(const shared_ptr<InstructionSet>& instructionSet); // This will print the instructions
 };

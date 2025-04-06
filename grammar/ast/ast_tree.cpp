@@ -1128,14 +1128,12 @@ void AbstractTreeGenerator::explore_expression(shared_ptr<ParseNode> root_node, 
 
         assignment_ptr->set_variableName(variable_name);
         assignment_ptr->set_expression(expression_ptr);
-        parent_ptr->set_type("assignment");
         parent_ptr->set_expression(assignment_ptr);
 
    }
    else{
     // We explore precedence here 
     shared_ptr<AstNode> ast_tree_root = recursive_expression_explorer(root_node->findChildren("prec3")[0], astNodeQueue, "prec3");
-    parent_ptr->set_type("other_expression");
     parent_ptr->set_expression(ast_tree_root);
 
 
