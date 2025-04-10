@@ -62,6 +62,10 @@ class Num : public AutomaObject{
     string to_string(int precision){
         return std::to_string(val);
     }
+    string repr() override{
+        cout<<"Num: " << val << endl;
+        return std::to_string(val);
+    }
 
 };
 

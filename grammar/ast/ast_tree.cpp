@@ -1297,11 +1297,21 @@ void AbstractTreeGenerator :: explore_boolLiteral(shared_ptr<ParseNode> root_nod
     }},
     */
     vector<shared_ptr<ParseNode> > boolLiteral_vec;
-    root_node->addChildrenVec("boolLiteral", boolLiteral_vec);
-    if(!boolLiteral_vec.empty()){
-        shared_ptr<boolLiteral> boolNode = dynamic_pointer_cast<boolLiteral>(parentAstNode);
-        boolNode->set_boolLiteral(boolLiteral_vec[0]->getValue() == "true");
+    root_node->addChildrenVec("TRUE", boolLiteral_vec);
+    vector<shared_ptr<ParseNode> > boolLiteral_vec2;
+    root_node->addChildrenVec("FALSE", boolLiteral_vec2);
+    shared_ptr<boolLiteral> boolNode = dynamic_pointer_cast<boolLiteral>(parentAstNode);
+    if (!boolLiteral_vec.empty()) {
+        boolNode->set_boolLiteral(true);
     }
+    else if (!boolLiteral_vec2.empty()) {
+        boolNode->set_boolLiteral(false);
+    }
+    else{
+        cerr<<"Error in bool literal"<<endl;
+        exit(1);
+    }
+
     // We are done here
 
 

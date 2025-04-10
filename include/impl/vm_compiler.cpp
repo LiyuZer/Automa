@@ -772,19 +772,24 @@ void VMCompiler :: decode_expression(shared_ptr<AstNode> expression_val, shared_
             shared_ptr<assignmentExpression> assignment_node = dynamic_pointer_cast<assignmentExpression>(node);
             // Get the variable name
             string variable_name = assignment_node->get_variableName();
+
+            // We will StoreVar the variable from R3
+            Instruction load;
+            load.type = InstructionType::STORE_VAR;
+            load.variable_name = variable_name;
+            load.reg1 = RegisterType::R3;
+            // We can add it stack
+            stackElem load_elem;
+            load_elem.is_instruction = true;
+            load_elem.instruction = load;
+            stack.push(load_elem);
+
             // Get the expression
             shared_ptr<AstNode> expression_node = assignment_node->get_expression();
             // Push the expression to the stack
             stackElem expression_elem;
             expression_elem.value = expression_node;
             stack.push(expression_elem);
-            // Now we create a Store instruction that takes the value from R3 and stores it in the variable
-            Instruction store;
-            store.type = InstructionType::STORE_VAR;
-            store.variable_name = variable_name;
-            store.reg1 = RegisterType::R3;
-            instruction_set->instructions.push_back(store);
-            // We are done with the assignment expression
         }
         else if(type == "expression"){
             // Just push the expression to the stack
@@ -901,7 +906,7 @@ shared_ptr<InstructionSet> VMCompiler :: compile(shared_ptr<Graph> graph_ptr){
             // that checks jump to the next transition if the condition is false
             // where the result is stored in R3
             Instruction jmp_if;
-            jmp_if.type = InstructionType::JMP_IF;
+            jmp_if.type = InstructionType::JMP_NOT;
             jmp_if.reg1 = RegisterType::R3; // The result of the condition is in R3
             jmp_if.marker = node + "_transition_" + to_string(transition_count); // The next node is the marker 
             instructionSet->instructions.push_back(jmp_if);
@@ -926,6 +931,14 @@ shared_ptr<InstructionSet> VMCompiler :: compile(shared_ptr<Graph> graph_ptr){
             shared_ptr<AstNode> accept_node = graph_ptr->get_accept();
             // Decode the expression
             decode_expression(accept_node, instructionSet);
+
+            // Also set a marker to node_transition to jump there 
+            Instruction marker;
+            marker.type = InstructionType::MARKER;
+            marker.marker = node + "_transition_" + to_string(transition_count);
+            instructionSet->instructions.push_back(marker);
+            instructionSet->markers[node + "_transition_" + to_string(transition_count)] = instructionSet->instructions.size() - 1; // Add the marker to the map
+
             Instruction return_instr;
             return_instr.type = InstructionType::RETURN;
             instructionSet->instructions.push_back(return_instr);
@@ -933,6 +946,14 @@ shared_ptr<InstructionSet> VMCompiler :: compile(shared_ptr<Graph> graph_ptr){
         else{
             // In this case we want to add a reject instruction
             // We will add a reject instruction at the end of the node
+
+            // Also set a marker to node_transition to jump there 
+            Instruction marker;
+            marker.type = InstructionType::MARKER;
+            marker.marker = node + "_transition_" + to_string(transition_count);
+            instructionSet->instructions.push_back(marker);
+            instructionSet->markers[node + "_transition_" + to_string(transition_count)] = instructionSet->instructions.size() - 1; // Add the marker to the map
+            
             Instruction reject;
             reject.type = InstructionType::REJECT;
             instructionSet->instructions.push_back(reject);
@@ -970,7 +991,7 @@ void VMCompiler::print_instructions(const shared_ptr<InstructionSet>& instructio
                 if (instr.val == -1) {
                     cout << "STORE STACK[SP - 1] R" << int(instr.reg1) + 1 << endl;
                 } else {
-                    cout << "STORE STACK[" << instr.val << "] R" << int(instr.reg1) + 1 << int(instr.reg3) + 1 << endl;
+                    cout << "STORE STACK[SP + " << instr.val << "] R" << int(instr.reg1) + 1 << endl;
                 }
                 break;
             case InstructionType::STORE_VAR:

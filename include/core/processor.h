@@ -26,6 +26,7 @@ class Processor{
         shared_ptr<AutomaObject> current_value;
         shared_ptr<InstructionSet> instruction_set;
         shared_ptr<RegisterSet> register_set;
+        shared_ptr<stackRegister> stack_register;
         stack<stackElem> stack; // This is the stack that we will use to store the values
         int instruction_index = 0; // This is the index of the instruction that we are currently executing
         bool running = false; // This will be used to check if the processor is running or not
@@ -35,6 +36,14 @@ class Processor{
         void set_instructionSet(shared_ptr<InstructionSet> instruction_set){
             this->instruction_set = instruction_set;
         }
+        void get_instructionSet(shared_ptr<InstructionSet> instruction_set){
+            this->instruction_set = instruction_set;
+        }
+        void get_registerSet(shared_ptr<RegisterSet> register_set){
+            this->register_set = register_set;
+        }
+        void print_instruction(const Instruction instr); // This will print the instruction
+
 
 
 };

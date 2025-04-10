@@ -78,6 +78,7 @@ class Path{
     int max_time;
     int parent_path_id = -1; // -1 if no parent path
     shared_ptr<RegisterSet> register_set; // This will be the register set
+    shared_ptr<stackRegister> stack_register; // This will be the stack register
     string graph_name; // This will be the graph name
     int program_counter = -1; // This will be the program counter
     unordered_map<string, shared_ptr<AutomaObject> > local_variables; // This will be the local variables
@@ -87,6 +88,8 @@ class Path{
         this->id = id;
         this->max_time = max_time;
         this->graph_name = graph_name;
+        this->register_set = shared_ptr<RegisterSet>(new RegisterSet);
+        this->stack_register = shared_ptr<stackRegister>(new stackRegister);
     }
 
     int get_id(){
@@ -117,11 +120,15 @@ class Path{
     void set_local_variable(string name, shared_ptr<AutomaObject> value){
         local_variables[name] = value;
     }
+    // Get the local variable from the path
     shared_ptr<AutomaObject> get_local_variable(string name){
         if(local_variables.find(name) != local_variables.end()){
             return local_variables[name];
         }
         return nullptr;
+    }
+    shared_ptr<stackRegister> get_stack_register(){
+        return stack_register;
     }
 
 

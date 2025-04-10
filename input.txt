@@ -1,15 +1,22 @@
-def main (c : 0):
-    nodes :
+def main(c: 0):
+    nodes:
         start :: ST;
-        j :: AC;
-        hey;
-        once;
-        moon;
- 
+        loop;
+        finish :: AC;
     transitions:
-        start -> moon => ((a - b / (c + 1)) > (d * (e + f)) && (g % 3 == 0 || h != i && j <= k)):
-            a = 5 + 6;
-        moon -> hey => ((a - b / (c + x1)) > (d * (e + f)) && (g % 3 == 0 || h != i && j <= k)):
-            a = 5 + 6;
+        start -> loop => true:
+            x = 1.0;       
+            i = 0;
+            maxIter = 1000;
+            S = 2.0;
+
+        loop -> loop => i < maxIter:
+            temp = S / x;
+            x = 0.5 * (x + temp);
+            i = i + 1;
+
+        loop -> finish => i >= maxIter:
+            a = 5;
+
     accept:
-    return 5;
+        return x;

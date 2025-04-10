@@ -88,6 +88,7 @@ enum class RegisterType{
     PC, // Program counter
     SP, // Stack location pointer
     STACK, // STACK  
+    NULL_REG,//Denotes empty
 };
 enum class ConstantType {
     Integer,
