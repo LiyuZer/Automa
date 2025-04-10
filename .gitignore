@@ -1,0 +1,33 @@
+# Ignore text files
+*.txt
+
+# Ignore executables (Linux/macOS)
+*.out
+*.exe
+*.bin
+*.elf
+
+# Ignore common build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+
+# Ignore dot files (graphviz)
+*.dot
+
+# Ignore CMake and build folders
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+build/
+out/
+
+# Ignore VSCode settings (optional)
+.vscode/
+
+# Ignore any core dumps
+core
