@@ -33,7 +33,7 @@ struct Node{
     bool start;
     string name;
     Node() : reject(false), accept(false), start(false), name("") {}
-    Node(string name): name(name){}
+    Node(string name): name(name), reject(false), accept(false), start(false) {}
 };
 struct transition{
 

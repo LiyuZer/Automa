@@ -4,7 +4,8 @@
 #include "../core/aut_obj.h"
 #include "../core/graph.h"
 #include "../../grammar/ast/ast_node.h"
-
+#include "../core/vm_compiler.h"
+#include "../core/processor.h"
 
 shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     /* We must traverse the ast tree and create the graph object
@@ -82,10 +83,17 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
 
 void Operator :: run(){
 
+    // Set up the processor 
+    Processor processor;
     while(!path_queue.empty()){
         // Take the first path from the queue
         shared_ptr<Path> path = path_queue.front();
         path_queue.pop();
-        // Run the path
+        // Run the path on the processor
+        // First fetch the instruction set for the path
+        shared_ptr<InstructionSet> instructionSet = get_instructionSet(path->get_graph_name());
+        processor.set_instructionSet(instructionSet);
+        processor.run(path);
+
     }
 }

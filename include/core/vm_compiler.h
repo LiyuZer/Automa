@@ -45,9 +45,15 @@ These are some of the basic instructions that we will have, we can add more inst
 
 #pragma once
 enum class InstructionType{
-    LOAD, // Load from a variable
+    LOAD, // Load from a variable to a register
     LOAD_CONST, // Load a constant
     CMP, // Compare two registers
+    GT, // Greater than
+    LT, // Less than
+    GE, // Greater than or equal to
+    LE, // Less than or equal to
+    EQ, // Equal to
+    NEQ, // Not equal to
     JMP_IF,
     JMP_NOT,
     JMP,
@@ -61,7 +67,8 @@ enum class InstructionType{
     OR, // Or operation
     INC, // Increment
     POP, // Pop from the stack
-    STORE,//Store to a variable
+    STORE,//Store to STACK
+    STORE_VAR, // Store to a variable
     STORE_CONST, 
     MARKER,
     REJECT,
@@ -89,6 +96,7 @@ enum class ConstantType {
     Bool,
     Float
 };
+
 struct Constant {
     ConstantType type;
     std::variant<int, std::string, char, bool, double> value;
@@ -109,23 +117,17 @@ struct Instruction{
     Constant constant; // This is the constant value
     int val ; // A miscellaneous value that we will use for the instruction
 };
-struct Register{
-    RegisterType type;
-    shared_ptr<AutomaObject> value; // Pointer to the automa object
-    int index = -1; // This will be used if we are using STACK
-    Register(RegisterType type, shared_ptr<AutomaObject> value){
-        this->type = type;
-        this->value = value;
-    }
-    RegisterType get_type(){
-        return type;
-    }
+struct stackElem{
+    shared_ptr<AstNode> value; // Pointer to the automa object
+    Instruction instruction; // The instruction that we will use to pop the value
+    bool is_instruction = false; // This will be used to check if the value is an instruction or not
 };
 
 struct InstructionSet{
     // Will contain a vector of instructions and an unordered map, that maps the markers to the instruction index
     vector<Instruction> instructions;
     unordered_map<string, int> markers; // This will map the markers to the instruction index
+    int instruction_start = 0; // This will be the start of the instruction set(for now it might not be 0, it is where the start node is)
 };
 
 // A VM compiler will take in a graph ptr and compile it into a set of instructions

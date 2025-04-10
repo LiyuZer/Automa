@@ -1,10 +1,9 @@
 digraph G {
-    "once" [shape=doublecircle, color=green, style=bold];
-    "hey" [shape=doublecircle, color=green, style=bold];
-    "moon" [shape=doublecircle, color=green, style=bold];
-    "j" [shape=doublecircle, color=green, style=bold];
+    "once" [shape=circle];
+    "hey" [shape=circle];
+    "moon" [shape=circle];
+    "j" [shape=doublecircle, color=blue];
     "start" [shape=doublecircle, color=green, style=bold];
-    "hey" -> "once" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
-    "start" -> "once" [label="Conditions: expression(type=) \nOperations: expression(type=) expression(type=) "];
+    "moon" -> "hey" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
     "start" -> "moon" [label="Conditions: expression(type=) \nOperations: expression(type=) "];
 }

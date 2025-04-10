@@ -783,7 +783,7 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
         }
         else{
 
-        // In this case there is no expresion so must be a term
+            // In this case there is no expresion so must be a term
             shared_ptr<AstNode> node;
             node = explore_term(root_node->findChildren("term")[0], astNodeQueue);
             return node;
@@ -982,7 +982,6 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
 
         vector<shared_ptr<ParseNode> > terms = root_node->findChildren("term");
         vector<shared_ptr<ParseNode> > binary_operations = root_node->findChildren("bin3");
-
         // We will add the binary operators here
         if(terms.size() == 0){
             shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
@@ -1018,12 +1017,12 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
             /* The only difference here is we are iteratively chaining up 
                 ast subtrees
             */
-           
             shared_ptr<AstNode> firstTerm = explore_term(terms[0], astNodeQueue);
             shared_ptr<AstNode> secondTerm = explore_term(terms[1], astNodeQueue);
 
             shared_ptr<binaryExpression> binaryNode = shared_ptr<binaryExpression>(new binaryExpression);
             binaryNode->set_operation(binary_operations[0]->find_only_child()[0]->getValue()); // Getting the value of the binary operation
+
             binaryNode->set_leftSide(firstTerm);
             binaryNode->set_rightSide(secondTerm);
             
@@ -1039,7 +1038,7 @@ shared_ptr<AstNode> AbstractTreeGenerator::recursive_expression_explorer(shared_
                 chainedBinaryPointer->set_rightSide(tempTerm); 
                 binaryNode = chainedBinaryPointer;
             }
-            if(terms.size() == 0){
+            if(terms.size() == 2){
                 chainedBinaryPointer = binaryNode;
             }
             vector<shared_ptr<ParseNode> > prec2 = root_node->findChildren("prec2"); // Changed to "prec2" to "prec3"

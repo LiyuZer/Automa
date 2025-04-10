@@ -33,6 +33,7 @@ void RunTime :: run(string input_file){
                 // Now we compile the graph
                 shared_ptr<InstructionSet> set = vm_compiler_ptr.compile(graph);
                 operator_ptr->add_instructionSet(graphDec_ptr->getName(), set);
+            
             }
             // We will check if the main graph instruction set is present
             shared_ptr<InstructionSet> main_graph_set = operator_ptr->get_instructionSet("main");
@@ -41,11 +42,10 @@ void RunTime :: run(string input_file){
                 return;
             }
 
-            // // // Now we will create a path and add it to the operator
-            // shared_ptr<Path> path = shared_ptr<Path>(new Path(0, graph));
-            // path->set_current_node(graph->get_start_node());
-            // operator_ptr->add_path(path);
-            // operator_ptr->run();// Now it is up to the operator to run the paths
+            // // Now we will create a path and add it to the operator
+            shared_ptr<Path> path = shared_ptr<Path>(new Path(0, "main"));
+            operator_ptr->add_path(path);
+            operator_ptr->run();
         } 
         else{
             cout << "Error in parsing, check for syntax errors" << endl;

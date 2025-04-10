@@ -1,24 +1,15 @@
-def fib (c : 0):
-    nodes :
-        start :: ST;
- 
-    transitions:
-        start -> once => x + 5:
-            a = 5 + 6;
-
 def main (c : 0):
     nodes :
         start :: ST;
-        j;
+        j :: AC;
         hey;
         once;
         moon;
  
     transitions:
-        start -> once => x < 5:
+        start -> moon => ((a - b / (c + 1)) > (d * (e + f)) && (g % 3 == 0 || h != i && j <= k)):
             a = 5 + 6;
-            b = 10 + 8;
-        hey -> once => x < 5:
+        moon -> hey => ((a - b / (c + x1)) > (d * (e + f)) && (g % 3 == 0 || h != i && j <= k)):
             a = 5 + 6;
-        start -> moon => x < (5 + 2):
-            a = 5 + 6;
+    accept:
+    return 5;
