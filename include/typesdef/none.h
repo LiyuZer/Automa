@@ -14,7 +14,6 @@ This will be the None obj, it will be used to represent the absence of a value.
 class None : public AutomaObject{
     public:
     None() : AutomaObject("none"){
-        set_immutable(true);
     }
     string repr() override{
         return "None";

@@ -24,4 +24,6 @@ class AutomaObject {
     int get_ref_count(){
         return ref_count;
     }
+    virtual string repr(){
+    }
 };

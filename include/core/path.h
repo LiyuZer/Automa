@@ -44,38 +44,26 @@ struct Register{
 };
 // Define the stack register 
 struct stackRegister{
-    vector<AstNode> stack; // This will be the stack
+    vector<shared_ptr<AutomaObject> > stack; // This will be the stack
     int stack_pointer = 0; // This will be the stack pointer
-    void push(AstNode node){
-        stack.push_back(node);
-        stack_pointer++;
-    }
 };
 struct RegisterSet{
     // A full register set as defined in the instruction set
-        Register R1;
-        Register R2;
-        Register R3;
-        Register R4;
-        Register R5;
-        Register R6;
-        Register R7;
-        Register R8;
-        Register R9;
-        Register R10; // This is the program counter
-        Register SP; // This is the stack pointer
+        vector<Register> registers; // This will be the register set
         stackRegister STACK; // This is the stack
+        Register SP;
         RegisterSet(){
-            R1.type = RegisterType::R1;
-            R2.type = RegisterType::R2;
-            R3.type = RegisterType::R3;
-            R4.type = RegisterType::R4;
-            R5.type = RegisterType::R5;
-            R6.type = RegisterType::R6;
-            R7.type = RegisterType::R7;
-            R8.type = RegisterType::R8;
-            R9.type = RegisterType::R9;
-            R10.type = RegisterType::R10;
+            // Initialize the register set
+            registers.push_back(Register(RegisterType::R1, nullptr));
+            registers.push_back(Register(RegisterType::R2, nullptr));
+            registers.push_back(Register(RegisterType::R3, nullptr));
+            registers.push_back(Register(RegisterType::R4, nullptr));
+            registers.push_back(Register(RegisterType::R5, nullptr));
+            registers.push_back(Register(RegisterType::R6, nullptr));
+            registers.push_back(Register(RegisterType::R7, nullptr));
+            registers.push_back(Register(RegisterType::R8, nullptr));
+            registers.push_back(Register(RegisterType::R9, nullptr));
+            registers.push_back(Register(RegisterType::R10, nullptr));
             SP.type = RegisterType::SP;
             SP.index = -1; // This will signify initial stack pointer
         }
@@ -92,6 +80,7 @@ class Path{
     shared_ptr<RegisterSet> register_set; // This will be the register set
     string graph_name; // This will be the graph name
     int program_counter = -1; // This will be the program counter
+    unordered_map<string, shared_ptr<AutomaObject> > local_variables; // This will be the local variables
     public:
     Path(int id, string graph_name, int max_time=10000, int parent_path_id = -1){
         this->parent_path_id = parent_path_id;
@@ -121,6 +110,18 @@ class Path{
     }
     int get_program_counter(){
         return program_counter;
+    }
+    void set_program_counter(int program_counter){
+        this->program_counter = program_counter;
+    }
+    void set_local_variable(string name, shared_ptr<AutomaObject> value){
+        local_variables[name] = value;
+    }
+    shared_ptr<AutomaObject> get_local_variable(string name){
+        if(local_variables.find(name) != local_variables.end()){
+            return local_variables[name];
+        }
+        return nullptr;
     }
 
 
