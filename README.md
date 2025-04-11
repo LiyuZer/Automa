@@ -39,6 +39,68 @@ As a machine learning enthusiast, I also wanted to develop a language optimized 
 
 ---
 
+---
+Here is some Automa code for calculating the sqrt of 2. 
+```
+def main():
+    nodes:
+        start :: ST;
+        loop;
+        finish :: AC;
+    transitions:
+        start -> loop => true:
+            x = 1.0;       
+            i = 0;
+            maxIter = 1000;
+            S = 2.0;
+
+        loop -> loop => i < maxIter:
+            temp = S / x;
+            x = 0.5 * (x + temp);
+            i = i + 1;
+
+        loop -> finish => i >= maxIter
+    accept:
+        return x;
+```
+Note that one of the transitions function here for example is :-
+```
+temp = S / x;
+x = 0.5 * (x + temp);
+i = i + 1;
+
+```
+This can easily be done in a few lines of Python code, and the syntax will be improved to make it less verbose, but the key point here is that the actual structure of the computation 
+is more visible, and the program becomes much easier to read in this format. You can arbitrarily choose the number of nodes you want to create based on how specifically you want to divide your algorithm. The goal is to add reusable transition functions that will make it so that rather than focusing on the sepecificc operations of each transition, we can class graphs based on there transition function types as well(this is a very goal for the far future), then it will be easy to analyze the structure of graphs within the same family. 
+
+In fact, at that point, you can assign a numbering to the transitions function, and you focus on the relativistic structure of the graphs rather than what the transitions functions 
+actually do, hopefully then you can do some really cool things.
+
+Another example of calling a graph non-deterministically is the following :-
+```
+def mutate(child, count, max_cn):
+    nodes:
+      start :: ST;
+      produce;
+      branch;
+      mutate;
+      final : AC;
+      
+    start -> producer;
+    produce -> produce => count < max_cn; // There will be one produce
+    produce -> branch => count < max_cn;
+    branch -> mutate;
+    mutate -> final =>  ():
+      mutate_child(child)
+    accept:
+      return child
+```
+This is a high-level simulated mutation run, in this case we call the graph mutate as so mutated_children = explore mutate(...), This returns a list of mutated children, which essentially represents a list of possible universes where teh child was mutated, and the computation was accepted. Note that in this case, the produce path, which is originally generated, actually rejects as if the count >= max_cn; there is no transition to final, so in the end, mutated_children will only contain the final results of the child branches. 
+
+The idea here is to simulate parallel programming as a parallel universe of computation that you can receive once the computation stops executing. 
+
+---
+
 ## Key Features  
 - **Graph-Based Computation**: Every computation is modeled as a graph traversal.  
 - **Memory-Driven Logic**: Operations manipulate memory structures, which graphs process during execution.  
