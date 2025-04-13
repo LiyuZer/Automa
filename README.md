@@ -78,7 +78,7 @@ actually do, hopefully then you can do some really cool things.
 
 Another example of calling a graph non-deterministically is the following :-
 ```
-def mutate(child, count, max_cn):
+def mutate(child, max_cn):
     nodes:
       start :: ST;
       produce;
@@ -86,7 +86,8 @@ def mutate(child, count, max_cn):
       mutate;
       final : AC;
       
-    start -> producer;
+    start -> producer:
+        count = 0;
     produce -> produce => count < max_cn; // There will be one produce
     produce -> branch => count < max_cn;
     branch -> mutate;
@@ -95,7 +96,7 @@ def mutate(child, count, max_cn):
     accept:
       return child
 //Example call of this function
-mutated_children = explore mutate
+mutated_children = explore mutate(child, 5)
 ```
 This is a high-level simulated mutation run; in this case, we call the graph mutate as so mutated_children = explore mutate(...), This returns a list of mutated children, which essentially represents a list of possible universes where teh child was mutated, and the computation was accepted. Note that in this case, the produce path, which is originally generated, actually rejects as if the count >= max_cn; there is no transition to final, so in the end, mutated_children will only contain the final results of the child branches. 
 
