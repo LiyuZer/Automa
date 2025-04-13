@@ -94,10 +94,13 @@ def mutate(child, count, max_cn):
       mutate_child(child)
     accept:
       return child
+//Example call of this function
+mutated_children = explore mutate
 ```
-This is a high-level simulated mutation run, in this case we call the graph mutate as so mutated_children = explore mutate(...), This returns a list of mutated children, which essentially represents a list of possible universes where teh child was mutated, and the computation was accepted. Note that in this case, the produce path, which is originally generated, actually rejects as if the count >= max_cn; there is no transition to final, so in the end, mutated_children will only contain the final results of the child branches. 
+This is a high-level simulated mutation run; in this case, we call the graph mutate as so mutated_children = explore mutate(...), This returns a list of mutated children, which essentially represents a list of possible universes where teh child was mutated, and the computation was accepted. Note that in this case, the produce path, which is originally generated, actually rejects as if the count >= max_cn; there is no transition to final, so in the end, mutated_children will only contain the final results of the child branches. 
 
-The idea here is to simulate parallel programming as a parallel universe of computation that you can receive once the computation stops executing. 
+The idea here is to simulate parallel programming as a parallel universe of computation you can receive once the computation stops executing. 
+
 
 ---
 
