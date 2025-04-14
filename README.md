@@ -89,10 +89,11 @@ def mutate(child, max_cn):
     start -> producer:
         count = 0;
     produce -> produce => count < max_cn; // There will be one produce
+        count = count + 1;
     produce -> branch => count < max_cn;
     branch -> mutate;
     mutate -> final =>  ():
-      mutate_child(child)
+      mutate_child(child) 
     accept:
       return child
 //Example call of this function
