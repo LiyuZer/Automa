@@ -7,7 +7,7 @@ At its core, every program in Automa is a **graph** consisting of nodes and tran
 - **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid.  
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
-Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
+Automa will support deterministic and **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
 
 ---
 
