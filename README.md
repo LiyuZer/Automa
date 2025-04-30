@@ -23,11 +23,15 @@ The path encapsulates the universe of computations—specifically the variables,
 
 ### Strong Isolated and Decentralized Execution
 
-Paths are isolated from one another; they cannot access the same memory. In the case of nondeterministic exploration, a new sprouted path represents an entirely new "universe" of computation—an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be computationally expensive initially, future optimizations will include copy-on-write techniques and methods to utilize more lightweight nondeterministic paths. This approach enables thousands of nondeterministic paths to run efficiently without concerns about parallel programming issues. Additionally, paths can execute on different machines in parallel, with the operator coordinating between them.  
+Paths are isolated from one another; they cannot access the same memory. In the case of nondeterministic exploration, a new sprouted path represents an entirely new "universe" of computation—an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be computationally expensive initially, future optimizations will include copy-on-write techniques and methods to utilize more lightweight nondeterministic paths. This approach enables thousands of nondeterministic paths to run efficiently without concerns about parallel programming issues. Additionally, paths can be executed on different machines in parallel, with the operator coordinating between them.  
 
 ### Computation as Structure  
 
 Automa views algorithms structurally rather than as a set of instructions. Computation is treated not as a series of commands, but as a structure that is traversed. This perspective enables different optimization strategies and analysis techniques that may not be apparent in traditional programming paradigms.
+
+Automa is in its essence is a structural programming language, based closely on the mathematical structure of algorithms. These graphs are not made for the purpose of visual appeal, but to serve as almost mathematical structures that can be run. Algorithms you can morph, analyze different isomorphisms, adapt, create, categorize etc. The idea being to structure our programs not from the data perspective, but from the algorithmic structure. 
+
+The way I think about it, a graph represents an abstraction for executing functions in some order. Normally in languages functions are composed, chained, put into procedural blocks etc. The structure of the function calls however is rarely visited from a meta perspective. What if we did that? What if we could view different arrangement of function calls, as part of a similar structure, say for example divide and conquer algorithms, or dynamic programming algorithms? Hopefully, this can be a beneficial abstraction in the future!
 
 ---
 
