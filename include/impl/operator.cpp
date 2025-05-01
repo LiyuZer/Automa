@@ -18,8 +18,8 @@ shared_ptr<Graph> Operator :: create_graph(shared_ptr<AstNode> graph_defintion){
     //Start with memory defintions 
 
     // Set the memory template here
-    shared_ptr<AstNode> memory = graphDef_ptr->get_parameterDef();
-    shared_ptr<memoryDef> paramater_ptr = dynamic_pointer_cast<memoryDef>(memory);
+    shared_ptr<AstNode> parameterdef = graphDef_ptr->get_parameterDef();
+    shared_ptr<parameterDef> paramater_ptr = dynamic_pointer_cast<parameterDef>(parameterdef);
     graph_ptr->set_paramater_def(paramater_ptr);
 
     //Now we will set the nodes 

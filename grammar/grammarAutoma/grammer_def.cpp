@@ -121,7 +121,6 @@ std::unordered_map<std::string, std::vector<SymbolPtr> > rules = {
         CreateToken("RETURN"),
         CreateRule("expression"),
         CreateToken("SEMICOLON"), 
-        
     }},
     {"parameterItem", {
         CreateParen('('),

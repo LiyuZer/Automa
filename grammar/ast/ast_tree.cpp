@@ -186,14 +186,16 @@ void AbstractTreeGenerator:: explore_parameterDef(shared_ptr<ParseNode> root_nod
 
     vector<shared_ptr<ParseNode> > node_vec;
     root_node->addChildrenVec("parameterItem", node_vec);
+    cout<<"Node vec size: "<<node_vec.size()<<endl;
 
     root_node = node_vec[0];
-    root_node->addChildrenVec("varDefenition", node_vec); 
+    root_node->addChildrenVec("varDefenition", node_vec);
     shared_ptr<parameterDef> param_ptr = dynamic_pointer_cast<parameterDef>(parentAstNode);
     
     //Check if varDefenition is empty
     if(node_vec.size() != 0){
         for (auto node : node_vec){
+            cout<<"I am here"<<endl;
             // Get the variable name
             vector<shared_ptr<ParseNode> > variable_vec;
             node->addChildrenVec("IDENTIFIER", variable_vec);

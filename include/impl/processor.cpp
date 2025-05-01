@@ -314,7 +314,8 @@ void Processor :: run(shared_ptr<Path> path){
         // and execute the instruction
         unique_ptr<Instruction> instruction_ptr = make_unique<Instruction>(instruction);
         InstructionType type = instruction_ptr->type;
-        
+        // Print the instruction
+        print_instruction(*instruction_ptr);
         switch (type){
             case InstructionType::LOAD:
                 execute_load(instruction_ptr, register_set, path);
@@ -397,14 +398,11 @@ void Processor :: run(shared_ptr<Path> path){
             case InstructionType::REJECT:
                 // TODO : Implement the reject instruction, for now just exit
                 cout << "Reject instruction" << endl;
-                //Print the value of the variable a 
-                cout<< "Value of x: " << path->get_local_variable("x")->repr() << endl;
                 // Exit the function 
                 return;
             case InstructionType::RETURN:
                 // TODO : Implement the return instruction
                 cout << "Return instruction" << endl;
-                cout<< "Value of x: " << path->get_local_variable("x")->repr() << endl;
                 return;
             default:
                 cout << "Unknown instruction type" << endl;

@@ -134,19 +134,19 @@ class Graph{
             // Add label with conditions and operations if present
             if (!(transition.condition == nullptr) || !transition.operations.empty()) {
                 dotFile << " [label=\"";
-                if (!(transition.condition == nullptr)) {
-                    dotFile << "Conditions: ";
-                    dotFile << transition.condition->repr() << " ";
-                }
-                if (!transition.operations.empty()) {
-                    if (!(transition.condition == nullptr)) {
-                        dotFile << "\\n";
-                    }
-                    dotFile << "Operations: ";
-                    for (const auto& operation : transition.operations) {
-                        dotFile << operation->repr() << " ";
-                    }
-                }
+                // if (!(transition.condition == nullptr)) {
+                //     dotFile << "Conditions: ";
+                //     dotFile << transition.condition->repr() << " ";
+                // }
+                // if (!transition.operations.empty()) {
+                //     if (!(transition.condition == nullptr)) {
+                //         dotFile << "\\n";
+                //     }
+                //     dotFile << "Operations: ";
+                //     for (const auto& operation : transition.operations) {
+                //         dotFile << operation->repr() << " ";
+                //     }
+                // }
                 dotFile << "\"]";
             }
 

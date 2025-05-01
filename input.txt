@@ -1,22 +1,23 @@
-def main(c: 0):
+def main(n: 0):
     nodes:
         start :: ST;
-        loop;
-        finish :: AC;
-    transitions:
-        start -> loop => true:
-            x = 1.0;       
-            i = 0;
-            maxIter = 1000;
-            S = 2.0;
+        check;
+        notprime;
+        prime :: AC;
 
-        loop -> loop => i < maxIter:
-            temp = S / x;
-            x = 0.5 * (x + temp);
+    transitions:
+        start -> check => true:
+            i = 2;
+            n = 37;
+
+        check -> notprime => (i < n) && (n % i == 0):
+            result = 0;
+
+        check -> check => (i < n) || (n % i != 0):
             i = i + 1;
 
-        loop -> finish => i >= maxIter:
-            a = 5;
+        check -> prime => i >= n:
+            result = 1;
 
     accept:
-        return x;
+        return result;
