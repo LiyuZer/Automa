@@ -7,7 +7,7 @@ At its core, every program in Automa is a **graph** consisting of nodes and tran
 - **Conditions**: Evaluate to `true` or `false` to determine if a transition is valid.  
 - **Operations**: Act on memory, modifying or interacting with stored data.  
 
-Automa supports deterministic and (soon-to-be fully implemented) **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
+Automa will support deterministic and **nondeterministic automata**, allowing multiple paths to be traversed simultaneously in graphs with multiple valid transitions.  
 
 ---
 
@@ -23,11 +23,15 @@ The path encapsulates the universe of computations—specifically the variables,
 
 ### Strong Isolated and Decentralized Execution
 
-Paths are isolated from one another; they cannot access the same memory. In the case of nondeterministic exploration, a new sprouted path represents an entirely new "universe" of computation—an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be computationally expensive initially, future optimizations will include copy-on-write techniques and methods to utilize more lightweight nondeterministic paths. This approach enables thousands of nondeterministic paths to run efficiently without concerns about parallel programming issues. Additionally, paths can execute on different machines in parallel, with the operator coordinating between them.  
+Paths are isolated from one another; they cannot access the same memory. In the case of nondeterministic exploration, a new sprouted path represents an entirely new "universe" of computation—an alternate path for how the calculation could have gone. A deep copy of the inputs and current graph state is required. While this might be computationally expensive initially, future optimizations will include copy-on-write techniques and methods to utilize more lightweight nondeterministic paths. This approach enables thousands of nondeterministic paths to run efficiently without concerns about parallel programming issues. Additionally, paths can be executed on different machines in parallel, with the operator coordinating between them.  
 
 ### Computation as Structure  
 
 Automa views algorithms structurally rather than as a set of instructions. Computation is treated not as a series of commands, but as a structure that is traversed. This perspective enables different optimization strategies and analysis techniques that may not be apparent in traditional programming paradigms.
+
+Automa is in its essence is a structural programming language, based closely on the mathematical structure of algorithms. These graphs are not made for the purpose of visual appeal, but to serve as almost mathematical structures that can be run. Algorithms you can morph, analyze different isomorphisms, adapt, create, categorize etc. The idea being to structure our programs not from the data perspective, but from the algorithmic structure. 
+
+The way I think about it, a graph represents an abstraction for executing functions in some order. Normally in languages functions are composed, chained, put into procedural blocks etc. The structure of the function calls however is rarely visited from a meta perspective. What if we did that? What if we could view different arrangement of function calls, as part of a similar structure, say for example divide and conquer algorithms, or dynamic programming algorithms? Hopefully, this can be a beneficial abstraction in the future!
 
 ---
 
@@ -36,6 +40,73 @@ Automa views algorithms structurally rather than as a set of instructions. Compu
 I've always wanted a graph-based programming language, but finding nothing suitable, I decided to create Automa. Creating a language that can properly represent graph-based programs with simple and efficient fundamentals has been challenging but rewarding. 
 
 As a machine learning enthusiast, I also wanted to develop a language optimized for ML computation—one that enables safe, robust, and efficient programs for both research and production environments.
+
+---
+
+---
+Here is some Automa code for calculating the sqrt of 2. 
+```
+def main():
+    nodes:
+        start :: ST;
+        loop;
+        finish :: AC;
+    transitions:
+        start -> loop => true:
+            x = 1.0;       
+            i = 0;
+            maxIter = 1000;
+            S = 2.0;
+
+        loop -> loop => i < maxIter:
+            temp = S / x;
+            x = 0.5 * (x + temp);
+            i = i + 1;
+
+        loop -> finish => i >= maxIter
+    accept:
+        return x;
+```
+Note that one of the transitions function here for example is :-
+```
+temp = S / x;
+x = 0.5 * (x + temp);
+i = i + 1;
+
+```
+This can easily be done in a few lines of Python code, and the syntax will be improved to make it less verbose, but the key point here is that the actual structure of the computation 
+is more visible, and the program becomes much easier to read in this format. You can arbitrarily choose the number of nodes you want to create based on how specifically you want to divide your algorithm. The goal is to add reusable transition functions that will make it so that rather than focusing on the sepecificc operations of each transition, we can class graphs based on there transition function types as well(this is a very goal for the far future), then it will be easy to analyze the structure of graphs within the same family. 
+
+In fact, at that point, you can assign a numbering to the transitions function, and you focus on the relativistic structure of the graphs rather than what the transitions functions 
+actually do, hopefully then you can do some really cool things.
+
+Another example of calling a graph non-deterministically is the following :-
+```
+def mutate(child, max_cn):
+    nodes:
+      start :: ST;
+      produce;
+      branch;
+      mutate;
+      final : AC;
+      
+    start -> producer:
+        count = 0;
+    produce -> produce => count < max_cn; // There will be one produce
+        count = count + 1;
+    produce -> branch => count < max_cn;
+    branch -> mutate;
+    mutate -> final =>  ():
+      mutate_child(child) 
+    accept:
+      return child
+//Example call of this function
+mutated_children = explore mutate(child, 5)
+```
+This is a high-level simulated mutation run; in this case, we call the graph mutate as so mutated_children = explore mutate(...), This returns a list of mutated children, which essentially represents a list of possible universes where teh child was mutated, and the computation was accepted. Note that in this case, the produce path, which is originally generated, actually rejects as if the count >= max_cn; there is no transition to final, so in the end, mutated_children will only contain the final results of the child branches. 
+
+The idea here is to simulate parallel programming as a parallel universe of computation you can receive once the computation stops executing. 
+
 
 ---
 
