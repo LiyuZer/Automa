@@ -22,7 +22,6 @@ class Lexer{
    }
 
 
-
     shared_ptr<Token> run(int& currentPos, string& input){
         while (currentPos < input.length() && skip(input[currentPos])) {
             currentPos++;
